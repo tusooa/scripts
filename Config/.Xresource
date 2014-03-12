@@ -1,0 +1,192 @@
+!! URxvt
+!URxvt.font:xft:Bitstream Vera Sans Mono:pixelsize=16:antialias=False:minspace=False
+!URxvt.font:xft:Monaco:pixelsize=16:antialias=False:minspace=False
+!,\
+!xft:WenQuanYi Zen Hei:medium:pixelsize=12:antialias=False
+URxvt.font: xft:Monaco:medium:pixelsize=12, xft:DejaVu Sans YuanTi Mono:medium:pixelsize=20
+URxvt.inputMethod:fcitx
+
+URxvt.shading:              500
+!URxvt.saveLines:            1500
+
+! color scheme
+*urxvt*color0: #2e3436
+*urxvt*color1: #cc0000
+*urxvt*color2: #4e9a06
+*urxvt*color3: #c4a000
+*urxvt*color4: #3465a4
+*urxvt*color5: #75507b
+*urxvt*color6: #0b939b
+*urxvt*color7: #d3d7cf
+*urxvt*color8: #555753
+*urxvt*color9: #ef2929
+*urxvt*color10: #8ae234
+*urxvt*color11: #fce94f
+*urxvt*color12: #729fcf
+*urxvt*color13: #ad7fa8
+*urxvt*color14: #00f5e9
+*urxvt*color15: #eeeeec
+
+! 透明
+!关闭scrollbar
+URxvt.scrollbar: False
+!设置前景色
+URxvt.foreground: white
+!设置背景色
+URxvt.background: rgba:0000/0000/0000/aaaa
+!grey6
+!设置颜色深度
+URxvt.depth: 32
+
+!URxvt.font:			xft:Terminus:pixelsize=12,xft:WenQuanYi Bitmap Song:pixelsize=12
+
+!URxvt.perl-ext:                 default,matcher
+!URxvt.perl-lib: ~/.vim/urxvt_vim_scrollback/vim-scrollback
+!启用标签
+!URxvt.perl-ext-common: vim-scrollback,default,tabbed
+!URxvt.perl-ext-common: vim-scrollback,default,tabbed
+!URxvt.vim-scrollback-paste: none
+!URxvt.urlLauncher:              /usr/bin/google-chrome
+!URxvt.matcher.button:   1
+URxvt.preeditType:              OffTheSpot
+!URxvt.preeditType:             Root
+URxvt.imFont:                   fixed
+!===================================================================!
+!设置字体分辨率
+Xft.dpi:                                96
+!设置字体
+!URxvt.font: xft:DejaVu Sans YuanTi Mono:pixelsize=18
+
+!颜色
+!URxvt.depth:                    32
+!URxvt.background:               [80]black
+!URxvt.foreground:               white
+!URxvt.colorBD:                  yellow
+!URxvt.colorUL:                  green
+URxvt.fadeing:                  170
+URxvt.pointerColor:             blue
+!背景
+URxvt.blurRadius:               60
+!滚动条
+URxvt.scrollBar:                False
+URxvt.scrollBar_right:  True
+URxvt.scrollBar_floating:True
+URxvt.scrollstyle:              plain
+URxvt.scrollColor:              grey
+!屏幕缓冲
+URxvt.saveLines:                65535
+URxvt.color12:                  DodgerBlue
+!光标
+URxvt.cursorBlink:              False
+!边框
+URxvt.borderLess:               False
+!Rxvt.menu:                             /etc/X11/Rxvt.menu
+! urxvt启动在中间屏幕上
+URxvt*Page: 0 1 1
+! 在less等里使用鼠标滚轮
+URxvt*secondaryWheel: true
+! color
+! tvale {{{
+*background: #000000
+*foreground: #FFFFFF
+!black
+*color0 : #222222
+*color8 : #454545
+!red
+*color1 : #B22222
+*color9 : #FA8072
+!green
+*color2 : #556B2F
+*color10: #9ACD32
+!yellow
+*color3 : #B8860B
+*color11: #DAA520
+!blue
+*color4 : #4682B4
+*color12: #6495ED
+!magenta
+*color5 : #9932CC
+*color13: #DA70D6
+!cyan
+*color6 : #87CEEB
+*color14: #B0E0E6
+!white
+*color7 : #C0C0C0
+*color15: #FFFFFF
+! }}}
+
+!! XTerm
+!look and feel
+xterm.termName: xterm-256color
+xterm.geometry: 80x27-0-0
+xterm*title: XTerm
+xterm*scrollBar: false
+xterm*rightScrollBar: false
+!xterm*loginshell: true
+xterm*cursorBlink: true
+xterm*background:  grey6
+xterm*foreground:  white
+xterm.borderLess: true
+xterm.cursorBlink: true
+!xterm*colorUL: yellow
+!xterm*colorBD: white
+
+!fix alt key input
+xterm*eightBitInput: false
+xterm*altSendsEscape: true
+
+
+!use selecting to copy, ctrl-v to paste
+!Ctrl p to print screen content to file
+!XTerm*VT100.Translations: \
+!#override \
+!    Ctrl <KeyPress> V: insert-selection(CLIPBOARD,PRIMARY,CUT_BUFFER0) \n\
+!    <BtnUp>: select-end(CLIPBOARD,PRIMARY,CUT_BUFFER0) \n\
+!    Ctrl <KeyPress> P: print() \n
+
+!font and locale
+xterm*locale: true
+xterm.utf8:     true
+xterm*utf8Title: true
+xterm*fontMenu*fontdefault*Label: Default
+!xterm*faceName: monofur:antialias=True:pixelsize=20
+!xter*boldFont: DejaVu Sans Mono:style=Bold:pixelsize=15
+!xterm*faceNameDoublesize: wenquanyi bitmap song:pixelsize=16:antialias=True
+xterm*xftAntialias: true
+xterm*cjkWidth:false
+!xterm*faceName: xft:Monaco:pixelsize=14,\
+!xft:DejaVu Sans YuanTi Mono:medium:pixelsize=14
+!XTerm*preeditType: Root
+
+!XTerm*faceName: xft:Monaco:pixelsize=17
+!XTerm*faceName: xft:Monaco:antialias=True:pixelsize=17, xft:DejaVu Sans YuanTi Mono:medium:pixelsize=17
+!xterm*faceName: Monaco:antialias=True:pixelsize=15
+XTerm*faceName: xft:Monaco:medium:pixelsize=19
+XTerm*faceNameDoublesize: xft:DejaVu Sans YuanTi Mono:medium:pixelsize=19
+
+xterm*inputMethod: fcitx
+
+!-- Tango color scheme
+*xterm*color0: #2e3436
+*xterm*color1: #cc0000
+*xterm*color2: #4e9a06
+*xterm*color3: #c4a000
+*xterm*color4: #3465a4
+*xterm*color5: #75507b
+*xterm*color6: #0b939b
+*xterm*color7: #d3d7cf
+*xterm*color8: #555753
+*xterm*color9: #ef2929
+*xterm*color10: #8ae234
+*xterm*color11: #fce94f
+*xterm*color12: #729fcf
+*xterm*color13: #ad7fa8
+*xterm*color14: #00f5e9
+*xterm*color15: #eeeeec
+
+!cursor
+Xcursor.theme: Oxygen_Blue
+
+
+! Emacs
+Emacs.geometry: 77x39+0+0

@@ -1,0 +1,64 @@
+#!/bin/bash --source
+
+# Dir Tree:
+# 为了前导0
+# 100000 100001 100002
+NoticeDir="$HOME/.cache/Scripts/notice/"
+
+mkdir -p "$NoticeDir"
+
+genVars()
+{
+    NoticeFile=(${NoticeDir}*)
+    if [[ "$NoticeFile" == "${NoticeDir}*" ]] ; then
+        NextNotice="${NoticeDir}100000"
+        NextNumber="$(basename "$NextNotice")"
+    else
+        #_Last=$[${#NoticeFile[@]}-1]
+        #echo $_Last
+        LastPath="${NoticeFile[${#NoticeFile[@]}-1]}"
+        NextNumber="$(basename "$LastPath")"
+        ((NextNumber ++))
+        NextNotice="${NoticeDir}$NextNumber"
+    fi
+}
+#NoticeFile="$HOME/.cache/Scripts/notice"
+#touch "$NoticeFile"
+
+addNotice()
+{
+    echo "$*" > "$NextNotice"
+    genVars
+}
+
+showNotice()
+{
+    local file prev
+    if [ -f "$NoticeFile" ] ; then
+        cat "$NoticeFile"
+    else
+        msgg "没有通知。"
+    fi
+    rm -f "$NoticeFile"
+    prev="$(basename "$NoticeFile")"
+    for file in "${NoticeFile[@]}" ; do
+        if [ -f "$file" ] ; then
+            #rm -f "$NoticeDir$prev"
+            mv -f "$file" "$NoticeDir$prev"
+            ((prev++))
+        fi
+    done
+    genVars
+}
+
+genVars
+
+#echo $Notice__ModType_
+#echo $Notice__ModType_
+# Module Test
+if ! [[ "$Notice__ModType_" == Module ]] ; then
+    echo "${NoticeFile[@]}"
+    echo "$NextNotice"
+    echo "$NextNumber"
+fi
+

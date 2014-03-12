@@ -1,0 +1,32 @@
+#ifndef _holidays_
+#define _holidays_
+
+
+1/1	New Year's Day
+1/26	Australia Day
+3/4	Labour Day 
+3/11	Labour Day 
+3/11	Eight Hours Day 
+3/11	Canberra Day 
+3/11	Adelaide Cup Day 
+3/29	Good Friday
+3/30	Easter Saturday 
+3/31	Easter
+4/1	Easter Monday
+4/2	Easter Tuesday 
+4/25	ANZAC Day
+5/6	May Day 
+5/6	Labour Day 
+5/12	Mother's Day
+6/3	Foundation Day 
+6/10	Queen's Birthday 
+8/5	Picnic Day 
+9/1	Father's Day
+9/30	Queen's Birthday 
+9/30	Family &amp; Community Day
+10/7	Labour Day 
+11/5	Melbourne Cup Day 
+12/25	Christmas Day
+12/26	Boxing Day
+
+#endif /* _holidays_ */

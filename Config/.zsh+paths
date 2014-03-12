@@ -1,0 +1,44 @@
+#!/bin/zsh --source
+
+# PATHs manager
+pathappend()
+{
+    local pathvar="$1"
+    shift
+    for dir in "$@" ; do
+        [ -d "$dir" ] && eval "$pathvar=\"\$$pathvar\${$pathvar+:}$dir\""
+    done
+}
+
+pathprepend()
+{
+    local pathvar="$1"
+    shift
+    for dir in "$@" ; do
+        [ -d "$dir" ] && eval "$pathvar=\"$dir\${$pathvar+:\$$pathvar}\""
+    done
+}
+
+PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/local/lib/pkgconfig"
+
+# Sbin
+pathappend PATH /sbin /usr/sbin
+
+# Tusooa Tree
+pathprepend PATH "$HOME/Apps/bin"
+
+# distro
+pathprepend PATH "$HOME/Apps/bin/$(distro)-aliases"
+
+#install
+pathprepend PATH "$HOME/Install/bin"
+pathprepend LD_LIBRARY_PATH "$HOME/Install/lib"
+pathprepend PKG_CONFIG_PATH "$HOME/Install/lib/pkgconfig"
+
+# Compile-Program
+#pathprepend "$HOME/应用/源码/gcode-svn/compile-program"
+
+export PATH
+export PKG_CONFIG_PATH
+export LD_LIBRARY_PATH
+

@@ -1,0 +1,14 @@
+#!/bin/bash --source
+# vim : ft=zsh
+
+# GoogleCode的更新脚本
+
+Ec_CHError=21
+
+# GoogleCodeCheckHead project-name
+GoogleCodeCheckHead()
+{
+    wget -O- "http://code.google.com/p/$1/source/browse/" 2>/dev/null | \
+        awk '/<ul class="leftside">/ { p=1; } /<td><b>/ { if(p){ split($0,a,/\s+/);split(a[1],b,/<\/?(td|b)>/);print b[3];exit } }'
+}
+

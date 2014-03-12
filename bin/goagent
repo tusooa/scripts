@@ -1,0 +1,5 @@
+#!/usr/bin/env perl
+
+use Scripts::scriptFunctions;
+$proxy = "$ENV{HOME}/goagent/local/proxy.py";
+exec {$proxy} ($proxy);

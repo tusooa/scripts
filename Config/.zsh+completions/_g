@@ -1,0 +1,14 @@
+#compdef g
+
+_arguments -S \
+    '--help[Print help information]' \
+    '--version[Print version information]' \
+    '(-l --line-number -L --no-line-number)'{-l,--line-number}'[Show line number]' \
+    '(-L --no-line-number -l --line-number)'{-L,--no-line-number}"[Don't show line number]" \
+    '(-n --show-filename -N --no-file-name)'{-n,--show-filename}'[Show file name(s)]' \
+    '(-N --no-file-name -n --show-filename)'{-N,--no-filename}"[Don't show file name(s)]" \
+    '(-g --common-grep -G --no-common-grep)'{-g,--common-grep}'[Use grep.perl in the style of cgrep]:perl regex::*:file:_files' \
+    '(-G --no-common-grep -g --common-grep)'{-G,--no-common-grep}'[Use grep.perl in its own style]' \
+    '(-f --file)'{-f,--file}'[Search in files]:*:file:_files' \
+    '*: :_guard "^-*" "perl regex"'
+#    '*:perl regex: ' && return 0

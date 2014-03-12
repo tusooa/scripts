@@ -1,0 +1,38 @@
+app-portage/layman subversion
+dev-libs/libxml2 icu
+net-misc/openssh kerberos
+sys-apps/portage python2
+app-emulation/wine -win64
+#app-text/docbook-sgml-utils jadetex
+#dev-lang/php gd
+dev-lang/ghc binary
+#app-accessibility/espeak pulseaudio
+=sys-apps/pciutils-3.1.7 -zlib
+media-libs/sdl-mixer mikmod
+app-i18n/fcitx gtk gtk3 qt
+#www-client/firefox bindist
+sys-devel/gcc -fortran
+x11-terms/rxvt-unicode secondary-wheel -vanilla
+media-libs/sdl-mixer mod
+sys-fs/udisks -crypt
+net-misc/networkmanager connection-sharing dhcpcd gnutls
+www-client/firefox bindist
+net-misc/hotot qt4
+sys-libs/zlib minizip
+>=dev-python/PyQt4-4.9.4 sql webkit declarative
+dev-libs/libxml2 -icu
+net-misc/networkmanager -nss -ppp
+#media-plugins/alsa-plugins -pulseaudio
+app-office/libreoffice-bin -gnome kde
+dev-lang/python sqlite
+gnome-base/gnome -cdr -dvdr -extras
+#required by gnome-extra/gnome-contacts-3.4.1, required by net-im/empathy-3.4.2.3[gnome], required by gnome-base/gnome-core-apps-3.4.1, required by gnome-base/gnome-3.4.1, required by >gnome-3.2 (argument)
+>=dev-libs/folks-0.6.9 eds
+#required by dev-libs/libpeas-1.6.2-r1, required by media-gfx/eog-3.4.3-r1, required by gnome-base/gnome-core-apps-3.4.1, required by gnome-base/gnome-3.4.1, required by >gnome-3.2 (argument)
+>=dev-python/pygobject-3.2.2-r1 python_single_target_python2_7
+>=dev-python/PyQt4-4.9.6-r2 script
+x11-terms/rxvt-unicode -perl
+>=kde-base/kdelibs-4.11.2-r1 semantic-desktop
+>=media-libs/harfbuzz-0.9.23 icu
+gnome-extra/zenity -webkit
+net-misc/networkmanager ppp

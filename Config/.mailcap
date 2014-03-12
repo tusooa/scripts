@@ -1,0 +1,2 @@
+text/html; /usr/bin/w3m -dump -T text/html; nametemplate=%s.html; copiousoutput
+

@@ -1,0 +1,94 @@
+#!/bin/zsh --source
+
+#alias -g rm='RemoveFile'
+#alias ls='ls -h --color=always'
+eval $(dircolors -b ~/.ls-colors)
+alias ls='ls -h --color=always -X --time-style="+[33m[[32m%Y-%m-%d [35m%k:%M[33m][0m"'
+alias l='ls -l'
+alias la='ls -A'
+alias sed='sed -r'
+#alias make=ColorMake
+alias grep='egrep'
+alias egrep="GREP_COLOR=\"\$(echo 3\$[\$(date +%N)%6+1]';1;4;40')\" egrep --color=always"
+alias less='less -R'
+alias df='df -Th'
+alias du='du -h'
+alias a=awk
+alias s=sed
+alias p=less
+#alias g=grep
+alias -g showip='curl ifconfig.me' # 显示计算机外网ip
+#alias irssi=Irssi-Alias
+alias dsame="awk '"'!a[$0]++'"'" # 累死人。
+#alias gssh='ssh -2 -p443 tusooa@shell.cjb.net ; ssh -2D7070 -p443 tusooa@shell.cjb.net'
+alias updateMail='fp -v <(gpg --decrypt ~/个人/账号/mail.gpg) -f ~/.getmail/getmailrc.in -o ~/.getmail/getmailrc; fp -v <(gpg --decrypt ~/个人/账号/mail.gpg) -f ~/.msmtprc.in -o ~/.msmtprc; chmod 600 ~/.getmail/getmailrc ~/.msmtprc'
+
+# command prompt
+alias \$=''
+alias ●=''
+alias ☎=''
+alias ']'=''
+alias 'tlcr:'=':' #这一行都是提示符.
+
+# Aliases for todo and remind
+alias t=todo
+#alias t=todo.sh
+#alias tc='todo.sh ls @code'
+#tn() { todo.sh ls "$@" | 'egrep' -v 'maybe|wait' ;}
+#tp() { todo.sh ls "$@" | 'egrep' 'maybe|wait' ;}
+alias wt='remind -w$(tput cols) -c+lc2 ~/.reminders'
+
+# 后缀别名
+alias -g A='|awk'
+alias -g L='|less'
+alias -g P='|perl'
+alias -g G="|g"
+alias -g S='|sed'
+alias -g B='S "s@\x1B\[[0-9;]*[mK]@@g"'
+alias -g D='|dsame'
+alias -g NN="*(oc[1])" # zsh里代表当前目录下最后修改的文件的alias http://roylez.heroku.com/2010/03/06/zsh-recent-file-alias.html
+#全部历史纪录 topx
+topx()
+{
+    history 0 | awk '{CMD[$2]++;count++;}END { for (a in CMD)print CMD[a] " " CMD[a]/count*100 "% " a;}' | grep -v "./" | column -c3 -s " " -t | sort -nr | nl | head -n "$1"
+}
+
+e()
+{
+    local NEWPATH="$(echo "$PATH" | sed -e 's@应用/脚本@Apps/Scripts@g;s@安装@Install@g;s@游戏@Games@g;')"
+    if [ "$*" ] ; then
+        PATH="$NEWPATH" "$@"
+    else
+        echo english path: "$NEWPATH"
+    fi
+}
+
+#[Esc][h] man 当前命令时，显示简短说明 
+alias run-help >&/dev/null && unalias run-help
+autoload run-help
+
+# Screen Aliases
+# 这些都被emacs取代...
+if [ "$TERM" = screen ] ; then
+    alias mutt='screen -t email mutt'
+#    alias irssi='screen -t chat Irssi-Alias'
+fi
+
+#进入相应的路径时只要 cd ~xxx
+hash -d dw="$HOME/Download"
+hash -d scripts="$HOME/Apps/bin"
+hash -d apps="$HOME/Apps"
+hash -d gcfg="$HOME/Apps/Config"
+hash -d dsrc="$HOME/Download/Source"
+
+function inList
+{
+    local var="$1" i
+    shift
+    for i in "$@" ; do
+        if [[ "$var" = "$i" ]] ; then
+            return 0
+        fi
+    done
+    return 1
+}

@@ -1,0 +1,32 @@
+[Launchers][1]
+name=System Settings
+command=systemsettings &
+icon=system-run
+[Launchers][2]
+name=Firefox
+command=firefox &
+icon=/opt/firefox/icons/mozicon128.png
+[Launchers][3]
+name=Emacs
+command=emacs &
+icon=emacs
+[Launchers][4]
+name=Gimp
+command=gimp &
+icon=gimp
+[Launchers][5]
+name=Okular
+command=okular &
+icon=okular
+[Launchers][6]
+name=VirtualBox
+command=VirtualBox &
+icon=virtualbox
+[Launchers][7]
+name=Libreoffice
+command=libreoffice &
+icon=libreoffice-main
+[Launchers][8]
+name=Transmission
+command=transmission-qt &
+icon=transmission-qt

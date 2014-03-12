@@ -1,0 +1,9 @@
+weather-uri = http://qq.ip138.com/weather/jiangsu/NanJing.wml
+color-today = 207,14,18,250
+#color-today = 229,94,35,250
+color-rest  = 255,255,255,250
+color-other = 31,59,229,250
+back-today  = 20,20,20,100
+back-rest   = 20,20,20,50
+font = ZhunYuan
+font-size = 18

@@ -1,0 +1,11 @@
+#!/bin/bash
+c=(black brown4 DarkGreen grey6)
+n=$(( $RANDOM%${#c[*]} ))
+case $n in
+    0)      g="+0+0";;
+    1)      g="+0-0";;
+    2)      g="-0+0";;
+    *)      g="-0-0";;
+esac
+
+exec /usr/bin/xterm -bg ${c[$n]} -geometry 80x27$g "$@"

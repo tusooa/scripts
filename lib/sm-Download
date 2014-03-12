@@ -1,0 +1,20 @@
+#!/bin/bash --source
+
+# sm-Download, 下载文件的。
+
+download()
+{
+    # download uri [dest]
+    # 支持axel wget aria2c
+    if quiet which axel ; then
+        axel ${2+-o "$2"} $1
+    elif quiet which aria2c ; then
+        aria2c -d / ${2+-o "$2"} $1
+    elif quiet which wget ; then
+        wget ${2+-O "$2"} $1
+    else
+        msgg "给你个shell，让你下载文件 $1 并且保存为 $2"
+        if quiet which zsh ; then zsh ; else bash ; fi
+    fi
+}
+

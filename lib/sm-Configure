@@ -1,0 +1,18 @@
+#!/bin/bash --source
+
+defg=main
+
+# Usage: Configure_new configVarNAME configFile defaultConfigFile
+# Example: Configure_new cfg "${configDir}weather" "${defConfDir}weather"
+# Or: conf cfg weather
+# Or (in weather): conf cfg
+Configure_new()
+{
+    local _cfgVarName="$1" _configFile="$2" _defaultConfigFile="$3"
+    declare -a _configArray
+    local line
+    while read line ; do _configArray=("${_configArray[@]}" "$line") ; done < "$_defaultConfigFile"
+    while read line ; do _configArray=("${_configArray[@]}" "$line") ; done < "$_configFile"
+    unset _configArray
+}
+

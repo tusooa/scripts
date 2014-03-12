@@ -1,0 +1,35 @@
+#!/bin/zsh --source
+
+# 一些不常用的东西.
+##在命令前插入 sudo {{{
+#定义功能 
+#sudo-command-line() {
+#    [[ -z $BUFFER ]] && zle up-history
+#    [[ $BUFFER != sudo\ * ]] && BUFFER="sudo $BUFFER"
+#    zle end-of-line                 #光标移动到行末
+#}
+#zle -N sudo-command-line
+#定义快捷键为： [Esc] [Esc]
+#bindkey "\e\e" sudo-command-line
+#}}}
+
+#{{{ F1 计算器
+#arith-eval-echo() {
+#  LBUFFER="${LBUFFER}echo \$(( "
+#  RBUFFER=" ))$RBUFFER"
+#}
+#zle -N arith-eval-echo
+#bindkey "^[[11~" arith-eval-echo
+#}}}
+
+####{{{
+#function timeconv { date -d @$1 +"%Y-%m-%d %T" }
+# }}}
+
+
+# Tips
+# 太无用,而且拖累启动速度
+#. ~/.zsh/tips-"$(distro)"
+#. ~/.zsh/tips
+
+

@@ -1,0 +1,228 @@
+#!/bin/bash --source
+
+true "${scriptName:=$(basename $0)}"
+
+# Gettext
+TEXTDOMAINDIR=/usr/share/locale
+TEXTDOMAIN="$scriptName"
+
+# Exit codes {{{
+Ec_FileNotFound=128
+Ec_CannotRun=127
+Ec_OptionError=1
+Ec_UserBreak=2
+Ec_SoftwareError=3
+Ec_ProgrammingError=4
+Ec_DataError=5
+Ec_Well=0
+# }}}
+
+# Colors {{{
+RED="\e[31m"
+GREEN="\e[32m"
+YELLOW="\e[33m"
+BLUE="\e[34m"
+PINK="\e[35m"
+GREENBLUE="\e[36m"
+WHITE="\e[37m"
+NORMAL="\e[0m"
+for color in RED GREEN YELLOW BLUE PINK GREENBLUE WHITE ; do
+    eval "_${color}=\"\e[1m\$${color}\""
+done
+unset color
+
+COLS="$(stty size)"
+COLS="${COLS#* }"
+STAT_COLS=$[COLS-13]
+LINE_UP="\e[A"
+SET_COLS="\e[${STAT_COLS}G"
+# }}}
+
+i18n()
+{
+    gettext -- "$@"
+}
+
+# I/O Functions {{{
+
+#echo()
+#{
+#    local format=$1
+#    shift 1
+#    printf " \b$format\n" "$@"
+#}
+
+echog()
+{
+    local format=$1
+    shift 1
+    printf " \b$(i18n "$format")\n" "$@"
+}
+
+warn()
+{
+    local format=$1
+    shift 1
+    printf " \b${_YELLOW}* ${NORMAL}$format${NORMAL}\n" "$@"
+}
+
+warng()
+{
+    local format=$1
+    shift 1
+    printf " \b${_YELLOW}* ${NORMAL}$(i18n "$format")${NORMAL}\n" "$@"
+}
+
+die()
+{
+    local ec=$1 format=$2
+    [ "$ec" ] || exit "$Ec_ProgrammingError"
+    shift 2
+    printf " \b${_RED}* ${NORMAL}$format${NORMAL}\n" "$@"
+    checkInteger "$ec" || exit "$Ec_ProgrammingError"
+    exit "$ec"
+}
+
+dieg()
+{
+    local ec=$1 format=$2
+    shift 2
+    printf " \b${_RED}* ${NORMAL}$(i18n "$format")${NORMAL}\n" "$@"
+    checkInteger "$ec" || exit "$Ec_ProgrammingError"
+    exit "$ec"
+}
+
+msg()
+{
+    local format=$1
+    shift 1
+    printf " \b${_GREEN}* ${NORMAL}${format}${NORMAL}\n" "$@"
+}
+
+msgg()
+{
+    local format=$1
+    shift 1
+    printf " \b${_GREEN}* ${NORMAL}$(i18n "${format}")${NORMAL}\n" "$@"
+}
+
+ask()
+{
+    local _var=$1 format=$2
+    shift 2
+    printf " \b${_BLUE}* ${NORMAL}$format${NORMAL} " "$@"
+    read $_var
+}
+
+askg()
+{
+    local _var=$1 format=$2
+    shift 2
+    printf " \b${_BLUE}* ${NORMAL}$(i18n "$format")${NORMAL} " "$@"
+    read $_var
+}
+
+# }}}
+
+# Extra Libraries Importing {{{
+[ -z "$IMPORT_PATH"  ] && IMPORT_PATH=("$HOME/Apps/lib/" "/usr/lib/scripts/")
+# import module
+# import dir_module
+# Example: import ConfigureFile
+import()
+{
+    local module="$1" i path
+    eval "[[ \$${module}_imported == 1 ]]" && return
+    if [[ "$module" = *_* ]] ; then
+        local modDir="${module%_*}"
+        modDir="${modDir/_//}/"
+    fi
+    local modName="${module##*_}"
+    #echo $modDir
+    #echo $modName
+    for i in "${IMPORT_PATH[@]}" ; do
+        [ -f "$i${modDir}sm-$module" ] && path="$i${modDir}sm-$module" && break
+#        [ -f "$i/$module" ] && path="$i/$module" && break
+#        [ -f "$i/$module.sm" ] && path="$i/$module.sm" && break
+    done
+    [ "$path" ] && {
+        eval "${module}_imported=1"
+        . "$path"
+    } || {
+        dieg $Ec_ProgrammingError "不能导入库\`%s': 没有那个文件或目录" "$module"
+    }
+    #echo ${module}
+    #eval echo \$${module}__ModType_
+}
+
+require()
+{
+    import "$1"
+}
+# }}}
+
+# Base script functions {{{
+version()
+{
+    echog "$scriptName $pkgver"
+}
+
+inArgList()
+{
+    local item="$1"
+    shift 1
+    for i in "$@" ; do [ "x$item" = "x$i" ] && return 0 ; done
+    return 1
+}
+
+isTrue()
+{
+	if [[ $2 = n ]] ; then
+		case "$1" in
+			[Yy]|[Yy][Ee][Ss])return $Ec_Well;;
+			*)return $Ec_DataError;;
+		esac
+	else
+		case "$1" in
+			[Nn]|[Nn][Oo])return $Ec_DataError;;
+			*)return $Ec_Well;;
+		esac
+	fi
+}
+
+checkInteger()
+{
+    [[ $1 =~ [+-]?[0-9]+ ]]
+}
+# }}}
+
+# 显示的函数 {{{
+quiet() { "$@" &>/dev/null ; }
+no-err() { "$@" 2>/dev/null ; }
+# }}}
+
+forever()
+{
+    while : ; do
+        "$@"
+    done
+}
+
+# Paths {{{
+# 如何使用config??
+#xdgConf="${XDG_CONFIG_HOME-$HOME/.config}/"
+#configDir="${xdgConf}Scripts/"
+#xdgCache="${XDG_CACHE_HOME-$HOME/.cache}/"
+#cacheDir="${xdgCache}Scripts/"
+#Scripts=$HOME/应用/脚本/
+#ConfDir="$configDir"
+#DefConfDir=$HOME/应用/默认配置/
+#ConfDirs=($DefConfDir $ConfDir)
+#Libraries=$HOME/应用/库/脚本/
+#Manuals=$HOME/应用/手册/
+#Pictures=$HOME/媒体/图片/
+#Service=$HOME/应用/服务/
+#ServiceLibraries=${Service}库/
+#DataDir=$HOME/应用/数据/
+# }}}
+

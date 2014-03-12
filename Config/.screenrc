@@ -1,0 +1,39 @@
+# 这是配置那个tab bar
+hardstatus alwayslastline
+# hardstatus string '%{=b}%{b}%{r}[%{b}%-w%{.BW}%n %t%{-}%+w%{r}] %=%{r}[%`lc-农历.py -s%`]'
+#hardstatus alwayslastline "%{=b}%{-b}%{R}[%{G}Tusooa%{R}] %{=b B}%-w%{=b BK}%>%n:%t%{-}%+w%{-b}%< %=" #[%{G}%c%{R}]"
+hardstatus alwayslastline "%{=b y}==> %{=b B}%-w%{=b BK g}%>%{g}%n %t%{-}%{b}%+w%<%=%{=b}%{G}%C%A, %Y-%m-%d %{=b y}<=="
+#hardstatus alwayslastline "%{=b}%{=b B}%-w%{=rb dg}%>%n %t%{=b B}%{-}%{=b B}%+w%{=b B}%<%=%{G}%C%A, %Y-%m-%d"
+#hardstatus string '%{=b}%{b}%{r}<%{b}%-w%{.BW}%n %t%{-}%+w%{r}>' #%`lc-农历.py -s%`'
+#hardstatus string '%-Lw%{= BW}%50>%n%f* %t%{-}%+Lw%<'
+
+termcapinfo * ti@:te@
+
+# screen里面的所有进程退出，screen就自动退出
+autodetach on
+
+# 退出vim/nano之后自动刷新屏幕
+altscreen on
+
+# 启动等待，显示版本
+msgwait 2
+version
+# 启动信息
+startup_message off # default: on
+
+# 启用beep报错
+vbell off
+
+# 默认的shell，不设置的话就是bash
+shell zsh
+
+##    Keybindings    ##
+
+# F10改标题
+bindkey -k k; title
+# F11左边的tab
+bindkey -k F1 prev
+# F12右边的tab
+bindkey -k F2 next
+#prefix key 改成C-x
+escape ^X^X

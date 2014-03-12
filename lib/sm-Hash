@@ -1,0 +1,15 @@
+#!/bin/bash --source
+
+Hash_new()
+{
+    local _hashName="$1"
+    shift
+    declare -gA "$_hashName"
+}
+
+Hash_keysToArray()
+{
+    local _hashName="$1" _toArray="$2"
+    shift 2
+    eval "$_toArray=("'${!'"$_hashName"'[@]}'")" # 比较难懂...
+}

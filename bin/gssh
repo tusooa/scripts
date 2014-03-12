@@ -1,0 +1,52 @@
+#!/usr/bin/env perl
+
+use 5.012;
+use Scripts::scriptFunctions;
+use Getopt::Long qw/:config gnu_getopt/;
+
+my $config = conf 'gssh';
+my $server = $config->get ('server') // '';
+my $localPort = $config->get ('local-port') // 7070;
+my $loginWithoutTunnel = $config->get ('login-without-tunnel') // 1;
+GetOptions('s|server=s' => \$server, 'n|no-tunnel' => \$loginWithoutTunnel);
+my $passwordFile = "${accountDir}ssh-${server}";
+
+open FILE, '<', $passwordFile or die "無法打開 $passwordFile： $!\n";
+chomp (my $host = <FILE>);
+chomp (my $port = <FILE>);
+chomp (my $user = <FILE>);
+chomp (my $password = <FILE>);
+
+sub command
+{
+    my $ssh = shift;
+    my $postlogin = shift;
+    qq[\
+set timeout 30
+spawn $ssh -2p $port $user\@$host
+expect {
+    "yes/no"
+    { send "yes\n" }
+    "password:"
+    { send "$password\n" }
+}
+expect "Last login"
+{$postlogin}
+]
+}
+
+sub run
+{
+    my $cmd = command @_;
+    #say $cmd;
+    system 'expect', '-c', $cmd;
+}
+
+if ($loginWithoutTunnel)
+{
+    run 'ssh', 'exit';
+    system 'notice-msg', '認証成功';
+}
+
+run "ssh -D$localPort", 'interact';
+system 'notice-msg', '連接已斷開';

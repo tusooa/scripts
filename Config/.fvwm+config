@@ -1,0 +1,12 @@
+# -*- Fvwm -*-
+
+Read env.fvwm
+#Read f.window
+Read window.fvwm
+Read func.fvwm
+Read style.fvwm
+Read bind.fvwm
+Read menu.fvwm
+Read misc.fvwm
+
+

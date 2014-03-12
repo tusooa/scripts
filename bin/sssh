@@ -1,0 +1,76 @@
+#!/bin/bash
+#AUTHOR: bones7456 (bones7456@gmail.com)
+#VERSION: 20090728
+# Tusooa Revision: 2
+
+if [[ $1 = -N ]] ; then
+    ssh_opts=-N
+    shift
+fi
+PASSFILE="$HOME/Private/Accounts/ssh-fq"
+
+if [[ $(which expect) = '' ]];then
+	echo "么装expect啊...先给装上吧..."
+	exit 1
+fi
+if [[ $(which ssh) = '' ]];then
+	echo "么装ssh啊...先给装上吧..."
+	exit 2
+fi
+if [[ ! -f $PASSFILE || ! -r $PASSFILE ]];then
+	echo "密码文件不存在或不可读"
+	exit 3
+fi
+PASSFILEAccess=`stat "$PASSFILE" | grep Access | head -1 | awk -F "[(/]+" '{print $2}'`
+if [[ $PASSFILEAccess -gt 0600 ]];then
+	echo "密码文件($PASSFILEAccess)权限太大了,为了安全起见,请设置为600"
+	exit 4
+fi
+if [[ $# -eq 0 ]];then
+	echo "Usage: $0 [-N] hostname1 [hostname2] [...]"
+	exit 5
+fi
+
+HOSTS=""
+EXP=""
+LINEPREFIX="name"
+NL="
+"
+USUALNAME=`grep -vE ^# $PASSFILE | grep usualName | awk '{print $2}'`
+USUALNAMEPSW=`grep -vE ^# $PASSFILE | grep usualPSW | awk '{print $2}'`
+
+echo -e "\x1b]0;""$@""\x07" >&2
+until [[ -z "$1" ]]
+do
+	THENAMEANDHOST=`grep -vE ^# $PASSFILE | grep "${LINEPREFIX}=$1" | awk '{print $2}'`
+	if [[ "x$THENAMEANDHOST" = "x" ]];then
+		echo "没有找到名称为 $1 的服务器..."
+		exit 10
+	fi
+	TMP=`echo "$THENAMEANDHOST" | wc -l`
+	if [[ $TMP -gt 1 ]];then
+		echo "找到多个名称匹配 $1 的服务器..."
+		echo "`grep -vE ^# $PASSFILE | grep "${LINEPREFIX}=$1"`"
+		exit 11
+	fi
+	THENAME=`grep -vE ^# $PASSFILE | grep "${LINEPREFIX}=$1" | awk '{print $2}' | awk -F "@" '{print $1}'`
+	THEPSW=`grep -vE ^# $PASSFILE | grep "${LINEPREFIX}=$1" | awk '{print $3}'`
+	CODING=`grep -vE ^# $PASSFILE | grep "${LINEPREFIX}=$1" | awk '{print $4}'`
+	HOSTS+=" ssh -D7070 $ssh_opts -t "$THENAMEANDHOST
+	EXP="expect {"$NL\"yes/no\"$NL"{ send \"yes\n\" }"$NL
+    if [[ "x$THEPSW" = "x" || "$THEPSW" = "|" && "$THENAME" = "$USUALNAME" ]] ; then
+		EXP+="\"password:\""$NL"{ send \""$USUALNAMEPSW"\n\" }"$NL"}"$NL
+	elif [[ "$THEPSW" != "NULL" ]] ; then
+		EXP+="\"password:\""$NL"{ send \""$THEPSW"\n\" }"$NL"}"$NL
+	fi
+	LINEPREFIX+="-$1"
+	shift
+done
+if [[ "x$CODING" = "x" ]];then
+	CODING=`grep -vE ^# $PASSFILE | grep usualCODING | awk '{print $2}'`
+fi
+CMD="set timeout 30"$NL"spawn ""$HOSTS"$NL"$EXP""expect \"Last login\" {interact}""$NL"
+echo "$CMD"
+echo "======================"
+expect -c "$CMD"
+

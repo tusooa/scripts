@@ -1,0 +1,50 @@
+#!/bin/bash --source
+# vim : ft=bash
+
+distro()
+{
+    local dist
+    if grep Ubuntu /etc/issue &> /dev/null ; then
+        dist=ubuntu
+    elif grep Arch /etc/issue &> /dev/null ; then
+        dist=arch
+    elif test -f /etc/gentoo-release ; then
+        dist=gentoo
+    else
+        dist=default
+    fi
+    if test "$1" ; then
+        [[ $dist == $1 ]]
+    else
+        echo "$dist"
+    fi
+}
+
+if distro ubuntu ; then
+    installPkg()
+    {
+        sudo aptitude install "$@"
+    }
+elif distro arch ; then
+    installPkg()
+    {
+        sudo yaourt -S "$@"
+    }
+elif distro gentoo ; then
+    installPkg()
+    {
+        sudo emerge -av "$@"
+    }
+else
+    installPkg()
+    {
+        msgg "嘿，给你一个shell，让你安装下面的包:"
+        msgg "$*"
+        if quiet which zsh ; then
+            zsh
+        else
+            bash
+        fi
+    }
+fi
+

@@ -1,0 +1,7 @@
+DesktopName 0 Main
+Module FvwmCommandS
+
+Style * MouseFocusClickRaises
+# 重新载入Conky配置，否则Conky会显示在其他窗口上面
+#Exec killall -USR1 conky
+

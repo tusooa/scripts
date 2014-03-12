@@ -1,0 +1,21 @@
+#!/bin/zsh --source
+# vim : ft=zsh
+
+distro()
+{
+    local dist
+    if grep Ubuntu /etc/issue &> /dev/null ; then
+        dist=ubuntu
+    elif grep Arch /etc/issue &> /dev/null ; then
+        dist=arch
+    elif test -f /etc/gentoo-release ; then
+        dist=gentoo
+    else
+        dist=default
+    fi
+    if test "$1" ; then
+        [[ $dist == $1 ]]
+    else
+        echo "$dist"
+    fi
+}

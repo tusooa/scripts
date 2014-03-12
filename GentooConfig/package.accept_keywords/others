@@ -1,0 +1,62 @@
+media-libs/libvpx ~amd64
+#<sys-boot/grub-9999:2 **
+#required by sys-fs/udisks-1.98.0, required by app-emulation/wine-1.5.7[udisks], required by @selected, required by @world (argument)
+=dev-libs/libatasmart-0.19 ~amd64
+#required by app-emulation/wine-1.5.7[udisks], required by @selected, required by @world (argument)
+=sys-fs/udisks-1.98.0 ~amd64
+#required by sys-fs/udisks-1.98.0, required by app-emulation/wine-1.5.7[udisks], required by @selected, required by @world (argument)
+=dev-util/gdbus-codegen-2.32.3 ~amd64
+#required by app-text/evince-2.32.0-r4, required by @selected, required by @world (argument)
+=dev-libs/glib-2.32.3 ~amd64
+#required by sys-fs/udisks-1.98.0, required by app-emulation/wine-1.5.7[udisks], required by @selected, required by @world (argument)
+=sys-auth/polkit-0.106-r3 ~amd64
+#required by sys-auth/polkit-0.106-r3, required by sys-fs/udisks-1.98.0, required by app-emulation/wine-1.5.7[udisks], required by @selected, required by @world (argument)
+=dev-lang/spidermonkey-1.8.5-r1 ~amd64
+#required by app-dicts/stardict-langdao-zh-en-gb (argument)
+>=app-dicts/stardict-langdao-zh-en-gb-2.4.2 ~amd64
+#required by app-dicts/stardict-xdict-zh-en-gb (argument)
+>=app-dicts/stardict-xdict-zh-en-gb-2.4.2 ~amd64
+#required by app-dicts/stardict-cedict-zh-en-gb (argument)
+>=app-dicts/stardict-cedict-zh-en-gb-2.4.2 ~amd64
+#required by app-dicts/stardict-langdao-en-zh-gb (argument)
+>=app-dicts/stardict-langdao-en-zh-gb-2.4.2 ~amd64
+#required by app-dicts/stardict-oxford-en-zh-gb (argument)
+>=app-dicts/stardict-oxford-en-zh-gb-2.4.2 ~amd64
+#required by app-dicts/stardict-cdict-en-zh-gb (argument)
+>=app-dicts/stardict-cdict-en-zh-gb-2.4.2 ~amd64
+#required by app-dicts/stardict-xdict-en-zh-gb (argument)
+>=app-dicts/stardict-xdict-en-zh-gb-2.4.2 ~amd64
+
+x11-misc/gtk2fontsel ~amd64
+#required by spring (argument)
+games-strategy/spring ~amd64
+#required by springlobby (argument)
+games-util/springlobby ~amd64
+
+#required by stardict-cdict-en-zh-big5 (argument)
+>=app-dicts/stardict-cdict-en-zh-big5-2.4.2 ~amd64
+#required by stardict-xdict-en-zh-big5 (argument)
+>=app-dicts/stardict-xdict-en-zh-big5-2.4.2 ~amd64
+#required by stardict-lazyworm-zh-en-big5 (argument)
+>=app-dicts/stardict-lazyworm-zh-en-big5-2.4.2 ~amd64
+#required by stardict-cedict-zh-en-big5 (argument)
+>=app-dicts/stardict-cedict-zh-en-big5-2.4.2 ~amd64
+#required by stardict-langdao-zh-en-big5 (argument)
+>=app-dicts/stardict-langdao-zh-en-big5-2.4.2 ~amd64
+#required by stardict-soothill-buddhist-zh-en-big5 (argument)
+>=app-dicts/stardict-soothill-buddhist-zh-en-big5-2.4.2 ~amd64
+#required by stardict-21shijishuangxiangcidian-en-zh-big5 (argument)
+>=app-dicts/stardict-21shijishuangxiangcidian-en-zh-big5-2.4.2 ~amd64
+#required by stardict-langdao-en-zh-big5 (argument)
+>=app-dicts/stardict-langdao-en-zh-big5-2.4.2 ~amd64
+#required by stardict-xdict-zh-en-big5 (argument)
+>=app-dicts/stardict-xdict-zh-en-big5-2.4.2 ~amd64
+#required by stardict-21shijishuangyukejicidian-en-zh-big5 (argument)
+>=app-dicts/stardict-21shijishuangyukejicidian-en-zh-big5-2.4.2 ~amd64
+#required by stardict-kdic-en-zh-big5 (argument)
+>=app-dicts/stardict-kdic-en-zh-big5-2.4.2 ~amd64
+#required by stardict-oxford-en-zh-big5 (argument)
+>=app-dicts/stardict-oxford-en-zh-big5-2.4.2 ~amd64
+#required by stardict-lazyworm-en-zh-big5 (argument)
+>=app-dicts/stardict-lazyworm-en-zh-big5-2.4.2 ~amd64
+=gnome-base/gnome-keyring-3.4.1-r1 ~amd64

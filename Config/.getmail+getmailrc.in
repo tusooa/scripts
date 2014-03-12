@@ -1,0 +1,15 @@
+[retriever]
+type = SimplePOP3SSLRetriever
+server = pop.gmail.com
+port = 995
+username = @user@
+password = @pass@
+
+[destination]
+type = Maildir
+path = ~/Mail/收/
+
+[options]
+verbose = 0
+delete = false
+message_log = ~/.getmail/getmail.log

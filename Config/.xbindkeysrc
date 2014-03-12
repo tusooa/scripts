@@ -1,0 +1,29 @@
+"paste.perl -t"
+  Mod4 + u
+
+"JumpExec.bash 'Mozilla Firefox' firefox"
+  Mod4 + w
+
+"JumpExec.bash 'gimp' gimp"
+  Mod4 + g
+
+"JumpExec.bash 'emacs : ' emacs"
+  Mod4 + m
+
+"new-screen.perl prev"
+  Control + b:1 + Release
+
+"new-screen.perl next"
+  Control + Alt + b:1 + Release
+
+"new-screen.perl next"
+  Alt + b:1 + Release
+
+"wmctrl -c :ACTIVE:"
+  Mod4 + x
+
+"Destroy.bash"
+  Mod4 + b:2 + Release
+
+"sd-截图.bash"
+  Mod4 + c

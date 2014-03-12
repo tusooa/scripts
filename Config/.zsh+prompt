@@ -1,0 +1,211 @@
+#!/bin/zsh --source
+
+NOCOL=$'%{\e[0m%}'
+
+#tlcr-check()
+#{
+#    local ret="$?"
+#    if [[ $ret = 0 ]] ; then
+#	echo -n "${_GREEN}tlcr: $ret${NOCOL}"
+#    else
+#	echo -n "${_RED}tlcr: $ret${NOCOL}"
+#    fi
+#}
+
+# Git
+get_git_status () {
+    unset __CURRENT_GIT_BRANCH
+    unset __CURRENT_GIT_BRANCH_STATUS
+    unset __CURRENT_GIT_BRANCH_IS_DIRTY
+    [[ "$PWD" = "$HOME" ]] && return
+    local dir=$(git rev-parse --git-dir 2>/dev/null)
+    [[ "${dir:h}" = "$HOME" ]] && return
+    local st="$(git status 2>/dev/null)"
+    if [[ -n "$st" ]]
+    then
+        local -a arr
+        arr=(${(f)st}) 
+        if [[ $arr[1] =~ 'Not currently on any branch.' ]]
+        then
+            __CURRENT_GIT_BRANCH='no-branch' 
+        else
+            __CURRENT_GIT_BRANCH="${arr[1][(w)4]}" 
+        fi
+        if [[ $arr[2] =~ 'Your branch is' ]]
+        then
+            if [[ $arr[2] =~ 'ahead' ]]
+            then
+                __CURRENT_GIT_BRANCH_STATUS=ahead
+            elif [[ $arr[2] =~ 'diverged' ]]
+            then
+                __CURRENT_GIT_BRANCH_STATUS=diverged 
+            else
+                __CURRENT_GIT_BRANCH_STATUS=behind 
+            fi
+        fi
+        [[ ! $st =~ "nothing to commit" ]] && __CURRENT_GIT_BRANCH_IS_DIRTY=1 
+    fi
+    return 0
+}
+
+get_prompt_git ()
+{
+    if [[ -n $__CURRENT_GIT_BRANCH ]]
+    then
+        local s=$__CURRENT_GIT_BRANCH
+        case "$__CURRENT_GIT_BRANCH_STATUS" in
+            ahead) s+="+"  ;;
+            diverged) s+="="  ;;
+            behind) s+="-"  ;;
+        esac
+        [[ $__CURRENT_GIT_BRANCH_IS_DIRTY = '1' ]] && s+="*" 
+        echo "${bg_WHITE}${RED}$s${NOCOL}"
+    fi
+}
+
+git_branch_chpwd ()
+{
+    get_git_status
+    return 0
+}
+
+git_branch_precmd ()
+{
+    [[ "$(fc -l -1)" = *git* ]] && get_git_status
+    return 0
+}
+
+prompt_pwd () # 截短路径
+{
+    local ppwd="${^${(%):-%~}}" restwidth=$[$COLUMNS - 58]
+    if [ ${#ppwd} -gt $restwidth ] ; then
+        local bfpwd="$(echo "$ppwd" | \egrep -o '^~\w+/')"
+        ppwd="${ppwd#$bfpwd}"
+        ppwd="$bfpwd$(echo "$ppwd" | sed -e 's!([^/])[^/]+?/!\1/!g')"
+    fi
+    #_prompt_pwd="$_prompt_color$bg_MAGENTA$ppwd$NOCOL"
+    _prompt_pwd="$ppwd"
+}
+
+dayCode ()
+{
+    echo "${bg_BLUE}dctm: $NOCOL"
+}
+
+setopt promptsubst
+_DATE_NOW="${_BLUE}%D{%Y-%m-%d} %T"
+_HOSTNAME="${_WHITE}${bg_CYAN}%m${NOCOL}"
+_TLCR="%(?!${_GREEN}tlcr: \$?${NOCOL}!${_RED}tlcr: \$?${NOCOL})"
+#jobs-check ()
+#{
+#    local jobs="$(print -Pn %j)"
+#    echo $jobs
+#    if [[ $jobs == 0 ]] ; then
+#        _JOBS=
+#    else
+_JOBS="%(1j!%U${_YELLOW}jobs: %j${NOCOL}%u !)" #!${_GREEN}jobs: %j${NOCOL})"
+#    fi
+#}
+#jobs-check
+PROMPT="${NOCOL}$_TLCR $_JOBS$_DATE_NOW $_HOSTNAME \$_prompt_color$bg_MAGENTA\$_prompt_pwd$NOCOL \$(get_prompt_git)
+${_WHITE}${bg_GREEN}●$NOCOL "
+PROMPT2="${RED}%_${_GREEN}>$NOCOL "
+pwd_color_chpwd()
+{
+    [[ $PWD = $OLDPWD ]] || #_prompt_pwd="${_CYAN}$bg_MAGENTA%~$NOCOL"
+        _prompt_color="${_CYAN}"
+    prompt_pwd
+    #_prompt_pwd="$_CYAN$bg_MAGENTA$(prompt_pwd)$NOCOL"
+}
+pwd_color_preexec()
+{
+    #_prompt_pwd="${_WHITE}${bg_MAGENTA}%~$NOCOL"
+    _prompt_color="${_WHITE}"
+}
+
+_prompt_color="${_WHITE}"
+prompt_pwd
+#_prompt_pwd="${_WHITE}$bg_MAGENTA%~$NOCOL"
+#RPROMPT="\$_prompt_pwd"
+SPROMPT="${_YELLOW}修正${NOCOL}:${_RED}%R${NOCOL}->${_GREEN}%r${NOCOL}:[${_CYAN}N${NOCOL}o/${_CYAN}y${NOCOL}es/${_CYAN}e${NOCOL}dit/${_CYAN}a${NOCOL}bort] ${_YELLOW}=>${NOCOL} "
+export SUDO_PROMPT=$'sudo: Password for \e[1;33m%p\e[0m:'
+
+preexec_functions=(pwd_color_preexec)
+precmd_functions=(git_branch_precmd)
+chpwd_functions=(pwd_color_chpwd git_branch_chpwd)
+
+screentitle ()
+{
+    print -Pn "\ek$*\e\\"
+}
+
+typeset -A _prefixes
+_prefixes=(sudo '#' e '@' man '?' perldoc 'P?' gfw '^' wget '<-' axel '<=' '.' '+' emerge 'M' nice '-')
+_commandPrefixes=(sudo e gfw nice)
+#_replaces=('#' '@' '?' 'P?')
+
+screenTitlePreexec()
+{
+    local cmd="$1" prefix continue
+    while : ; do
+        continue=0
+        for i in ${(k)_prefixes} ; do
+            #echo $cmd, $i,$continue
+            if [[ "$cmd" = "$i "* ]] ; then
+                #echo match "$i"
+                cmd="${cmd#$i }"
+            #cmd="${cmd%% *}"
+            #cmd="${cmd##*/}"
+                prefix="$prefix$_prefixes[$i]"
+            #cmd="$_prefixes[$i]""$cmd"
+            #break
+                if inList "$i" "${_commandPrefixes[@]}" ; then
+                    continue=1
+                    #echo "command:$i"
+                else
+                    break
+                fi
+            fi
+        done
+        if [[ "$continue" = 0 ]] ; then
+            #echo break
+            break
+        fi
+    done
+        
+#    if [[ "$1" =~ '^sudo ' ]] ; then
+#        cmd="${1#sudo }"
+#        cmd="${cmd%% *}"
+#        cmd="${cmd##*/}"
+#        cmd="#$cmd"
+#    elif [[ "$1" =~ '^e ' ]] ; then
+#        cmd="${1#e }"
+#        cmd="${cmd%% *}"
+#        cmd="${cmd##*/}"
+#        cmd="@$cmd"
+#    elif [[ "$1" =~ '^man ' ]] ; then
+#        cmd="${1#man }"
+#        cmd=
+#    else
+    if [[ -z "$cmd" ]] ; then
+        cmd="$1"
+    fi
+    cmd="${cmd%% *}"
+    cmd="${cmd##*/}"
+#    cmd="${cmd%% *}"
+    cmd="${cmd%%-*}"
+#    cmd="${cmd##*/}"
+    screentitle "$prefix$cmd"
+}
+
+screenTitlePrecmd()
+{
+    local dir="${^${(%):-%~}}"
+    dir="${dir##*/}"
+    screentitle ":$dir"
+}
+
+if [[ "$TERM" = screen ]] ; then
+    preexec_functions+=(screenTitlePreexec)
+    precmd_functions+=(screenTitlePrecmd)
+fi

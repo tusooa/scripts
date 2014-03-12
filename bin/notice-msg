@@ -1,0 +1,49 @@
+#!/usr/bin/env perl
+
+use 5.012;
+use Scripts::scriptFunctions;
+
+my $scriptName = 'notice-msg';
+my $config = conf $scriptName;
+my $method = $config->get ('msg-method');
+say $method;
+my ($title, $icon) = ($scriptName, 'info');
+my ($message, $detail);
+given (scalar @ARGV)
+{
+    when (1)
+    {
+        $message = shift @ARGV;
+    }
+    when (2)
+    {
+        ($message, $detail) = @ARGV;
+    }
+    when (3)
+    {
+        ($title, $message, $detail) = @ARGV;
+    }
+    when (4)
+    {
+        ($title, $icon, $message, $detail) = @ARGV;
+    }
+}
+
+given ($method)
+{
+    when ('notify')
+    {
+        use Net::DBus;
+        my $bus = Net::DBus->session->get_service
+            ('org.freedesktop.Notifications')->get_object
+            ('/org/freedesktop/Notifications',
+             'org.freedesktop.Notifications');
+        $bus->Notify
+            ($title, 0, $icon, $message, $detail, [], {}, -1);
+    }
+    default
+    {
+        die "Unknown method: $_\n";
+    }
+}
+

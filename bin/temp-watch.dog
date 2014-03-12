@@ -1,0 +1,71 @@
+#!/bin/bash
+# -*- shell-script -*-
+
+function vars1
+{
+    file='/sys/class/hwmon/hwmon0/temp1_input'
+    maxtemp=92000
+    emtemp=97000
+}
+
+function vars2
+{
+    file='/sys/class/hwmon/hwmon0/temp2_input'
+    maxtemp=91000
+    emtemp=95000
+}
+
+case "$1" in
+    1)vars1;;
+    2)vars2;;
+    *)"$0" 1 &
+        exec "$0" 2;;
+esac
+shift
+(while : ; do
+    if [[ "$(cat "$file")" -gt $maxtemp ]]; then
+        if pkill -STOP make ; then
+            sleep 120
+            pkill -CONT make
+        fi
+    fi
+    sleep 1
+done)&
+(while : ; do
+    if [[ "$(cat "$file")" -gt $maxtemp ]]; then
+        if pkill -STOP kmk ; then # for VBox, etc.
+            sleep 120
+            pkill -CONT kmk
+        fi
+    fi
+    sleep 1
+done)&
+(if [[ "$1" ]] ; then
+    while : ; do
+        if [[ "$(cat "$file")" -gt $maxtemp ]]; then
+            if pkill -STOP "$1" ; then
+                sleep 120
+                pkill -CONT "$1"
+            fi
+        fi
+        sleep 1
+    done
+fi)&
+(while : ; do
+    if [[ "$(cat "$file")" -gt $emtemp ]]; then
+#        if pkill -STOP make ; then # for VBox, etc.
+#            sleep 120
+#            pkill -CONT make
+#        fi
+        pkill -9 emerge
+    fi
+    sleep 1
+done)&
+while : ; do
+    #echo "$(cat "$file")"
+    if [[ "$(cat "$file")" -gt $maxtemp ]]; then
+        sudo -u tusooa env DISPLAY=:0 /home/tusooa/Apps/Scripts/notice-msg "Temp $1 > $maxtemp"
+        sleep 120
+    fi
+    sleep 1
+done

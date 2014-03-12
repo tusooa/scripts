@@ -1,0 +1,50 @@
+#右上角菜单
+#KillModule FvwmButtons
+#DestroyModuleConfig topRight: *
+#*topRight: Geometry 65x65-0+0
+#*topRight: Colorset 0
+#*topRight: Rows 1
+#*topRight: Columns 1
+#*topRight: (1x1, Frame 0, Icon $[fvwm]control.png, Action (Mouse 1) `Exec exec urxvt -e run-prog.perl`)
+#FvwmButtons topRight
+
+# == old config ==
+#Key t A 4 JumpExec "好友列表" pidgin
+#Key r A 4 JumpExec XChat xchat
+#Key f A 4 JumpExec "F-Spot" f-spot
+#Key a A 4 Exec exec xterm -geometry 80x27-0+0 -bg blue4 -title "Mutt" -e mutt
+#Key r A 4 Exec exec xterm -geometry 80x27-0-0 -title "Irssi" -e Irssi-Alias
+#Key c A 4 JumpExec "Chromium" chromium
+#Key v A 4 JumpExec "VirtualBox" VirtualBox
+
+#窗口的按钮
+#mouse 1         2       a       close
+#mouse 2     2   a   all ($c) close
+#mouse 3         2       a       destroy
+#mouse 1     4       a       maximize 100 100
+#mouse 2         4       a       maximize 0 100
+#mouse 3         4       a       maximize 100 0
+#mouse 1		6    	a     	iconify
+#mouse 2		6    	a     	all ($c) iconify on
+#mouse 3         6       a       all ($c) windowshade on
+#mouse 1		8	a	togglestaysontop
+#mouse 1		0	a	funcfullscreen
+
+# Border, Title and Button Styles
+#Style * BorderWidth 10, HandleWidth 5
+
+#ButtonStyle	1	MiniIcon (-- flat)
+#ButtonStyle	all	-- UseTitleStyle Flat
+#ButtonStyle	2	Pixmap w-关.png	-- flat
+#ButtonStyle	4	Pixmap w-大.png	-- flat
+#ButtonStyle	6	Pixmap w-小.png	-- flat
+#ButtonStyle	8	Pixmap w-顶.png	-- flat
+#ButtonStyle	0	Pixmap w-全.png	-- flat
+
+#Style	"*"	MWMBorder
+#Style	"*"	MWMButtons
+#TitleStyle	Centered
+#ButtonStyle	all	-- UseTitleStyle
+
+# 最大化边缘
+#EwmhBaseStruts 0 310 0 0

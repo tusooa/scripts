@@ -1,0 +1,15 @@
+#!/usr/bin/env tclsh
+package require Expect
+spawn w3m -dump http://www.issh.in/apple.htm
+
+expect -re "密码： \\\[(\[\\w\\.]+)" {
+    set password $expect_out(1,string)
+}
+spawn ssh -NtD 7070 -p 8562 www.issh.in@173.192.165.183
+expect "(yes/no)" {
+    send "yes\r"
+    exp_continue
+} "assword" {
+    send "$password\r"
+}
+interact

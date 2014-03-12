@@ -1,0 +1,50 @@
+#!/bin/zsh --source
+
+export EDITOR='emacsclient' PACKAGER='tusooa@gmail.com'
+export FCDWDIR="$HOME/个人/下载/full circle"
+# 输入法
+export XMODIFIERS="@im=fcitx"
+export QT_IM_MODULE=fcitx GTK_IM_MODULE=fcitx
+export XIM=fcitx XIM_PROGRAM=fcitx
+
+# LANG
+if [[ $TERM = linux ]] ; then
+    LANG=en_US.UTF-8
+else
+    LANG=zh_CN.UTF-8
+fi
+
+# less
+export PAGER=less
+export MANPAGER='/usr/bin/less -isR'
+export LESS_TERMCAP_md=$'\e[1;31m' #bold1
+export LESS_TERMCAP_mb=$'\e[1;31m'
+export LESS_TERMCAP_me=$'\e[0m'
+export LESS_TERMCAP_so=$'\e[01;44;33m' #search highlight
+export LESS_TERMCAP_se=$'\e[0m'
+export LESS_TERMCAP_us=$'\e[1;2;32m' #bold2
+export LESS_TERMCAP_ue=$'\e[0m'
+export LESS="-M -i -R --shift 5"
+export LESSCHARSET=utf-8
+export GROFF_NO_SGR=1 #groff不转换颜色
+export READNULLCMD=less
+# In archlinux the pipe script is in PATH, how ever in debian it is not
+[[ -x $(whence -cp src-hilite-lesspipe.sh 2>/dev/null) ]] && export LESSOPEN="| src-hilite-lesspipe.sh %s"
+[ -x /usr/share/source-highlight/src-hilite-lesspipe.sh ] && export LESSOPEN="| /usr/share/source-highlight/src-hilite-lesspipe.sh %s" || :
+
+# Ctrl+@ 设置标记，标记和光标点之间为 region
+colors=(red green yellow blue magenta cyan)
+num=$[$RANDOM % ${#colors}]
+color=${colors[(num-1) % ${#colors} +2]}
+zle_highlight=(
+    region:bg=magenta
+    special:bold,fg=magenta # 特殊
+    isearch:underline # ???
+    default:bold,fg=$color # 输入
+)
+
+# Perl Brew
+
+#export PERLBREW_ROOT="$HOME/安装/stow/perlbrew" \
+#    PERLBREW_HOME="$HOME/.perlbrew"
+

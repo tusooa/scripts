@@ -1,0 +1,16 @@
+
+
+# Accounts will inherit settings from this section
+defaults
+auth             on
+tls              on
+tls_trust_file   /usr/share/ca-certificates/mozilla/Thawte_Premium_Server_CA.crt
+
+# A first gmail address
+account        default
+host           smtp.gmail.com
+port           587
+from           @user@
+user           @user@
+password       @pass@
+tls_trust_file /etc/ssl/certs/ca-certificates.crt

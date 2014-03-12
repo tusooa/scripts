@@ -1,0 +1,85 @@
+set realname = "Tusooa Zhu"
+set mbox_type=Maildir           # Maildir格式
+set folder="~/Mail"           # 邮件目录
+set mask="!^\\.[^.]"            # 隐藏dotfiles
+set mbox="+收"               # 收件箱
+set record="+发"             # 发件箱
+set postponed="+写"          # 草稿箱
+set spoolfile="~/Mail/收"   # MDA直接把邮件递到我的收件箱
+set sort=reverse-threads            # 新的在最上面，按thread归档
+set sort_aux=last-date-received     # 同一个thread里面，最新的在最上面
+set ascii_chars=yes
+set from="tusooa@gmail.com"
+color index yellow default ~p              # 发给我的，黄色
+color index brightblue default ~P                # 我发的，蓝色
+color index brightyellow default ~N        # 新的，黄色粗体
+color index brightgreen default "~N ~p"    # 新发给我的，绿色粗体
+color index default blue ~O
+bind pager j next-line
+bind pager k previous-line
+bind pager,index l next-entry
+bind pager,index h previous-entry
+bind pager '^N' next-entry
+bind pager '^P' previous-entry
+bind index '#' limit
+macro pager g "!countup.perl getmail getmail -nv\n"
+macro index g "!countup.perl getmail getmail -nv\n"
+set pager_index_lines=10
+subscribe ubuntu-zh@lists.ubuntu.com kde-china@kde.org
+ignore *
+unignore from subject X-mailer date
+hdr_order subject from to date
+folder-hook . 'macro index d "~/Mail/废\r"'
+folder-hook ~/Mail/废 'bind index d delete-message'
+source ~/.mutt/alias
+set alias_file=~/.mutt/alias
+auto_view text/html
+set sendmail="/usr/bin/msmtp"
+set editor=emacsclient
+#my_hdr from:Tusooa Zhu <tusooa@gmail.com>
+#set pager_stop=yes
+set edit_headers=yes
+set markers=no #自动换行时不显示+
+set signature=~/.mutt/sign
+
+#http://www.gentoo.org/doc/zh_cn/guide-to-mutt.xml?style=printable
+#引用颜色
+color quoted brightgreen default
+color quoted1 magenta default
+color quoted2 yellow default
+color quoted3 red default
+#color signature cyan default
+
+#邮件颜色
+#header默认
+color hdrdefault brightcyan default
+#header From
+color header brightwhite default "^from:"
+#header subject
+color header brightwhite default "^subject:"
+#签名
+color signature brightwhite default
+#index模式，选中的邮件
+color indicator brightwhite green
+#错误信息,minibuffer(借用emacs术语。)
+color error brightred default
+#mode-line和header-line(再次借用emacs术语。)
+color status brightwhite cyan
+#树状图。
+color tree brightmagenta default
+#???
+color tilde brightmagenta default
+#电邮地址
+color body brightwhite default "[-a-z_0-9.]+@[-a-z_0-9.]+"
+#评论签名???
+#color body brightyellow default "^Good signature"
+#color body brightwhite default "^Bad signature from.*"
+#正常颜色
+color normal white default
+#minibuffer里的信息(如回复是问回复给谁)
+color message brightgreen default
+#附件
+color attachment brightgreen default
+
+set include=yes	#回复时引用原文
+set fast_reply=yes #回复时不询问回复地址

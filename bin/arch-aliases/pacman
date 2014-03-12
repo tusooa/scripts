@@ -1,0 +1,27 @@
+#!/bin/bash
+
+pkgver=0.1
+. scriptFunctions
+
+#if [ -x '/usr/bin/powerpill' ] ; then
+#    cmd='powerpill "$@"'
+if [ -x '/usr/bin/pacman-color' ] ; then
+    cmd='/usr/bin/pacman-color "$@"'
+else
+    cmd='/usr/bin/pacman "$@"'
+fi
+
+if [ "$(echo "$@" | g 'Sy|Su|Sc|S |R' 2>/dev/null)" ] ; then
+    cmd="sudo $cmd"
+fi
+eval "$cmd"
+[ "$(echo "$@" | grep Sy)" ] || exit 0
+askg var "Do you want to upgrade the programs list?[Y/n]"
+
+case "$var" in 
+	[Yy]|"") ;;
+	*) exit 0 ;;
+esac
+sudo pacfile -S
+mkdir -p $HOME/.share/
+pacfile 'bin/[^\/]+$' > $HOME/.share/programsList && echo "programs list is up to date"

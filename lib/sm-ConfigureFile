@@ -1,0 +1,14 @@
+#!/bin/bash --source
+
+Ec_ConfError=21
+
+function loadConf
+{
+    for dir in "${ConfDirs[@]}"; do
+        if [[ -f ${dir}$1 ]] ; then
+            . ${dir}$1 || dieg $Ec_ConfError "配置文件问题。"
+        fi
+    done
+}
+
+

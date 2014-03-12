@@ -1,0 +1,47 @@
+
+SetEnv _menuIcon /usr/share/icons/gnome/22x22/
+SetEnv _hicolorIcon /usr/share/icons/hicolor/22x22/
+
+DestroyMenu RootMenu
+AddToMenu   RootMenu "主菜单" Title
+#+ "终端(&T)%mini.term.xpm%"		        Exec exec xterm-多彩
++ "%$[_menuIcon]apps/web-browser.png%&Firefox" JumpExec "Firefox" firefox
+#+ "%$[_hicolorIcon]apps/pidgin.png%&Pidgin" JumpExec "Pidgin" pidgin
++ "V&irtualBox" JumpExec VirtualBox VirtualBox
++ "&Hotot" JumpExec 傲兔 gfw hotot
++ "&FvwmConsole" Module FvwmConsole
++ "%$[_hicolorIcon]apps/pidgin.png%&GIMP" JumpExec "GIMP" gimp
++ "%$[_hicolorIcon]apps/evince.png%&Evince" JumpExec "Document Viewer" evince
++ "&Transmission" JumpExec Transmission transmission-gtk
++ "F&ileZilla" JumpExec FileZilla filezilla
++ "Libreoffice" JumpExec LibreOffice libreoffice
++ "Inkscape" JumpExec Inkscape inkscape
++ "Emacs" RunEmacs
++ "Okular" JumpExec Okular okular
++ "Skype" JumpExec Skype skype
++ "Aria" JumpExec Aria $[HOME]/Install/bin/Aria
++ "SMPlayer" JumpExec "SMPlayer" smplayer
+#+ "贪吃蛇(&S)" Exec exec xterm -geometry 60x40+0+0 -title SnakeGame -e sn-贪吃蛇.bash
+#+ "●象棋(&C)"				Exec exec gmchess
++ ""					                Nop
++ "Restart Menu" Popup Restart
++ "Lock Screen" Exec xlock -mode blank
+
+DestroyMenu Restart
+AddToMenu Restart
++ "不重启" Nop
++ "Reload config" Read config
++ "Reload conky" Exec exec pkill -USR1 conky
++ "重启 Fvwm(&R)" Restart fvwm -s
++ "&Quit fvwm%mini.stop.xpm%" FvwmForm FvwmForm-QuitVerify
++ "重启系统(&B)" Exec exec gksu -m "想重启？输入密码。" reboot
++ "关机(&X)" Exec exec gksu -m "想关机？输入密码。" halt
+
+DestroyMenu WindowMenu
+AddToMenu WindowMenu
++ "窗口菜單" Title
++ "最小" Iconify
++ "卷起" WindowShade
++ "最大" Maximize 100 100
++ "關閉" Close
++ "強制退出" Destroy

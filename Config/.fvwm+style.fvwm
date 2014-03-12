@@ -1,0 +1,85 @@
+# kde cursor
+# set in ~/.Xresource
+SetEnv CursorDir "$[HOME]/.icons/Oxygen_Blue/cursors/"
+CursorStyle DEFAULT $[CursorDir]default
+CursorStyle TITLE $[CursorDir]default
+CursorStyle MENU $[CursorDir]default
+CursorStyle ROOT $[CursorDir]default
+##CursorStyle SYS $[CursorDir]hand2
+#CursorStyle MOVE  $[CursorDir]fleur
+#CursorStyle SELECT $[CursorDir]cross
+#CursorStyle DESTROY $[CursorDir]pirate
+
+# 字体
+Style * Font $[RegularFont]
+Style * IconFont $[RegularFont]
+MenuStyle * BorderWidth 1, Font "$[RegularFont]"
+
+# 标题，無边框
+Style * Title, !Borders, HandleWidth 3
+# 按鈕
+ButtonStyle 1 MiniIcon (-- flat)
+Mouse 1 1 a Menu WindowMenu
+ButtonStyle all -- UseTitleStyle Flat
+ButtonStyle 2 Pixmap "$[fvwm]close.png" -- flat
+Mouse 1 2 a Close
+Mouse 2 2 a Delete
+Mouse 3 2 a Destroy
+ButtonStyle 4 Pixmap "$[fvwm]small.png" -- flat
+Mouse 1 4 a Iconify
+Mouse 2 4 a WindowShade
+Mouse 3 4 a WindowShade
+
+#IconBox 设置
+Style * IconBox 50x900+40+40, IconGrid 20 20, IconFill right bottom, IconSize 48 48, StickyIcon
+Style * !IconTitle, IconTitleRelief 0, IndexedIconName, IconBackgroundPadding 0, IconBackgroundRelief 0
+
+Style * NoPPosition
+Style xterm     !Title, !Borders, !Iconifiable, !Sticky, WindowListSkip
+Style urxvt     UseStyle xterm
+Style urxvt !Borders, !Title, !Iconifiable
+Style screen    UseStyle xterm
+Style env       UseStyle xterm
+Style dock      !Title, !Borders, !Iconifiable, Sticky, StaysOnBottom, WindowListSkip
+Style tint2     UseStyle dock
+Style *panel    UseStyle dock
+Style *dock     UseStyle dock
+Style *tray     UseStyle dock
+Style *clock    UseStyle dock
+Style trayer    UseStyle dock
+Style conky     UseStyle dock
+Style Conky     UseStyle dock
+Style topRight  UseStyle dock
+#EWMHIgnoreWindowType是重点。只有这样，plasma才能被关掉。
+#Style plasma-desktop !Title, !Borders, !Iconifiable, Sticky, !StaysOnBottom, !EWMHIgnoreWindowType, WindowListSkip
+#Style "Plasma " Title, !Borders, Iconifiable, !Sticky, !StaysOnBottom
+
+# Colors
+Colorset 0 fg white, fgsh white, bg #969b0c, sh #969b0c, hi #ffffff, Translucent #283e5e 80, Tint white 15, bgTint #0c0c9b 15
+#Colorset 1 fg white, fgsh white, bg #283e5e, hi #fff, sh #283e5e, Translucent #969b0c 70, Tint white 15, bgTint #318bcf 15
+#Colorset 3 fg #9aafbf, bg #000000, fgsh #000000, NoShape, RootTransparent, Tint #283e5e 70
+#Colorset 4 fg #ffffff, bg #000000, fgsh #000000, Noshape, RootTransparent, Tint #101f36 70
+# 透明的。(假透明。)
+#Colorset 8 RootTransparent buffer, fg '#2242c7', bg average, Tint white 15, bgTint blue 15
+#Colorset 42 RootTransparent buffer, fg '#2242c7', bg average, Tint white 15, bgTint cyan 15
+
+
+# 边框和标题样式
+# 透明的。
+Colorset 0 fg white, bg #1c5572, Transparent, Tint white 15, bgTint cyan 15
+Style * Colorset 0, HilightColorset 0
+BorderStyle Inactive Colorset 0 -- flat
+BorderStyle Active Colorset 0 -- flat
+TitleStyle AllInactive Colorset 0 -- flat
+TitleStyle AllActive Colorset 0 -- flat
+
+MenuStyle * Hilight3DOff, HilightBack #424164, ActiveFore white
+MenuStyle * MenuColorset 0
+MenuStyle * Foreground grey90
+MenuStyle * Background #1c5572
+MenuStyle * BorderWidth 1, TitleUnderlines1, SeparatorsLong, TrianglesSolid
+MenuStyle * ItemFormat "%.2|%.5i%.5l%.5i%2.3>%2|"
+MenuStyle * AutomaticHotKeys
+MenuStyle * MenuFace VGradient 128 1 #2c80A0 1 #1c5572
+ColormapFocus FollowsFocus
+

@@ -1,0 +1,27 @@
+DesktopSize 3x3
+Key 1 W 4 PointerWindow MoveToPage 0 0
+Key 2 W 4 PointerWindow MoveToPage 1 0
+Key 3 W 4 PointerWindow MoveToPage 2 0
+Key 4 W 4 PointerWindow MoveToPage 0 1
+Key 5 W 4 PointerWindow MoveToPage 1 1
+Key 6 W 4 PointerWindow MoveToPage 2 1
+Key 7 W 4 PointerWindow MoveToPage 0 2
+Key 8 W 4 PointerWindow MoveToPage 1 2
+Key 9 W 4 PointerWindow MoveToPage 2 2
+Style "Mozilla Firefox" StartsOnPage 0 0, SkipMapping
+Style "stardict" StartsOnPage 1 0, SkipMapping
+Style "Skype" StartsOnPage 1 0, SkipMapping
+Style "gimp" StartsOnPage 2 0, SkipMapping
+Style "feh" StartsOnPage 2 0, SkipMapping
+Style "Inkscape" StartsOnPage 2 0, SkipMapping
+Style "Document Viewer" StartsOnPage 2 0, SkipMapping
+Style "LibreOffice" StartsOnPage 2 0, SkipMapping
+Style "emacs@tusooa-laptop" StartsOnPage 0 1, SkipMapping
+Style "emacs : " StartsOnPage 0 1,SkipMapping
+Style "screen" StartsOnPage 1 1, SkipMapping
+Style "urxvt" StartsOnPage 1 1, SkipMapping
+Style "env" StartsOnPage 1 1, SkipMapping
+Style "VirtualBox" StartsOnPage 1 2, SkipMapping
+Style "GMChess" StartsOnPage 2 1
+Style "SnakeGame" StartsOnPage 2 1
+Style "chromium" StartsOnPage 0 2, SkipMapping

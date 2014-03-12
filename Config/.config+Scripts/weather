@@ -1,0 +1,14 @@
+font = DejaVu Sans YuanTi
+max = 6
+#color-today = 20,20,20,255
+#color-rest = 20,20,20,255
+#color-other = 20,20,20,255
+color-today = 224,217,22,255
+color-rest = 224,217,22,255
+color-other = 224,217,22,255
+#color-rest = 198,22,38,255
+#color-other = 198,22,38,255
+size = 80
+font-size = 12
+picture-size = 64
+show-shadow = 1

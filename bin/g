@@ -1,0 +1,154 @@
+#!/usr/bin/env perl
+# IMPORTANT: 待测试
+use Getopt::Long qw/:config bundling/;
+use File::Basename;
+use 5.012;
+use Scripts::scriptFunctions;
+
+my (@files, @regex);
+my $help = 0;
+my $showVersion = 0;
+#print ((fileparse $0)[0]);
+my $commonGrep = ((fileparse $0)[0] ~~ qw/cg gg gc/) ? 1 : 0; #根据文件名判断
+#print $commonGrep;
+my $ln = 0;
+my $fn = 'DEFAULT';
+
+GetOptions (
+    'help' => \$help,
+    'version' => \$showVersion,
+    'common-grep|g' => \$commonGrep,
+    'no-common-grep|G' => sub { $commonGrep = 0 },
+    'file|f' => sub { @files = multiArgs },
+    'end' => sub {}, #对于-f等多参数的结束
+    'line-number|l' => \$ln,
+    'no-line-number|L' => sub { $ln = 0 }, # default
+    'show-filename|n', \$fn,
+    'no-filename|N', sub { $fn = 0 },
+);
+
+my $scriptName = 'grep.perl';
+my $version = '0.1';
+my $filenameColor = $ENV{G_CFILENAME} // "\e[33m";
+my $lineNumColor = $ENV{G_CLINENUM} // "\e[32m";
+
+if ($help)
+{
+    say
+qq{$scriptName $version, 简写 g.
+用法:
+    g [opts] regex ... -f file ...
+    g [opts] regex ... -f file ... --end regex ...
+    g [opts] -g regex [file ...] # (like common grep)
+    cg / gg / gc `` # ``
+    some-command | g [opts] regex ...
+    g [opts] regex ... < single-file
+    g [opts] regex ... << here-document
+    g [opts] regex ... <<< string
+    正则表达式永远都是空格分隔的.
+    -f 后边的所有参数都被视作文件名.
+    文件名用空格分隔.
+    如果STDIN是管道过来的,而且没有指定文件，那么:所有的命令行参数都作为正则.
+选项:
+    --help                      就是这个帮助信息
+    --version                   打印 $scriptName 的版本
+    -l, --line-number           显示行号
+    -L, --no-line-number        (默认的)不显示行号
+    -n, --show-filename         显示文件名:如果有多个文件,默认会这么做的
+    -N, --no-filename           不显示文件名(联系上边的看吧.)
+    --end                       结束多参数选项(如：-f)
+};
+    exit 0;
+}
+
+if ($showVersion)
+{
+    say qq{$scriptName version $version};
+    exit 0;
+}
+
+#@files = split (/,/,join (',',@files));
+if (! -t STDIN and ! $commonGrep)
+{
+    # pipe
+    @regex = @ARGV;
+    @files = (@files ? @files : '-');
+}
+#elsif (! -t STDIN and $commonGrep)
+#{
+#    # pipe, cGrep
+#    @regex = (shift @ARGV);
+#    @files = ((@ARGV, @files) ? (@ARGV, @files) : '-');
+#}
+elsif ($commonGrep)
+{
+    #print @ARGV;
+    @regex = (shift @ARGV); # cgrep只允许一个正则
+    #print @ARGV,' ,',@files;
+    @files = (@ARGV, @files);
+    #这个功能实在鸡肋..cgrep不需要-f的
+    @files = (@files ? @files : '-'); # 哪个放在前边好？？
+    #print @files;
+}
+#elsif (@ARGV == 2 and ! @files)
+#{
+#    @regex = ($ARGV[0]);
+#    @files = ($ARGV[1]);
+#}
+elsif (! @files)
+{
+    @regex = @ARGV;
+    @files = ('-');
+}
+else
+{
+    @regex = @ARGV;
+}
+#say "@regex ,,, @files";
+#exit 0;
+if ($fn eq 'DEFAULT') # 如果没有特别指定显示文件名
+{
+    $fn = @files > 1 ? 1 : 0;
+}
+my @col = map "\e[1;4;3".(int rand(6) +1).';40m', @regex;
+
+no strict 'refs';
+for my $file (@files)
+{
+    my $fh = $file;
+    if ($file eq '-' or $file eq '/dev/stdin'
+        or $file eq '/proc/self/fd/0' # 等等高级写法...
+       )
+    {
+        $fh = \*STDIN; # 还是不要'STDIN'.
+    }
+    else
+    {
+        open $fh, '<', $fh or die "Cannot open `$file': $!\n";
+        # ● gc [ ~/.conkyrc  
+        # Unmatched [ in regex; marked by <-- HERE in m/([ <-- HERE )/ at /home/tusooa/应用/脚本/gc line 140, </home/tusooa/.conkyrc> line 1.
+
+    }
+    #for my $i (@regex)
+    #{
+    #    @_ = grep /$i/, @_;
+    #}
+    #$_ = join "",@_;
+    # 如果原来就有颜色呢？去掉。
+    #s/\e\[[0-9;]*[mK]//g;
+    LINE:
+    while (<$fh>)
+    {
+        for my $i (0..$#regex)
+        {
+            #print STDERR $regex[$i];
+            s{($regex[$i])}{$col[$i]$1\e[0m}g or next LINE;
+        }
+        print "${filenameColor}${file}:\e[0m" if $fn;
+        # 行号,具体参见 ● perldoc -v '$.'
+        print "${lineNumColor}${.}:\e[0m" if $ln;    
+        print;
+    }
+}
+
+

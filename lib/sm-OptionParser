@@ -1,0 +1,251 @@
+#!/bin/bash --source
+# vim : ft=bash
+
+# sm-OptionParser
+
+#declare -x -a _saveOpts oType oShort oLong oDesc oValue oValues
+#declare -x -a aList
+
+Ec_NoOpt=21
+
+# addOpt type short long description [default] [values]
+# types: b(oolean) e(ntry)
+# default: the default value of the option
+# values: optional for type `entry'
+# example: addOpt b e example-opt 'An example option'
+addOpt()
+{
+    local type="$1" short="$2" long="$3" desc="$4" default="$5" values="$6"
+    oType+=("$type")
+    oShort+=("$short")
+    oLong+=("$long")
+    oDesc+=("$desc")
+    oValue+=("$default")
+    oValues+=("$values")
+}
+
+bool()
+{
+    local i=0
+    while [[ ${oType[i]} ]] ; do
+        if [[ ${oType[i]} = b ]] ; then
+            if [[ $1 == ${oShort[i]} || $1 == ${oLong[i]} ]] ; then
+                [[ ${oValue[i]} = yes ]] && return $Ec_Well || return $Ec_NoOpt
+            fi
+        fi
+        (( i++ ))
+    done
+    return $Ec_NoOpt
+}
+
+entry()
+{
+    local i=0
+    while [[ ${oType[i]} ]] ; do
+        if [[ ${oType[i]} = e ]] ; then
+            if [[ $1 == ${oShort[i]} || $1 == ${oLong[i]} ]] ; then
+                value="${oValue[i]}"
+                if [[ $value ]] ; then echo "$value" ; return $Ec_Well
+                else return $Ec_ValueError ; fi
+            fi
+        fi
+        (( i++ ))
+    done
+    return $Ec_NoOpt
+}
+
+entSet()
+{
+    quiet entry "$@"
+}
+
+entIs()
+{
+    local option="$1" value="$2"
+    eValue="$(entry "$option")"
+    ret=$?
+    if ! [[ $value ]] ; then
+        # 不需要看值。
+        return $ret
+    fi
+    [[ $ret = $Ec_NoOpt ]] && return $Ec_NoOpt
+    [[ $value = $eValue ]] && return $Ec_Well || return $Ec_ValueError
+}
+
+# Use in parseOpts()
+setOpt()
+{
+    local i=0 option="$1" value="$2"
+    local v
+    [ -z "${option}" ] && return $Ec_NoOpt
+
+    while [[ ${oType[i]} ]] ; do
+        #msg $option,${oShort[i]},${oLong[i]}
+        if [[ ${option} = ${oShort[i]} || ${option} = ${oLong[i]} ]] ; then
+            if [[ ${oValues[i]} ]] ; then
+                # 有一个固定的值选择列表
+                # perl多方便阿，~~ 就行了\e9nd
+                for v in ${oValues[i]} ; do
+                    if [[ $v == $value ]] ; then
+                        oValue[i]="$value"
+                        return $Ec_Well
+                    fi
+                done
+                # 非法的值。
+                dieg $Ec_OptionError "选项 ${oLong[i]} 非法的值 \`${value}'"
+            else
+                if [[ ${oType[i]} = b && ! $value ]] ; then
+                    oValue[i]=yes
+                else
+                    oValue[i]="$value"
+                fi
+                return $Ec_Well
+            fi
+        fi
+        (( i++ ))
+    done
+    dieg $Ec_OptionError "Unknown option: ${option}"
+}
+
+#setBool()
+#{
+#    [[ $1 ]] || return $Ec_NoOpt
+#    if [[ $2 ]] ; then
+#        setOpt "$1" "$2" || return $?
+#    else
+#        setOpt "$1" yes  || return $?
+#    fi
+#    return $Ec_Well
+#}
+
+help()
+{
+    echog "Usage: %s %s" "$scriptName" "${scriptUsage:=[options]}"
+    echog "Options:"
+    local i=0 entry
+    while [[ ${oType[i]} ]] ; do
+        echo -n "    "
+        [[ ${oShort[i]} ]] && echo -n "-${oShort[i]}"
+        [[ ${oShort[i]} && ${oLong[i]} ]] && echo -n ", "
+        [[ ${oLong[i]} ]] && echo -n "--${oLong[i]}"
+        case "${oType[i]}" in
+            e)
+                echo -e "\t${oDesc[i]} [entry]"
+                if [[ ${oValues[i]} ]] ; then
+                    echo -e "\t\tValues: ${oValues[i]}"
+                fi
+                [[ ${oValue[i]} ]] && \
+                    echo -e "\t\tDefault: ${oValue[i]}"
+                ;;
+            b)
+                echo -e "\t${oDesc[i]}"
+                ;;
+        esac
+        (( i++ ))
+    done # opts
+    if [[ $scriptNotes ]] ; then
+        echo "Notes:"
+        echo -e "\t$scriptNotes"
+    fi
+    if [[ $scriptExample ]] ; then
+        echo "Examples:"
+        while read line ; do
+            echo -e "\t$scriptName $line"
+        done <<< "$scriptExample"
+    fi
+    exit $Ec_Well
+}
+
+parseOpts()
+{
+    local option i j k opt
+    #aList+=("$0")
+    _saveOpts=("$@")
+    i=1
+    while (( $i <= $# )); do
+        unknownOpt=yes
+        option=${!i}
+        if [[ ${option:0:1} = - ]] ; then
+            # 是一个选项。
+            if [[ ${option:1:1} = - ]] ; then
+                # 长选项。
+                if [[ ${option} = -- ]] ; then
+                    # 选项结束。
+                    for (( j = i+1 ; j <= $# ; j++ )) ; do
+                        option=${!j}
+                        aList+=("$option")
+                    done
+                    break
+                fi
+                if [[ $option = *=* ]] ; then opt=${option%%\=*}
+                else opt=$option ; fi
+
+                setOpt "${opt:2}" "$val"
+            else # long opt
+                for (( k = 1; k < ${#option} ; k++ )) ; do
+                    unknownOpt=yes
+                    opt=${option:$k:1}
+
+                    j=0
+                    while [[ ${oType[j]} ]] ; do
+                        if [[ $opt = ${oShort[j]} ]] ; then
+                            unknownOpt=no
+                            case "${oType[j]}" in
+                                b)
+                                    oValue[j]=yes
+                                    break;;
+                                e)
+                                    if [[ ${option:$[k+1]:1} ]] ; then
+                                        val=${option:$[k+1]:${#option}}
+                                    else
+                                        (( i++ ))
+                                        val=${!i}
+                                    fi
+                                    setOpt "$opt" "$val" && break 2
+                                    ;;
+                            esac
+                        fi # valid option
+                        (( j++ ))
+                    done # loop through options
+
+                    [[ $unknownOpt = yes ]] &&
+                        dieg $Ec_OptionError "Unknown option: $opt"
+                done
+            fi # option
+        else
+            aList+=("$option")
+        fi
+        (( i++ ))
+    done
+
+    if bool help ; then
+        help ; exit
+    fi
+    if bool version ; then
+        version ; exit
+    fi
+    
+}
+
+addOpt b '' help 'Show this help info.'
+addOpt b '' version 'Show version info.'
+
+explodeOpts()
+{
+    # -ab => -a -b <= $Options <array>
+    # First, save the options.
+    _saveOpts=("$@")
+    Options=()
+    local arg=$1
+    while [[ $arg ]] ; do
+        if [[ ${arg:0:1} == '-' && ${arg:1:1} != '-' ]] ; then
+            Options+=("-${arg:1:1}")
+            (( ${#arg} > 2 )) && arg="-${arg:2}" || { shift; arg=$1; }
+        else
+            Options+=("$arg")
+            shift
+            arg=$1
+        fi
+    done
+}
+

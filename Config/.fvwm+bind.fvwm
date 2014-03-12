@@ -1,0 +1,66 @@
+# Super，用于热键组合。位于Mod4。xmodmap -pm查看
+# 热键启动程式。
+SetEnv Scripts ~/Apps/bin/
+Key w A 4 RunFirefox
+Key d A 4 JumpExec "Document Viewer" evince
+Key g A 4 JumpExec "gimp" gimp
+Key c A 4 Exec $[Scripts]sd-截图.bash
+#Key p A 4 Exec $[Scripts]sd-截图.bash -p
+#Key j A 4 Exec $[Scripts]sd-截图.bash -j
+#Key J A 4 Exec $[Scripts]sd-截图.bash -pj
+#Key n A 4 Exec exec $[Scripts]edit-new-pic.perl
+Key s A 4 JumpExec Skype skype
+Key t A 4 Exec exec xterm-多彩
+Key m A 4 RunEmacs
+# xdg-open 自动打开。
+Key e A 4 Exec exec AutoOpen
+# autoquery
+Key q A 4 Exec exec autoquery.perl
+# Tinyurl 短地址
+Key u A 4 Exec exec paste.perl -t
+
+#Key t A 4 Exec exec xterm
+#Key z A 4 All (urxvt) shadex
+Key z A 4 Exec xlock -mode blank
+########################
+# 声音调节。
+# Fn-[F10...F12]
+Key Equal A 4 Exec exec amixer set Master toggle
+Key bracketleft A 4 Exec exec amixer set Master 10%-
+Key bracketright A 4 Exec exec amixer set Master 10%+
+#Key XF86AudioMute A A Exec exec amixer set Master toggle
+#Key XF86AudioLowerVolume A A Exec exec amixer set Master 10%-
+#Key XF86AudioRaiseVolume A A Exec exec amixer set Master 10%+
+# Fn加上下光标，
+#Key XF86AudioPlay A A Exec exec amixer set Master 10%-
+#Key XF86AudioStop A A Exec exec amixer set Master 10%+
+# Fn加左右光标，定义于~/.xmodmaprc
+Key XF86AudioPrev A A Exec exec mocp -r
+Key XF86AudioNext A A Exec exec mocp -f
+
+# 菜单
+Mouse 1 R A Menu RootMenu
+Mouse 3         R       A       WindowList mouse -1p -1p
+#mouse 3         r       c       windowlist mouse -1p -1p onlylistskip
+
+#Super+ 窗口操作
+#Mouse 1 R 4 Exec kupfer
+Mouse 1 WFST 4 Move
+Mouse 2 WFST 4 Stick
+Mouse 3 WFST 4 Resize
+Mouse 4 WFST 4 Maximize
+Mouse 5 WFST 4 Iconify
+Key x WFST 4 Close
+Mouse 1 I A WindowListFunc
+Mouse (urxvt) 1 WFST C Exec exec new-screen.perl prev
+Mouse (urxvt) 1 WFST M Exec exec new-screen.perl next
+Mouse (urxvt) 1 WFST CM Exec exec new-screen.perl next
+#+方向键，对齐到屏幕边缘
+Key Up          WFST 4 Move w 0
+Key Down        WFST 4 Move w -0
+Key Left        WFST 4 Move 0 w
+Key Right       WFST 4 Move -0 w
+# 该死的中键设置
+#Mouse 1 A S Exec exec xdotool click 2
+#Mouse 9 A A Exec exec switch-roll.bash
+

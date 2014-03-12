@@ -1,0 +1,30 @@
+#!/usr/bin/env perl
+use 5.010;
+while (<>)
+{
+    chomp;
+    s/^\s*//;
+    s/\s*$//;
+    if (/^(\d+)$/) {
+        <>;<>;<>;say "$1";
+    } elsif (/^(\d+)\s+.+$/) {
+        $x=$1;<>;<>;chomp ($i=<>);
+        if ($i=~/^\s*$/){chomp ($i=<>)}
+        if ($i=~/^\s*[\d\.]+\s*$/){<>;chomp ($i=<>)}
+        $i=~s/^\s//;$i=~s/\s$//;
+        say "$x ", process ($i);
+    }
+}
+sub process
+{
+    local $_;
+    $_ = shift;
+    s/\)\s+/)/;
+    if (/\(.*[inI].*\)/){s/^.+\(/(/;s/\).+$/)/}
+    else{m{\s+(\d+)};$rank=$1>200 ? ("(~". int($1/100)*100 .")") : "($1)";s/\s+\d+/$rank/;
+         if (m{\Q$rank\E\s+(.+?)\s*$}){
+             $w=$1;$w=~/^(.+?)\s+/;$all=$1;s/\Q$rank\E.+$/[$all]$rank/
+         }
+    }
+    $_;
+}

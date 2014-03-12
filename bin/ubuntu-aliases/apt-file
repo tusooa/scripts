@@ -1,0 +1,5 @@
+#!/bin/sh
+sudo apt-file "$@"
+if [ "$1" = update ] ; then
+    sudo apt-file search bin/ > "$HOME/.share/programsList"
+fi

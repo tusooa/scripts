@@ -1,0 +1,13 @@
+SetEnv fvwm $[HOME]/.fvwm/
+SetEnv LANG "zh_TW.UTF-8"
+SetEnv LC_CTYPE "zh_CN.UTF-8"
+SetEnv LC_ALL ""
+SetEnv XIM fcitx
+SetEnv XIM_PROGRAM fcitx
+SetEnv XMODIFIERS "@im=fcitx"
+SetEnv QT_IM_MODULE fcitx
+SetEnv GTK_IM_MODULE fcitx
+
+ImagePath +":$[fvwm]icons:/usr/share/icons/"
+SetEnv RegularFont "xft:DejaVuSansYuanTi-Regular:pixelsize=16:Medium"
+SetEnv HeiFont "xft:WenQuanYi Micro Hei:pixelsize=16:Medium"

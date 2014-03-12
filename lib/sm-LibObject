@@ -1,0 +1,28 @@
+#!/bin/bash --source
+
+# LibObject 面向对象的 Bash
+require Hash
+
+# Object_new objName property1 defValue1 property2 defValue2 ...
+
+Object_new()
+{
+    local _objectName="$1"
+    Hash_new "$_objectName"
+    while [[ $# > 0 ]] ; do
+        Object_setProperty "$_objectName" "$1" "$2"
+        shift 2
+    done
+}
+
+Object_setProperty()
+{
+    local _objectName="$1" _propertyName="$2" _value="$3"
+    eval "$_objectName"'["$_propertyName"]="$_value"'
+}
+
+Object_getProperty()
+{
+    local _objName="$1" _propertyName="$2"
+    eval echo '${'"$_objectName"'["$_propertyName"]}'
+}

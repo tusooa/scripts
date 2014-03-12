@@ -1,0 +1,79 @@
+#!/usr/bin/env perl
+
+use 5.010;
+use WWW::AUR::PKGBUILD;
+
+# pkgbuild2makefile
+# 把pkgbuild里的依赖关系写到makefile里。
+
+$fullName = 'pkgbuild2makefile';
+$version = '0.1';
+$scriptName = 'pb2mf';
+
+sub help
+{
+	print << "EOF";
+$fullName $version
+Usage: $scriptName <absTreeDir> <outfile>
+EOF
+	exit 0;
+}
+
+#say $#ARGV;
+#say @ARGV;
+#$ARGV[0] == '--help' && help;
+
+$dir = $ARGV[0];
+$out = $ARGV[1];
+
+open (OUT, '>', $out) or die "Failed to open `$out': $!\n";
+say OUT "%.p :\n\t".'@echo $@';
+
+#chdir($dir) or die "Failed to chdir: $!\n";
+opendir (DIR, $dir) or die "Failed to opendir `$dir': $!\n";
+while (readdir DIR)
+{
+	#say "$dir/$_/PKGBUILD";
+	my $pkgbuild = "$dir/$_/PKGBUILD";
+	-e $pkgbuild or next;
+	say;
+	#say $pkgbuild;
+	open (IN, '<', $pkgbuild) or warn "Failed to open `$pkgbuild': $!\n";
+	my $pbtext = join ('', <IN>);
+	#say $pbtext;
+	my $pb = WWW::AUR::PKGBUILD->new ($pbtext);
+	close IN;
+	my %pb = $pb->fields;
+	#say $pb{pkgname};
+	#say "@{$pb{depends}}";
+	#my $pkgname = $pb{pkgname};
+	my $deps;# = join '.p ', @{ $pb{depends} };
+	my $comments = '#'; # record versions
+	# struct: @{$pb{depends}} = ({cmp => '>=', str => 'db>=4.8', pkg => 'db', ver => '4.8'},
+	# {cmp => '>=', str => 'glibc', pkg => 'glibc', ver => '0'}, ...... );
+	for $x (@{ $pb{depends} })
+	{
+		$deps .= "${$x}{pkg}.p ";
+		if (${$x}{ver} != 0)
+		{
+			$comments .= " ${$x}{cmp},${$x}{pkg},${$x}{ver}"; #据说Makefile的行尾如果是空格，会出错。
+		}
+	}
+	$deps ~~ s/\s+$//; #据说Makefile的行尾如果是空格，会出错。
+	#$deps and ($deps = $deps . '.p');
+	if (@{ $pb{pkgname} })
+	{
+		for $name (@{ $pb{pkgname} })
+		{
+			say OUT "$name.p : ${deps}";
+		}
+	}
+	else
+	{
+		say OUT "$pb{pkgname}.p : ${deps}";
+	}
+	say OUT $comments;
+}
+
+close OUT;
+

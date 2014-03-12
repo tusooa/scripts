@@ -1,0 +1,18 @@
+[user]
+    name = Tusooa Zhu
+    email = tusooa@gmail.com
+    signingkey = tusooa@gmail.com
+[color]
+    ui = always
+[gui]
+    fontui = -family ZhunYuan -size 13 -weight normal -slant roman -underline 0 -overstrike 0
+    fontdiff = -family Monaco -size 13 -weight normal -slant roman -underline 0 -overstrike 0
+[pretty]
+    graph = %Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset
+[alias]
+    c = commit -a
+    p = push origin master
+    pd = push origin develop
+    s = status
+    a = !git.perl
+    clog = log --color --graph --pretty=graph --abbrev-commit --

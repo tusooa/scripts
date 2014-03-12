@@ -1,0 +1,7 @@
+#!/bin/bash --source
+# vim :set ft=bash
+
+checkRunning()
+{
+    [ -f "$HOME/.run/$scriptName" ]
+}

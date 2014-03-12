@@ -1,0 +1,6 @@
+.#*#
+#*#
+*~
+*.elc
+Config/.config+Scripts/countup.cache
+src/*/build/*

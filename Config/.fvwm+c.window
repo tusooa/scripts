@@ -1,0 +1,19 @@
+dsize 3 3
+ston "Firefox" 0 0
+ston stardict 1 0
+ston Skype 1 0
+ston gimp 2 0
+ston feh 2 0
+ston Inkscape 2 0
+ston "Document Viewer" 2 0
+ston LibreOffice 2 0
+ston emacs 0 1
+ston screen 1 1
+ston urxvt 1 1
+ston env 1 1
+ston VirtualBox 1 2
+# Games, No-SkipMapping
+ston GMChess 2 1 nosm
+ston SnakeGame 2 1 nosm
+ston chromium 0 2
+

@@ -1,0 +1,38 @@
+
+# 修正系统函数：恢复窗口时，鼠标居中
+AddToFunc WindowListFunc
++ I WarpToWindow 50 50
+
+# Jump & Exec 函数
+DestroyFunc JumpExec
+AddToFunc JumpExec
++ I All ($0) WindowListFunc
++ I TestRc (NoMatch) Exec exec $1 $2 &
+
+# 切换xterm卷帘的函数
+DestroyFunc shadex
+AddToFunc shadex
++ I ThisWindow PipeRead '[ $[w.y] -gt 200 ] && echo WindowShade S || echo WindowShade N'
+
+# 启动emacs之后，调整窗口大小
+DestroyFunc RunEmacs
+AddToFunc RunEmacs
++ I All (emacs) WindowListFunc
++ I TestRc (!NoMatch) Break
++ I Exec exec emacs
++ I Wait emacs
++ I All (emacs) Maximize 78 99
++ I All (emacs) Move -0 w
+#Resize 81c 30c
+
+DestroyFunc RunFirefox
+AddToFunc RunFirefox
++ I All (Firefox) WindowListFunc
++ I TestRc (!NoMatch) Break
++ I Exec exec firefox
+#+ I Wait Firefox
+#+ I All (Firefox) MoveToPage 0 0
+
+DestroyFunc InitFunction
+AddToFunc   InitFunction
++ I Exec exec $[fvwm]autostart.bash

@@ -1,0 +1,60 @@
+#!/bin/bash
+# vim :set ft=bash
+scriptName=ac-归档.bash
+pkgver=0.1
+. scriptFunctions
+import OptionParser
+#help()
+#{
+#    echog """
+#Usage: %s [options] [files to ca]
+#Options:
+#--help Print help info
+#--version Print version info
+#-o file, --output=file Set output file
+#""" "$0"
+#}
+
+addOpt e o output 'Set output file' /dev/stdout
+
+parseOpts "$@"
+
+o="$(entry o)"
+
+#while [[ $# > 0 ]] ; do
+#    case "${aList[0]}" in
+#	--help)help; exit;;
+#	--version)version; exit;;
+#	-o)shift ; o="${aList[0]}" ;;
+#	--output=*)o="${1#--output=}";;
+#	--)
+#	    shift
+#            break;;
+#	-*)
+#            dieg "$Ec_OptionError" "Error: Unknown option \`%s'" "${aList[0]}" >&2;;
+#        *)break;;
+#    esac
+#    shift
+#done
+
+case "$o" in
+    *.tar.lzma|*.tlz)
+	tar --lzma -cf "$o" "${aList[@]}";;
+    *.tar.gz|*.tgz)
+	tar -zcf "$o" "${aList[@]}";;
+    *.tar.bz2|*.tbz2)
+	tar -jcf "$o" "${aList[@]}";;
+    *.tar.lzip|*.tar.lz|*.tlzip)
+	tar -c "${aList[@]}" | lzip -9c > "$o";;
+    *.tar)tar -cf "$o" "${aList[@]}";;
+    *.gz)gzip -9c "${aList[0]}" > "$o";;
+    *.bz2)bzip2 -9c "${aList[0]}" > "$o";;
+    *.lzma)lzma -9c "${aList[0]}" > "$o";;
+    *.lzip|*.lz)lzip -9c "${aList[0]}" > "$o";;
+    /dev/stdout)
+	tar -c "${aList[@]}";;
+    *)
+	warng "无法根据文件名判断文件类型。使用tar。" >&2
+	tar -cf "$o" "${aList[@]}";;
+esac
+

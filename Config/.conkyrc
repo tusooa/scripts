@@ -1,0 +1,84 @@
+# Use Xft?
+use_xft yes
+xftfont DejaVu Sans YuanTi:pixelsize=16:medium
+# Update interval in seconds
+update_interval 1
+# This is the number of times Conky will update before quitting.
+# Set to zero to run forever.
+total_run_times 0
+# Create own window instead of using desktop (required in nautilus)
+own_window yes
+own_window_argb_visual yes
+own_window_transparent yes
+own_window_type normal
+own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager
+# Use double buffering (reduces flicker, may not work for everyone)
+double_buffer yes
+# Minimum size of text area
+minimum_size 260 800
+maximum_width 260
+# Draw shades?
+draw_shades no
+# Draw outlines?
+draw_outline no
+# Draw borders around text
+draw_borders no
+# Stippled borders?
+stippled_borders 0
+# border margins
+#border_margin 5
+# border width
+border_width 0
+# Default colors and also border colors
+default_color ffffff
+default_shade_color black
+default_outline_color black
+own_window_colour 262626
+# Text alignment, other possible values are commented
+# top_left, top_right, bottom_left, bottom_right
+alignment top_left
+# Gap between borders of screen and text
+# same thing as passing -x at command line
+gap_x 15
+gap_y 15
+# Subtract file system buffers from used memory?
+no_buffers yes
+# set to yes if you want all text to be in uppercase
+uppercase no
+# number of cpu samples to average
+# set to 1 to disable averaging
+cpu_avg_samples 2
+# number of net samples to average
+# set to 1 to disable averaging
+net_avg_samples 2
+override_utf8_locale yes
+use_spacer right
+
+color0 000000
+color1 B64040
+color2 5DBE63
+color3 E1A738
+color4 7372D7
+color5 CA4AB3
+color6 5DBCBE
+color7 FFFFFF
+template1 ${if_running \1}${color3}\1${alignr}${color1}\n${execp \2 \3}${color}${endif}
+template2 ${if_existing /tmp/\1}${color3}\1${alignr}${color}${endif}
+template3 ${execpi 1800 rr-RSS.perl \1}
+template4 ${color7}|${offset -7}${voffset 3}v${voffset -3}  ${color yellow}${downspeedf \1}${tab 5}Kbps${alignr}${color0}${downspeedgraph \1 16,100 000000 ffffff}
+template5 ${color7}|${offset -9}${voffset -3}^${voffset 3}  ${color yellow}${upspeedf \1}${tab 5}Kbps${alignr}${color0}${upspeedgraph \1 16,100 000000 ffffff}${color7}
+●\${addr $_}\${tab 60}
+TEXT
+${font DejaVu Sans YuanTi:size=18}${color yellow}${time %Y-%m-%d %k:%M:%S}${font}
+${color yellow}${execi 300 lc-农历.perl}${color}${alignr}
+${color7}top CPU${color yellow}${tab 10}${top name 1}${alignr}${color cyan}${top cpu 1}${top mem 1}
+${color7}top 内存${color yellow}${tab 10}${top_mem name 1}${alignr}${color cyan}${top_mem cpu 1}${top_mem mem 1}
+${color7}CPU温度${color yellow}${tab 10}${execp expr $(cat /sys/class/hwmon/hwmon0/temp1_input) / 1000}°C ,   ${execp expr $(cat /sys/class/hwmon/hwmon0/temp2_input) / 1000}°C
+${color7}风扇转速${color yellow}${tab 10}${execp cat /proc/acpi/ibm/fan | awk '/speed/{print $2}'}/min
+${execp net.perl}
+#${color4}${hr}${alignr}
+#${color0}Countup${alignr}
+#${execpi 20 countup.perl}
+#${color0}Todo${alignr}
+#${execpi 5 cat ~/.cache/Scripts/todo}
+

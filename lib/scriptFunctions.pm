@@ -1,0 +1,80 @@
+package Scripts::scriptFunctions;
+use Exporter;
+use Scripts::Configure qw/$defg/;
+use 5.012;
+use File::Basename qw/basename/;
+our $VERSION = 0.1;
+our @ISA = qw/Exporter/;
+our @EXPORT_OK = qw/$appsDir/;
+our @EXPORT = qw/
+$configDir $cacheDir $dataDir
+$accountDir $scriptsDir $libDir
+$verbose verbose $debug debug
+conf $pathConf $defg $scriptName
+multiArgs time2date
+/;
+
+our $scriptName= basename $0;
+our $verbose   = 0;
+our $debug     = 0;
+my $xdgConf   = $ENV{XDG_CONFIG_HOME} ? "$ENV{XDG_CONFIG_HOME}/" : "$ENV{HOME}/.config/";
+our $configDir = "${xdgConf}Scripts/";
+my $xdgCache  = $ENV{XDG_CACHE_HOME} ? "$ENV{XDG_CACHE_HOME}/" : "$ENV{HOME}/.cache/";
+our $cacheDir  = "${xdgCache}Scripts/";
+
+our $pathConf = Scripts::Configure->new($configDir.'scriptpath', '/dev/null');
+
+our $appsDir   = $pathConf->get ($defg, 'appsDir') // "$ENV{HOME}/应用/";
+our $dataDir   = $pathConf->get ($defg, 'dataDir') // "${appsDir}数据/";
+our $accountDir= $pathConf->get ($defg, 'accountDir')// "$ENV{HOME}/个人/账号/";
+our $scriptsDir= $pathConf->get ($defg, 'scriptsDir') // "${appsDir}脚本/";
+our $libDir    = $pathConf->get ($defg, 'libDir') // "${appsDir}库/脚本/";
+our $defConfDir= $pathConf->get ($defg, 'defConfDir') // "${appsDir}默认配置/";
+
+sub time2date
+{
+    my @t = @_ ? @_ : localtime;
+    my $year = $t[5] + 1900;
+    my $month = $t[4] + 1;
+    my $day = $t[3];
+    "${year}-${month}-${day}";
+}
+
+sub multiArgs
+{
+#    say "@ARGV";say $ARGV[0];
+    my @args;
+    while (@ARGV and ! ($ARGV[0] ~~ /^-/))
+    # 不以-开头的参数，都记作多个参数。示例。g regex -f <f1 f2 f3> -- regex2
+    # 详见grep.perl
+    {
+#        say "adding $ARGV[0]";
+        push @args, (shift @ARGV);
+    }
+#    say "@args";
+    @args;
+}
+
+sub conf
+{
+    my $file = shift;
+    $file = $file // $scriptName;
+    my $conf = Scripts::Configure->new ($configDir.$file, $defConfDir.$file);
+    $conf;
+}
+
+$pathConf = conf 'scriptpath'; #不加这，cairo-w就会出错。
+
+#sub main
+#{
+#    require Getopt::Long qw/:config gnu_getopt/;
+#    my ($action, $conf);
+#    GetOptions (
+#        'c|test-conf=s' => sub { $conf});
+#}
+
+#if ($0 eq 'scriptFunctions.pm') {
+#    main;
+#}
+
+1;

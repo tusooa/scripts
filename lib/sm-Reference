@@ -1,0 +1,73 @@
+#!/bin/bash --source
+
+# Reference support for bash
+
+# a reference: var='--ref-2-anotherVar'
+# extends as $anotherVar
+
+# makeRef refName toVarName [type]
+# Example: makeRef var anotherVar scalar
+#          # => var='--ref-2-__reference_scalar_12345_0'
+_refCount=0
+makeRef ()
+{
+    local _referenceName="$1" _pointToVarName="$2" _type="$3"
+    if ! [[ $_type ]] ; then
+        _type=scalar
+    fi
+    local _newVarName=__reference_"$_type"_"$$"_"$_refCount"
+    copyOneToAnother "$_pointToVarName" "$_newVarName" "$_type"
+    _refCount=$[$_refCount+1]
+    eval "$_referenceName"'=--ref-2-'"$_newVarName"
+    unset _pointToVarName _newVarName
+}
+
+copyOneToAnother ()
+{
+    local _pointToVarName="$1" _newVarName="$2" _type="$3"
+    #echo "moveOneToAnother: type is $_type"
+    case "$_type" in
+        scalar)
+            eval "$_newVarName"'="$'"$_pointToVarName"'"';;
+        array)
+            eval "$_newVarName"'=("${'"$_pointToVarName"'[@]}")';;
+        'hash')
+            require Hash
+            eval """
+                     Hash_new \"$_newVarName\"
+                     Hash_keysToArray \"$_pointToVarName\" '__ref_tmp_array'
+                     for key in \"\${__ref_tmp_array[@]}\" ; do
+                         $_newVarName[\"\$key\"]=\"\${$_pointToVarName[\"\$key\"]}\"
+                     done
+                 """;; #实在累的要死。
+    esac
+}
+
+dumpRef ()
+{
+    local _refName="$1" _dumpTo="$2"
+    local _pointToVarName="$(extendRefVarName "$_refName")"
+    local _type
+    case "$_pointToVarName" in
+        __reference_scalar_*)_type=scalar;;
+        __reference_array_*) _type=array;;
+        __reference_hash_*)  _type=hash;;
+    esac
+    copyOneToAnother "$_pointToVarName" "$_dumpTo" "$_type"
+}
+
+extendRef ()
+{
+    eval echo \"'$'"${1#--ref-2-}"\"
+}
+
+extendRefVarName ()
+{
+    echo "${1#--ref-2-}"
+}
+
+isRef ()
+{
+    [[ $1 = --ref-2-* ]]
+}
+

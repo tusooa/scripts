@@ -1,0 +1,81 @@
+#!/usr/bin/env perl
+
+use 5.012;
+use version;
+
+my %depends = (
+	a => ['b','c','d'],
+	b => ['c'],
+	c => ['d >= 0.1', 'e'],
+	d => [],
+	e => ['f','g'],
+	f => ['g'],
+	g => ['d >= 0.2'],
+);
+
+my @seq = ();
+
+my $n = 1;
+my $mod = scalar (keys %depends)+1;
+my $debug = 0;
+my $cmp = /(>=|>|=|<|<=)/;
+my %versions;
+# struct: my %versions = ( d => ['>= 0.2','>= 0.1'], ......);
+
+for my $p (keys %depends)
+{
+	my @newdeps;
+	for (@{$depends{$p}})
+	{
+		@_ = split / /;
+		next if @_ == 1;
+		die "如果执行到这里，说明数据有问题\n" if @_ != 3;
+		$debug && say "$_, $_[0], $_[1], $_[2]";
+		push @{$versions{$_[0]}}, "$_[1] $_[2]";
+		push @newdeps, $_[0];
+	}
+	$depends{$p} = \@newdeps;
+}
+
+while (scalar keys %depends != 0)
+{
+	if ($n % $mod == 0)
+	{
+		say "第 $n 次循环。Press Enter to continue.";
+		say "(如果出现这个，多半是出问题了)";
+		<STDIN>;
+	}
+	if ($debug)
+	{
+		say "@seq";
+		for my $k (keys %depends) { print "$k: ". scalar @{$depends{$k}}; for my $x (@{$depends{$k}}) { print " '$x'" }; say }
+	}
+	my $found = 0;
+	for my $k (keys %depends) { if (@{$depends{$k}} == 0) { $found = $k; last } };
+	if ($found)
+	{
+		push @seq, $found;
+		delete $depends{$found};
+		for my $k (keys %depends)
+		{
+			#my @newdeps = (grep ($_!=$found, @{$depends{$k}}));
+			#say "@newdeps";
+			$depends{$k} = [grep ! ($_ ~~ $found), @{$depends{$k}}];#map $_ ne $found , @{$depends{$k}};
+		}
+	}
+	else
+	{
+		die "如果执行到这里，说明不应该的事情发生了。数据有问题吧。\n";
+	}
+	$n++;
+}
+
+for (@seq)
+{
+	print;
+	if ($versions{$_})
+	{
+		for my $x (@{$versions{$_}}) { print "  $x"; }
+	}
+	print "\n";
+}

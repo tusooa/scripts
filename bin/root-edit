@@ -1,0 +1,8 @@
+#!/bin/bash
+
+case "$1" in
+    /*)file="$1";;
+    *)file="${PWD}/$1";;
+esac
+
+exec emacsclient /sudo:root@localhost:"$file"

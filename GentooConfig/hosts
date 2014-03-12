@@ -1,0 +1,53 @@
+# /etc/hosts: Local Host Database
+#
+# This file describes a number of aliases-to-address mappings for the for 
+# local hosts that share this file.
+#
+# In the presence of the domain name service or NIS, this file may not be 
+# consulted at all; see /etc/host.conf for the resolution order.
+#
+
+# IPv4 and IPv6 localhost aliases
+127.0.0.1	tusooa-laptop localhost
+::1		tusooa-laptop localhost
+
+
+#2620:0:860:2:21d:9ff:fe33:f235 static.wikipedia.org    #Wikipedia Static HTML Dumps
+#2620:0:860:2:21d:9ff:fe33:f235 hume.wikimedia.org      #Wikipedia Static HTML Dumps
+#2620:0:860:2:230:48ff:fe5a:eb1e download.wikimedia.org #Wikimedia Downloads
+#2620:0:860:2:230:48ff:fe5a:eb1e download.wikipedia.org #Wikimedia Downloads
+#2620:0:860:2:230:48ff:fe5a:eb1e dumps.wikimedia.org    #Wikimedia Downloads
+#2620:0:860:2:230:48ff:fe5a:eb1e storage2.wikimedia.org #Wikimedia Downloads
+#2620:0:862:1::25:1 lists.wikimedia.org                 #
+#2620:0:862:1:209:3dff:fe10:d5d2 svn.wikimedia.org      #Wikimedia Subversion
+#2620:0:862:1:209:3dff:fe10:d5d2 mayflower.esams.wikimedia.org
+#2620:0:862:1:6666:6666:6666:6666 ipv6and4.labs.wikimedia.org #Wikimedia IPv6 AAAA record testing
+203.208.46.160 twitdao.appspot.com
+#屏蔽广告，百毒
+0.0.0.0 nfdns8.cncmax.cn
+0.0.0.0 nfdnserror8.wo.com.cn baidu.com
+
+199.59.149.210 t.co
+216.194.70.6 shell.cjb.net
+
+74.125.39.99 chrome.google.com
+74.125.39.99 clients2.google.com
+
+#
+# Imaginary network.
+#10.0.0.2               myname
+#10.0.0.3               myfriend
+#
+# According to RFC 1918, you can use the following IP networks for private 
+# nets which will never be connected to the Internet:
+#
+#       10.0.0.0        -   10.255.255.255
+#       172.16.0.0      -   172.31.255.255
+#       192.168.0.0     -   192.168.255.255
+#
+# In case you want to be able to connect directly to the Internet (i.e. not 
+# behind a NAT, ADSL router, etc...), you need real official assigned 
+# numbers.  Do not try to invent your own network numbers but instead get one 
+# from your network provider (if any) or from your regional registry (ARIN, 
+# APNIC, LACNIC, RIPE NCC, or AfriNIC.)
+#
