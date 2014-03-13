@@ -2,7 +2,7 @@
 
 use 5.012;
 use Scripts::scriptFunctions;
-
+use POSIX qw/strftime/;
 #my $config = conf 'gitpath';
 
 #chdir $config->get ('gitDir');
@@ -25,10 +25,11 @@ if (@_)
     }
     if (! $_)
     {
-        chomp ($_ = `date '+%F %T'`);
+        $_ = strftime '%Y-%m-%d %H:%M:%S', localtime;
     }
     say "提交注释为 $_ 的更新。";
     system 'git', 'commit', '-a', '-m', $_;
     system 'git', 'pull';
-    system 'git', 'push';
+    system 'git', 'p';#use git p instead of git push
+    #git p -> git push origin master
 }
