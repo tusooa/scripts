@@ -92,3 +92,10 @@ function inList
     done
     return 1
 }
+
+c()
+{
+    if [ "$*" ] ; then
+        LC_ALL=C "$@"
+    fi
+}
