@@ -37,18 +37,10 @@ if ($help)
     say
 qq{$scriptName $version, 简写 g.
 用法:
-    g [opts] regex ... -f file ...
-    g [opts] regex ... -f file ... --end regex ...
+    g [opts] [regex] ... -f file ...
     g [opts] -g regex [file ...] # (like common grep)
-    cg / gg / gc `` # ``
-    some-command | g [opts] regex ...
-    g [opts] regex ... < single-file
-    g [opts] regex ... << here-document
-    g [opts] regex ... <<< string
-    正则表达式永远都是空格分隔的.
+    gc 或cg 或 gg 等同于 g -g
     -f 后边的所有参数都被视作文件名.
-    文件名用空格分隔.
-    如果STDIN是管道过来的,而且没有指定文件，那么:所有的命令行参数都作为正则.
 选项:
     --help                      就是这个帮助信息
     --version                   打印 $scriptName 的版本
@@ -57,6 +49,9 @@ qq{$scriptName $version, 简写 g.
     -n, --show-filename         显示文件名:如果有多个文件,默认会这么做的
     -N, --no-filename           不显示文件名(联系上边的看吧.)
     --end                       结束多参数选项(如：-f)
+高级玩法
+    g -lnf files ... # 连接这些文件并显示文件名和行号
+                     # 不是cgrep模式的话，正则可以省略的。
 };
     exit 0;
 }
@@ -83,18 +78,13 @@ if (! -t STDIN and ! $commonGrep)
 elsif ($commonGrep)
 {
     #print @ARGV;
-    @regex = (shift @ARGV); # cgrep只允许一个正则
+    @regex = (shift @ARGV or die "没有指定正则表达式\n"); # cgrep只允许一个正则
     #print @ARGV,' ,',@files;
     @files = (@ARGV, @files);
     #这个功能实在鸡肋..cgrep不需要-f的
     @files = (@files ? @files : '-'); # 哪个放在前边好？？
     #print @files;
 }
-#elsif (@ARGV == 2 and ! @files)
-#{
-#    @regex = ($ARGV[0]);
-#    @files = ($ARGV[1]);
-#}
 elsif (! @files)
 {
     @regex = @ARGV;
@@ -104,11 +94,9 @@ else
 {
     @regex = @ARGV;
 }
-#say "@regex ,,, @files";
-#exit 0;
 if ($fn eq 'DEFAULT') # 如果没有特别指定显示文件名
 {
-    $fn = @files > 1 ? 1 : 0;
+    $fn = @files - 1;
 }
 my @col = map "\e[1;4;3".(int rand(6) +1).';40m', @regex;
 
@@ -141,6 +129,9 @@ for my $file (@files)
     {
         for my $i (0..$#regex)
         {
+            $regex[$i] or next; #解决了如下bug:
+            # ● git diff G -lnf /dev/stdin --end '' #嗯，准确说是 g ''。当regex为空时的问题。
+
             #print STDERR $regex[$i];
             s{($regex[$i])}{$col[$i]$1\e[0m}g or next LINE;
         }
