@@ -36,3 +36,4 @@ x11-terms/rxvt-unicode -perl
 >=media-libs/harfbuzz-0.9.23 icu
 gnome-extra/zenity -webkit
 net-misc/networkmanager ppp
+www-client/firefox bindist

@@ -87,11 +87,6 @@ prompt_pwd () # 截短路径
     _prompt_pwd="$ppwd"
 }
 
-dayCode ()
-{
-    echo "${bg_BLUE}dctm: $NOCOL"
-}
-
 setopt promptsubst
 _DATE_NOW="${_BLUE}%D{%Y-%m-%d} %T"
 _HOSTNAME="${_WHITE}${bg_CYAN}%m${NOCOL}"
@@ -140,7 +135,7 @@ screentitle ()
 }
 
 typeset -A _prefixes
-_prefixes=(sudo '#' e '@' man '?' perldoc 'P?' gfw '^' wget '<-' axel '<=' '.' '+' emerge 'M' nice '-')
+_prefixes=(sudo '#' e '' ssh '@' man '?' perldoc 'P?' gfw '^' nice '-')
 _commandPrefixes=(sudo e gfw nice)
 #_replaces=('#' '@' '?' 'P?')
 

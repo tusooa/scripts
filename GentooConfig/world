@@ -75,6 +75,7 @@ kde-base/kdebase-startkde
 kde-base/kdepimlibs
 kde-base/kdeplasma-addons
 kde-base/kdm
+kde-base/kolourpaint
 kde-base/ksnapshot
 kde-base/kstyles
 kde-base/okular
@@ -145,6 +146,7 @@ sys-process/vixie-cron
 virtual/perl-Attribute-Handlers
 virtual/perl-MIME-Base64
 virtual/perl-digest-base
+www-client/firefox
 www-client/firefox-bin
 www-client/google-chrome
 www-client/w3m

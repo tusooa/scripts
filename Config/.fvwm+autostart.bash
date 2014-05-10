@@ -11,8 +11,8 @@ xset -b
 xrdb ~/.Xresource
 #/usr/libexec/polkit-gnome-authentication-agent-1 &
 #xbindkeys&
-trayer --widthtype pixel --width 200 --edge bottom --align left --transparent true &
-nm-applet &
+#trayer --widthtype pixel --width 200 --edge bottom --align left --transparent true &
+#nm-applet &
 menu2ctrl.bash &
 罗技鼠标-m525.bash &
 fcitx &
@@ -26,8 +26,8 @@ tray-volume.perl &
 #FvwmCommand 'Next (env) WarpToWindow 20 110'
 #(sleep 1;xdotool click 1)&
 #FvwmCommand 'Close'
-sleep 2
-FvwmCommand "All (urxvt) Maximize"
+#sleep 2
+#FvwmCommand "All (urxvt) Maximize"
 #sleep 3
 conky &
 #mlnet &
