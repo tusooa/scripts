@@ -135,8 +135,8 @@ screentitle ()
 }
 
 typeset -A _prefixes
-_prefixes=(sudo '#' e '' ssh '@' man '?' perldoc 'P?' gfw '^' nice '-')
-_commandPrefixes=(sudo e gfw nice)
+_prefixes=(sudo '#' e '' c '' ssh '@' man '?' perldoc 'P?' gfw '^' nice '-')
+_commandPrefixes=(sudo e c gfw nice)
 #_replaces=('#' '@' '?' 'P?')
 
 screenTitlePreexec()

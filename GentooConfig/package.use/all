@@ -37,3 +37,10 @@ x11-terms/rxvt-unicode -perl
 gnome-extra/zenity -webkit
 net-misc/networkmanager ppp
 www-client/firefox bindist
+# required by media-sound/amarok-2.8.0
+# required by amarok (argument)
+=virtual/mysql-5.1 embedded
+# required by virtual/mysql-5.1
+# required by media-sound/amarok-2.8.0
+# required by amarok (argument)
+=dev-db/mysql-5.1.70 embedded

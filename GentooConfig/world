@@ -21,7 +21,6 @@ app-emacs/haskell-mode
 app-emulation/aqemu
 app-emulation/playonlinux
 app-emulation/qemu
-app-emulation/virtualbox
 app-emulation/wine
 app-emulation/winetricks
 app-i18n/fbterm
@@ -86,6 +85,7 @@ kde-misc/networkmanagement
 mail-client/mutt
 mail-filter/procmail
 mail-mta/msmtp
+mate-base/mate
 media-fonts/wqy-zenhei
 media-gfx/feh
 media-gfx/fontforge
@@ -93,6 +93,7 @@ media-gfx/gimp
 media-gfx/scrot
 media-plugins/alsa-plugins
 media-sound/alsa-utils
+media-sound/amarok
 media-sound/pulseaudio
 media-sound/timidity++
 media-video/gnome-mplayer
