@@ -13,6 +13,6 @@ my $s=/eth/?"\${color yellow}$_":$_;
 #__END__
 print "\${template4 $_}
 \${template5 $_}
-●\${addr $_}\${tab 60}$s\${color}";
+●\${addr $_}\${alignr}$s\${color}";
 #print "\${color3}网络信息\${tab 30}\${color}\${downspeedgraph $_ 20,80 000000 00ff00}\${tab 30}\${upspeedgraph $_ 20,80 000000 ff0000}\${offset -168}\${color}\${font DejaVu Sans YuanTi Mono}\${downspeedf $_}K\${tab 0}\${upspeedf $_}K
 #●\${addr $_}\${tab 60}$s\${color}\${font ZhunYuan}";

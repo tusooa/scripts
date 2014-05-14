@@ -15,8 +15,8 @@ own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager
 # Use double buffering (reduces flicker, may not work for everyone)
 double_buffer yes
 # Minimum size of text area
-minimum_size 260 800
-maximum_width 260
+minimum_size 210 800
+maximum_width 210
 # Draw shades?
 draw_shades no
 # Draw outlines?
@@ -36,7 +36,7 @@ default_outline_color black
 own_window_colour 262626
 # Text alignment, other possible values are commented
 # top_left, top_right, bottom_left, bottom_right
-alignment top_left
+alignment top_right
 # Gap between borders of screen and text
 # same thing as passing -x at command line
 gap_x 15
@@ -65,16 +65,19 @@ color7 FFFFFF
 template1 ${if_running \1}${color3}\1${alignr}${color1}\n${execp \2 \3}${color}${endif}
 template2 ${if_existing /tmp/\1}${color3}\1${alignr}${color}${endif}
 template3 ${execpi 1800 rr-RSS.perl \1}
-template4 ${color7}|${offset -7}${voffset 3}v${voffset -3}  ${color yellow}${downspeedf \1}${tab 5}Kbps${alignr}${color0}${downspeedgraph \1 16,100 000000 ffffff}
-template5 ${color7}|${offset -9}${voffset -3}^${voffset 3}  ${color yellow}${upspeedf \1}${tab 5}Kbps${alignr}${color0}${upspeedgraph \1 16,100 000000 ffffff}${color7}
+template4 ${color7}|${offset -7}${voffset 3}v${voffset -3}${tab 50}${color yellow}${downspeedf \1}${tab 2}Kbps\n${alignr}${color0}${downspeedgraph \1 16,150 000000 ffffff}
+template5 ${color7}|${offset -9}${voffset -3}^${voffset 3}${tab 50}${color yellow}${upspeedf \1}${tab 2}Kbps\n${alignr}${color0}${upspeedgraph \1 16,150 000000 ffffff}${color7}
 ●\${addr $_}\${tab 60}
 TEXT
-${font DejaVu Sans YuanTi:size=18}${color yellow}${time %Y-%m-%d %k:%M:%S}${font}
-${color yellow}${execi 300 lc-农历.perl}${color}${alignr}
-${color7}top CPU${color yellow}${tab 10}${top name 1}${alignr}${color cyan}${top cpu 1}${top mem 1}
-${color7}top 内存${color yellow}${tab 10}${top_mem name 1}${alignr}${color cyan}${top_mem cpu 1}${top_mem mem 1}
-${color7}CPU温度${color yellow}${tab 10}${execp expr $(cat /sys/class/hwmon/hwmon0/temp1_input) / 1000}°C ,   ${execp expr $(cat /sys/class/hwmon/hwmon0/temp2_input) / 1000}°C
-${color7}风扇转速${color yellow}${tab 10}${execp cat /proc/acpi/ibm/fan | awk '/speed/{print $2}'}/min
+${font DejaVu Sans YuanTi:size=18}${color yellow}${tab 30}${time %Y,%-m,%-d,}
+${tab 30}${time %k,%M,%S}${font}
+${color yellow}${tab 30}${execi 300 lc-农历.perl}${color}${alignr}
+${color7}top CPU${color yellow}${alignr}${top name 1}
+${alignr}${color cyan}${top cpu 1}${top mem 1}
+${color7}top 内存${color yellow}${alignr}${top_mem name 1}
+${alignr}${color cyan}${top_mem cpu 1}${top_mem mem 1}
+${color7}CPU温度${color yellow}${alignr}${execp expr $(cat /sys/class/hwmon/hwmon0/temp1_input) / 1000}°C ,   ${execp expr $(cat /sys/class/hwmon/hwmon0/temp2_input) / 1000}°C
+${color7}风扇转速${color yellow}${alignr}${execp cat /proc/acpi/ibm/fan | awk '/speed/{print $2}'}/min
 ${execp net.perl}
 #${color4}${hr}${alignr}
 #${color0}Countup${alignr}
