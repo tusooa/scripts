@@ -69,7 +69,7 @@ template4 ${color7}|${offset -7}${voffset 3}v${voffset -3}${tab 50}${color yello
 template5 ${color7}|${offset -9}${voffset -3}^${voffset 3}${tab 50}${color yellow}${upspeedf \1}${tab 2}Kbps\n${alignr}${color0}${upspeedgraph \1 16,150 000000 ffffff}${color7}
 ●\${addr $_}\${tab 60}
 TEXT
-${font DejaVu Sans YuanTi:size=18}${color yellow}${tab 30}${time %Y,%-m,%-d,}
+${font DejaVu Sans YuanTi:size=18}${color yellow}${tab 30}${time %Y,%-m,%-d (%u)}
 ${tab 30}${time %k,%M,%S}${font}
 ${color yellow}${tab 30}${execi 300 lc-农历.perl}${color}${alignr}
 ${color7}top CPU${color yellow}${alignr}${top name 1}
