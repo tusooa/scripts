@@ -44,3 +44,4 @@ www-client/firefox bindist
 # required by media-sound/amarok-2.8.0
 # required by amarok (argument)
 =dev-db/mysql-5.1.70 embedded
+app-editors/emacs imagemagick

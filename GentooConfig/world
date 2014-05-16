@@ -12,6 +12,7 @@ app-dicts/stardict-langdao-zh-en-gb
 app-dicts/stardict-oxford-en-zh-gb
 app-dicts/stardict-xdict-en-zh-gb
 app-dicts/stardict-xdict-zh-en-gb
+app-editors/emacs
 app-editors/nano
 app-emacs/color-theme
 app-emacs/ebuild-mode

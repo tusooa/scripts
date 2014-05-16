@@ -44,13 +44,12 @@ setopt nonomatch
 command_not_found_handler()
 {
     if [ -f "$HOME/.share/programsList" ] ; then
-        return 127
-    fi
-    local l="$(grep "/${1}$" $HOME/.share/programsList)"
-    if [ "$l" ]; then
-        echo "packages contains the command \`$1':"
-        echo "$l" | awk '{print "\033[0;1;32m" $1 "\t\t\033[31m /" $2}'
-        echo "Run \`get <package>' to install it"
+        local l="$(grep "/${1}$" $HOME/.share/programsList)"
+        if [ "$l" ]; then
+            echo "packages contains the command \`$1':"
+            echo "$l" | awk '{print "\033[0;1;32m" $1 "\t\t\033[31m /" $2}'
+            echo "Run \`get <package>' to install it"
+        fi
     fi
     return 127
 }
