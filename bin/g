@@ -4,6 +4,7 @@ use Getopt::Long qw/:config bundling/;
 use File::Basename;
 use 5.012;
 use Scripts::scriptFunctions;
+use Scripts::EnvConf;
 
 my (@files, @regex);
 my $help = 0;
@@ -13,6 +14,8 @@ my $commonGrep = ((fileparse $0)[0] ~~ qw/cg gg gc/) ? 1 : 0; #根据文件名�
 #print $commonGrep;
 my $ln = 0;
 my $fn = 'DEFAULT';
+my $removeComment = 0;
+my $commentStart = '#';
 
 GetOptions (
     'help' => \$help,
@@ -23,17 +26,19 @@ GetOptions (
     'end' => sub {}, #对于-f等多参数的结束
     'line-number|l' => \$ln,
     'no-line-number|L' => sub { $ln = 0 }, # default
-    'show-filename|n', \$fn,
-    'no-filename|N', sub { $fn = 0 },
+    'show-filename|n'=> \$fn,
+    'no-filename|N'=> sub { $fn = 0 },
+    'remove-comment|c' => \$removeComment,
+    'comment-startswith|s=s' => \$commentStart,
 );
 
 my $scriptName = 'grep.perl';
 my $version = '0.1';
-my $filenameColor = $ENV{G_CFILENAME} // "\e[33m";
-my $lineNumColor = $ENV{G_CLINENUM} // "\e[32m";
-
-if ($help)
-{
+my $gColors = Scripts::EnvConf->new ($ENV{G_COLORS});
+my $filenameColor = $gColors->{fn} ? "\e[".($gColors->{fn})."m" : "\e[33m";
+my $lineNumColor = $gColors->{ln} ? "\e[".($gColors->{ln})."m" : "\e[32m";
+my $rCommentRegex = qr/^(?!\s*(?:${commentStart}))/;
+if ($help) {
     say
 qq{$scriptName $version, 简写 g.
 用法:
@@ -49,6 +54,8 @@ qq{$scriptName $version, 简写 g.
     -n, --show-filename         显示文件名:如果有多个文件,默认会这么做的
     -N, --no-filename           不显示文件名(联系上边的看吧.)
     --end                       结束多参数选项(如：-f)
+    -c, --remove-comment        去除行首注释
+    -s, --comment-startswith='' 设置注释以什么开头(默认是'#')
 高级玩法
     g -lnf files ... # 连接这些文件并显示文件名和行号
                      # 不是cgrep模式的话，正则可以省略的。
@@ -56,27 +63,16 @@ qq{$scriptName $version, 简写 g.
     exit 0;
 }
 
-if ($showVersion)
-{
+if ($showVersion) {
     say qq{$scriptName version $version};
     exit 0;
 }
-
 #@files = split (/,/,join (',',@files));
-if (! -t STDIN and ! $commonGrep)
-{
+if (! -t STDIN and ! $commonGrep) {
     # pipe
     @regex = @ARGV;
     @files = (@files ? @files : '-');
-}
-#elsif (! -t STDIN and $commonGrep)
-#{
-#    # pipe, cGrep
-#    @regex = (shift @ARGV);
-#    @files = ((@ARGV, @files) ? (@ARGV, @files) : '-');
-#}
-elsif ($commonGrep)
-{
+} elsif ($commonGrep) {
     #print @ARGV;
     @regex = (shift @ARGV or die "没有指定正则表达式\n"); # cgrep只允许一个正则
     #print @ARGV,' ,',@files;
@@ -84,20 +80,21 @@ elsif ($commonGrep)
     #这个功能实在鸡肋..cgrep不需要-f的
     @files = (@files ? @files : '-'); # 哪个放在前边好？？
     #print @files;
-}
-elsif (! @files)
-{
+} elsif (! @files) {
     @regex = @ARGV;
     @files = ('-');
-}
-else
-{
+} else {
     @regex = @ARGV;
 }
-if ($fn eq 'DEFAULT') # 如果没有特别指定显示文件名
-{
+
+if ($fn eq 'DEFAULT') { # 如果没有特别指定显示文件名
     $fn = @files - 1;
 }
+
+if ($removeComment) {
+    unshift @regex, $rCommentRegex;
+}
+
 my @col = map "\e[1;4;3".(int rand(6) +1).';40m', @regex;
 
 no strict 'refs';
@@ -137,7 +134,7 @@ for my $file (@files)
         }
         print "${filenameColor}${file}:\e[0m" if $fn;
         # 行号,具体参见 ● perldoc -v '$.'
-        print "${lineNumColor}${.}:\e[0m" if $ln;    
+        print "${lineNumColor}${.}:\e[0m" if $ln;
         print;
     }
 }
