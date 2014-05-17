@@ -2,8 +2,8 @@
 
 #alias -g rm='RemoveFile'
 #alias ls='ls -h --color=always'
-eval $(dircolors -b ~/.ls-colors)
-alias ls='ls -h --color=always -X --time-style="+[33m[[32m%Y-%m-%d [35m%k:%M[33m][0m" --hide="*~"' #hide backupfiles
+eval "$(dircolors -b ~/.ls-colors)"
+alias ls='ls -h --color=always -X --time-style="+[33m[[1;34m%Y,%_m,%_d (%u) [35m%H,%M,%S[0;33m][0m" --hide="*~"' #hide backupfiles
 alias l='ls -l'
 alias la='ls -A'
 alias sed='sed -r'
@@ -68,7 +68,6 @@ alias run-help >&/dev/null && unalias run-help
 autoload run-help
 
 # Screen Aliases
-# 这些都被emacs取代...
 if [ "$TERM" = screen ] ; then
     alias mutt='screen -t email mutt'
 #    alias irssi='screen -t chat Irssi-Alias'

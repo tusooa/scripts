@@ -28,6 +28,8 @@ export LESS="-M -i -R --shift 5"
 export LESSCHARSET=utf-8
 export GROFF_NO_SGR=1 #groff不转换颜色
 export READNULLCMD=less
+# grep.perl color
+export G_COLORS='fn=1;33:ln=1;32'
 # In archlinux the pipe script is in PATH, how ever in debian it is not
 [[ -x $(whence -cp src-hilite-lesspipe.sh 2>/dev/null) ]] && export LESSOPEN="| src-hilite-lesspipe.sh %s"
 [ -x /usr/share/source-highlight/src-hilite-lesspipe.sh ] && export LESSOPEN="| /usr/share/source-highlight/src-hilite-lesspipe.sh %s" || :

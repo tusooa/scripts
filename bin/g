@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# IMPORTANT: 待测试
+
 use Getopt::Long qw/:config bundling/;
 use File::Basename;
 use 5.012;
@@ -98,17 +98,13 @@ if ($removeComment) {
 my @col = map "\e[1;4;3".(int rand(6) +1).';40m', @regex;
 
 no strict 'refs';
-for my $file (@files)
-{
+for my $file (@files) {
     my $fh = $file;
     if ($file eq '-' or $file eq '/dev/stdin'
         or $file eq '/proc/self/fd/0' # 等等高级写法...
-       )
-    {
+       ) {
         $fh = \*STDIN; # 还是不要'STDIN'.
-    }
-    else
-    {
+    } else {
         open $fh, '<', $fh or die "Cannot open `$file': $!\n";
         # ● gc [ ~/.conkyrc  
         # Unmatched [ in regex; marked by <-- HERE in m/([ <-- HERE )/ at /home/tusooa/应用/脚本/gc line 140, </home/tusooa/.conkyrc> line 1.
@@ -122,10 +118,8 @@ for my $file (@files)
     # 如果原来就有颜色呢？去掉。
     #s/\e\[[0-9;]*[mK]//g;
     LINE:
-    while (<$fh>)
-    {
-        for my $i (0..$#regex)
-        {
+    while (<$fh>) {
+        for my $i (0..$#regex) {
             $regex[$i] or next; #解决了如下bug:
             # ● git diff G -lnf /dev/stdin --end '' #嗯，准确说是 g ''。当regex为空时的问题。
 
@@ -138,5 +132,7 @@ for my $file (@files)
         print;
     }
 }
+#● g -clns'#|$' -f g |wc -l
+#101
 
 
