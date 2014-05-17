@@ -70,7 +70,7 @@ template5 ${color7}|${offset -9}${voffset -3}^${voffset 3}${tab 50}${color yello
 ●\${addr $_}\${tab 60}
 TEXT
 ${font DejaVu Sans YuanTi:size=18}${color yellow}${tab 30}${time %Y,%-m,%-d (%u)}
-${tab 30}${time %k,%M,%S}${font}
+${tab 30}${time %H,%M,%S}${font}
 ${color yellow}${tab 30}${execi 300 lc-农历.perl}${color}${alignr}
 ${color7}top CPU${color yellow}${alignr}${top name 1}
 ${alignr}${color cyan}${top cpu 1}${top mem 1}

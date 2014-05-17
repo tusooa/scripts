@@ -25,7 +25,7 @@ if (@_)
     }
     if (! $_)
     {
-        $_ = strftime '%Y-%m-%d %H:%M:%S', localtime;
+        $_ = strftime '%Y,%-m,%-d (%u) %H,%M,%S', localtime;
     }
     say "提交注释为 $_ 的更新。";
     system 'git', 'commit', '-a', '-m', $_;
