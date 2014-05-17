@@ -1,49 +1,22 @@
-#!/usr/bin/env perl
+#!/bin/bash
+# 来自 eexpress: https://github.com/eexpress/eexp-bin/blob/master/msg
 
-use 5.012;
-use Scripts::scriptFunctions;
-
-my $scriptName = 'notice-msg';
-my $config = conf $scriptName;
-my $method = $config->get ('msg-method');
-say $method;
-my ($title, $icon) = ($scriptName, 'info');
-my ($message, $detail);
-given (scalar @ARGV)
-{
-    when (1)
-    {
-        $message = shift @ARGV;
-    }
-    when (2)
-    {
-        ($message, $detail) = @ARGV;
-    }
-    when (3)
-    {
-        ($title, $message, $detail) = @ARGV;
-    }
-    when (4)
-    {
-        ($title, $icon, $message, $detail) = @ARGV;
-    }
-}
-
-given ($method)
-{
-    when ('notify')
-    {
-        use Net::DBus;
-        my $bus = Net::DBus->session->get_service
-            ('org.freedesktop.Notifications')->get_object
-            ('/org/freedesktop/Notifications',
-             'org.freedesktop.Notifications');
-        $bus->Notify
-            ($title, 0, $icon, $message, $detail, [], {}, -1);
-    }
-    default
-    {
-        die "Unknown method: $_\n";
-    }
-}
+title="计划任务提醒"
+#icon="/usr/share/icons/gnome/48x48/actions/system-search.png"
+icon=/usr/share/icons/oxygen/48x48/status/dialog-information.png
+case "$#" in
+    1)
+        msg="$1";;
+    2)
+        title="$1"; msg="$2";;
+    3)
+        icon="$1"; title="$2"; msg="$3";;
+    4)
+        sound="$1"; icon="$2"; title="$3"; msg="$4";;
+    *)
+        title="格式错误"; msg="参数应该介于1－4个。依此为：sound icon title text。";;
+esac
+[ "$DISPLAY" ] || export DISPLAY=:0
+notify-send -i "$icon" "$title" "$msg" &
+[ -f "$sound" ] && { paplay $sound || canberra-gtk-play -i window-slide ; } || :
 

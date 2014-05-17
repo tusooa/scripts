@@ -16,6 +16,7 @@ my $ln = 0;
 my $fn = 'DEFAULT';
 my $removeComment = 0;
 my $commentStart = '#';
+my $showColor = 1;
 
 GetOptions (
     'help' => \$help,
@@ -30,13 +31,12 @@ GetOptions (
     'no-filename|N'=> sub { $fn = 0 },
     'remove-comment|c' => \$removeComment,
     'comment-startswith|s=s' => \$commentStart,
+    'color' => \$showColor,
+    'no-color|C' => sub { $showColor = 0 },
 );
 
 my $scriptName = 'grep.perl';
 my $version = '0.1';
-my $gColors = Scripts::EnvConf->new ($ENV{G_COLORS});
-my $filenameColor = $gColors->{fn} ? "\e[".($gColors->{fn})."m" : "\e[33m";
-my $lineNumColor = $gColors->{ln} ? "\e[".($gColors->{ln})."m" : "\e[32m";
 my $rCommentRegex = qr/^(?!\s*(?:${commentStart}))/;
 if ($help) {
     say
@@ -73,13 +73,10 @@ if (! -t STDIN and ! $commonGrep) {
     @regex = @ARGV;
     @files = (@files ? @files : '-');
 } elsif ($commonGrep) {
-    #print @ARGV;
     @regex = (shift @ARGV or die "没有指定正则表达式\n"); # cgrep只允许一个正则
-    #print @ARGV,' ,',@files;
     @files = (@ARGV, @files);
     #这个功能实在鸡肋..cgrep不需要-f的
     @files = (@files ? @files : '-'); # 哪个放在前边好？？
-    #print @files;
 } elsif (! @files) {
     @regex = @ARGV;
     @files = ('-');
@@ -95,8 +92,17 @@ if ($removeComment) {
     unshift @regex, $rCommentRegex;
 }
 
-my @col = map "\e[1;4;3".(int rand(6) +1).';40m', @regex;
-
+my @col;
+my $nocol;
+my $filenameColor;
+my $lineNumColor;
+if ($showColor) {
+    my $gColors = Scripts::EnvConf->new ($ENV{G_COLORS});
+    $filenameColor = $gColors->{fn} ? "\e[".($gColors->{fn})."m" : "\e[33m";
+    $lineNumColor = $gColors->{ln} ? "\e[".($gColors->{ln})."m" : "\e[32m";
+    @col = map "\e[1;4;3".(int rand(6) +1).';40m', @regex;
+    $nocol = "\e[0m";
+}
 no strict 'refs';
 for my $file (@files) {
     my $fh = $file;
@@ -124,11 +130,11 @@ for my $file (@files) {
             # ● git diff G -lnf /dev/stdin --end '' #嗯，准确说是 g ''。当regex为空时的问题。
 
             #print STDERR $regex[$i];
-            s{($regex[$i])}{$col[$i]$1\e[0m}g or next LINE;
+            s{($regex[$i])}{$col[$i]$1$nocol}g or next LINE;
         }
-        print "${filenameColor}${file}:\e[0m" if $fn;
+        print "${filenameColor}${file}:$nocol" if $fn;
         # 行号,具体参见 ● perldoc -v '$.'
-        print "${lineNumColor}${.}:\e[0m" if $ln;
+        print "${lineNumColor}${.}:$nocol" if $ln;
         print;
     }
 }

@@ -105,6 +105,10 @@ user-complete()
             BUFFER="${BUFFER%NN}*(oc[1])"
             zle end-of-line
             ;;
+        '')BUFFER='cd ' # do not really like it,
+                        # but hate the <TAB> when empty line much more,,,
+            zle end-of-line
+            ;;
     esac
     zle expand-or-complete
 }
