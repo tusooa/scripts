@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-use Getopt::Long qw/:config bundling/;
+use Getopt::Long qw/:config gnu_getopt/;
 use File::Basename;
 use 5.012;
 use Scripts::scriptFunctions;
