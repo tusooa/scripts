@@ -17,7 +17,7 @@
 ; emacs server
 (server-start)
 ;; font
-(set-frame-font "Monaco-10")
+(set-frame-font "Ubuntu Mono-13")
 (set-fontset-font (frame-parameter nil 'font)
                   'han "DejaVu Sans YuanTi Mono"
 )

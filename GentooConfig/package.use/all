@@ -10,13 +10,11 @@ dev-lang/ghc binary
 =sys-apps/pciutils-3.1.7 -zlib
 media-libs/sdl-mixer mikmod
 app-i18n/fcitx gtk gtk3 qt
-#www-client/firefox bindist
 sys-devel/gcc -fortran
 x11-terms/rxvt-unicode secondary-wheel -vanilla
 media-libs/sdl-mixer mod
 sys-fs/udisks -crypt
 net-misc/networkmanager connection-sharing dhcpcd gnutls
-www-client/firefox bindist
 net-misc/hotot qt4
 sys-libs/zlib minizip
 >=dev-python/PyQt4-4.9.4 sql webkit declarative
@@ -36,7 +34,6 @@ x11-terms/rxvt-unicode -perl
 >=media-libs/harfbuzz-0.9.23 icu
 gnome-extra/zenity -webkit
 net-misc/networkmanager ppp
-www-client/firefox bindist
 # required by media-sound/amarok-2.8.0
 # required by amarok (argument)
 =virtual/mysql-5.1 embedded

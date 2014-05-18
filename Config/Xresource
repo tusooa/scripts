@@ -3,7 +3,7 @@
 !URxvt.font:xft:Monaco:pixelsize=16:antialias=False:minspace=False
 !,\
 !xft:WenQuanYi Zen Hei:medium:pixelsize=12:antialias=False
-URxvt.font: xft:Monaco:medium:pixelsize=12, xft:DejaVu Sans YuanTi Mono:medium:pixelsize=20
+URxvt.font: xft:Ubuntu Mono:medium:pixelsize=15, xft:DejaVu Sans YuanTi Mono:medium:pixelsize=20
 URxvt.inputMethod:fcitx
 
 URxvt.shading:              500
