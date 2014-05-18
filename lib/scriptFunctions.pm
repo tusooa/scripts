@@ -44,11 +44,13 @@ sub multiArgs
 {
 #    say "@ARGV";say $ARGV[0];
     my @args;
-    while (@ARGV and ! ($ARGV[0] ~~ /^-/))
+    while (@ARGV) {
     # 不以-开头的参数，都记作多个参数。示例。g regex -f <f1 f2 f3> -- regex2
     # 详见grep.perl
-    {
-#        say "adding $ARGV[0]";
+    #        say "adding $ARGV[0]";
+        #解决了如下bug:
+        # g regex -f - file #其中file会被识别成正则的问题
+        last if $ARGV[0] =~ /^-/ and ! ($ARGV[0] eq '-');
         push @args, (shift @ARGV);
     }
 #    say "@args";
@@ -64,6 +66,7 @@ sub conf
 }
 
 $pathConf = conf 'scriptpath'; #不加这，cairo-w就会出错。
+#原因是之前没有指明默认配置在哪里
 
 #sub main
 #{
