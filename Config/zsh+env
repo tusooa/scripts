@@ -53,3 +53,7 @@ zle_highlight=(
 #export PERLBREW_ROOT="$HOME/安装/stow/perlbrew" \
 #    PERLBREW_HOME="$HOME/.perlbrew"
 
+# android ssh auto set display
+if [ "$SSH_CONNECTION" ] ; then
+    export DISPLAY="${SSH_CONNECTION%% *}:0"
+fi
