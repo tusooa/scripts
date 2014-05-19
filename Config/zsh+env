@@ -13,7 +13,10 @@ if [[ $TERM = linux ]] ; then
 else
     LANG=zh_CN.UTF-8
 fi
-
+# 解决了如下bug
+# ssh -pXXX tusooa@tusooa-laptop
+# 时ls显问号的问题
+export LANG
 # less
 export PAGER=less
 export MANPAGER='/usr/bin/less -isR'
