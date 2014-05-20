@@ -1,4 +1,8 @@
 #!/usr/bin/env perl
+# 本来这个脚本来自eexpress的
+# 但是我现在找不到它了
+# 原来该是从http://git.ubuntu.org.cn 看到的
+# 但是它现在根本看不见了
 
 use Getopt::Long qw/:config gnu_getopt/;
 use File::Basename;
@@ -17,7 +21,8 @@ my $fn = 'DEFAULT';
 my $removeComment = 0;
 my $commentStart = '#';
 my $showColor = 1;
-
+my $ignoreCase = 0;
+my $fixed = 0;
 GetOptions (
     'help' => \$help,
     'version' => \$showVersion,
@@ -33,6 +38,10 @@ GetOptions (
     'comment-startswith|s=s' => \$commentStart,
     'color' => \$showColor,
     'no-color|C' => sub { $showColor = 0 },
+    'ignore-case|i' => \$ignoreCase,
+    'no-ignore-case|I' => sub { $ignoreCase = 0 },
+    'fixed|F' => \$fixed,
+    'no-fixed|r' => sub { $fixed = 0 },
 );
 
 my $scriptName = 'grep.perl';
@@ -88,10 +97,20 @@ if ($fn eq 'DEFAULT') { # 如果没有特别指定显示文件名
     $fn = @files - 1;
 }
 
-if ($removeComment) {
+if ($removeComment) { # eexpress https://github.com/eexpress/eexp-bin/blob/master/config/.bash/alias
+# ▶ dog
+# alias dog='grep -v -E "(^$|^#|^!)"'
     unshift @regex, $rCommentRegex;
 }
 
+if ($fixed) {
+    @regex = map quotemeta $_, @regex;
+}
+if ($ignoreCase) {
+    @regex = map qr/$_/i, @regex;
+} else {
+    @regex = map qr/$_/, @regex;
+}
 my @col;
 my $nocol;
 my $filenameColor;
