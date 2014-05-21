@@ -18,8 +18,15 @@ if ($status[-1] =~ /nothing (added )?to commit/)
 if (@status)
 {
     print "文件:\n@status";
-    #my @diff = grep /\d+m[-+]/, `git diff`;
-    #print "差异:\n@diff";
+    my $rows = (split /\s/, `stty size`)[0];
+    my @diff = grep /\d+m[-+]/, `git diff`;
+    if (@diff < $rows) {
+        print "差异:\n@diff";
+    } else {
+        open LESS, '|-', 'less';
+        print LESS @diff;
+        close LESS;
+    }
     if (!($_ = join ' ', @ARGV))
     {
         say "本地需要提交。请输入提交的注释并回车(空注释将被日期代替):";

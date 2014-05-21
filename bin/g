@@ -125,16 +125,21 @@ if ($showColor) {
 no strict 'refs';
 for my $file (@files) {
     my $fh = $file;
-    if ($file eq '-' or $file eq '/dev/stdin'
-        or $file eq '/proc/self/fd/0' # 等等高级写法...
+    if ($file eq '-' #or $file eq '/dev/stdin' #不再特殊处理这些。只保留-
+        #or $file eq '/proc/self/fd/0' # 等等高级写法...
        ) {
-        $fh = \*STDIN; # 还是不要'STDIN'.
+        $fh = 'STDIN'; # \*STDIN => GLOB(0x1bb76a8)
+        $file = "(Standard Input)";
     } else {
-        open $fh, '<', $fh or die "Cannot open `$file': $!\n";
+        if (!open $fh, '<', $fh) {
+            say STDERR "Cannot open `$file': $!";
+            next;
+        }
         # ● gc [ ~/.conkyrc  
         # Unmatched [ in regex; marked by <-- HERE in m/([ <-- HERE )/ at /home/tusooa/应用/脚本/gc line 140, </home/tusooa/.conkyrc> line 1.
 
     }
+    # 以下几行注释的内容，是eexpress之原始代码。
     #for my $i (@regex)
     #{
     #    @_ = grep /$i/, @_;
@@ -158,6 +163,6 @@ for my $file (@files) {
     }
 }
 #● g -clns'#|$' -f g |wc -l
-#101
+#128
 
 
