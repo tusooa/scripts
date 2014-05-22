@@ -1,6 +1,6 @@
 #compdef g
 
-_arguments -S \
+_arguments -s -S \
     '--help[Print help information]' \
     '--version[Print version information]' \
     '(-l --line-number -L --no-line-number)'{-l,--line-number}'[Show line number]' \
@@ -9,6 +9,14 @@ _arguments -S \
     '(-N --no-file-name -n --show-filename)'{-N,--no-filename}"[Don't show file name(s)]" \
     '(-g --common-grep -G --no-common-grep)'{-g,--common-grep}'[Use grep.perl in the style of cgrep]:perl regex::*:file:_files' \
     '(-G --no-common-grep -g --common-grep)'{-G,--no-common-grep}'[Use grep.perl in its own style]' \
+    '(-c --remove-comment)'{-c,--remove-comment}'[Remove comment at the beginning of line]' \
+    '(-s --comment-startswith)'{-s+,--comment-startswith=}'[Comment starts with]::perl regex:' \
+    '(-C --color --no-color)'--color'[Show colors]' \
+    '(-C --color --no-color)'{--no-color,-C}'[Do not show colors]' \
+    '(-i --ignore-case -I --no-ignore-case)'{-i,--ignore-case}'[Ignore case]' \
+    '(-i --ignore-case -I --no-ignore-case)'{-I,--no-ignore-case}'[Do not ignore case]' \
+    '(-F --fixed -r --no-fixed)'{-F,--fixed}'[Match plain text, not regex]' \
+    '(-F --fixed -r --no-fixed)'{-r,--no-fixed}'[Match regex]' \
     '(-f --file)'{-f,--file}'[Search in files]:*:file:_files' \
     '*: :_guard "^-*" "perl regex"'
 #    '*:perl regex: ' && return 0
