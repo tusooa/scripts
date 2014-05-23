@@ -1,1 +1,2 @@
+# -*- conf-unix -*-
 msg-method = notify

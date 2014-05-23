@@ -1,3 +1,4 @@
+# -*- conf-unix -*-
 font = DejaVu Sans YuanTi
 max = 6
 #color-today = 20,20,20,255

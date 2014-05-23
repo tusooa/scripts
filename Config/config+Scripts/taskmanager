@@ -1,3 +1,4 @@
+# -*- conf-unix -*-
 [Launchers][1]
 name=System Settings
 command=systemsettings &

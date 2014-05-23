@@ -1,3 +1,4 @@
+# -*- conf-unix -*-
 appsDir = /home/tusooa/Apps/
 dataDir = /home/tusooa/Apps/Data/
 accountDir = /home/tusooa/Account/

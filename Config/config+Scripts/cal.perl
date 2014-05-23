@@ -1,3 +1,4 @@
+# -*- conf-unix -*-
 [Colors]
 #regular = #5dbe63
 weekend = #ca4ab3
@@ -13,6 +14,7 @@ regular = #f9fa04
 ##11374f
 [Fonts]
 regular = DejaVu Sans YuanTi
+monospace = Ubuntu Mono
 size = 16
 [Language]
 chinese = 1

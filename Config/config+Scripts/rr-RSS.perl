@@ -1,3 +1,4 @@
+# -*- conf-unix -*-
 [Colors]
     conky-title = ${color5}
     conky-feeds = ${color0}

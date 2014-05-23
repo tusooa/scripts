@@ -1,3 +1,4 @@
+# -*- conf-unix -*-
 [user]
 	name = ThisTusooa
 	email = tusooa@vista.aero

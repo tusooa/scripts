@@ -23,8 +23,8 @@ my $record = $cacheDir . 'calendar';
 $ENV{LANG} = 'zh_CN.UTF-8';
 $ENV{LC_ALL} = '';
 
-my $today = strftime "%Y-%m-%d", localtime time;
-my $fileday = strftime "%Y-%m-%d", localtime ((stat $record)[9]);
+#my $today = strftime '%Y-%m-%d', localtime time;
+#my $fileday = strftime '%Y-%m-%d', localtime ((stat $record)[9]);
 #exit if $fileday eq $today;
 
 my (undef, undef, undef, $day, $mon, $year, $wan) = localtime time;

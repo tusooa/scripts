@@ -1,3 +1,4 @@
+# -*- conf-space -*-
 # Use Xft?
 use_xft yes
 xftfont DejaVu Sans YuanTi:pixelsize=16:medium

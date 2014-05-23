@@ -1,32 +1,35 @@
 #!/usr/bin/env perl
 use 5.012;
-use Tie::iCal;
 use LWP::Simple;
+use utf8;
 my $year = (localtime time)[5] + 1900;
-my %files = ('/tmp/enh' => 'http://www.google.com/calendar/ical/en.australian%23holiday%40group.v.calendar.google.com/public/basic.ics', '/tmp/cnh' => 'ical.mac.com/ical/China32Public32Holidays.ics');
+#say $year;
+#my %files = (#'/tmp/enh' => 'http://www.google.com/calendar/ical/en.australian%23holiday%40group.v.calendar.google.com/public/basic.ics',
+#             '/tmp/cnh' => #'http://www.google.com/calendar/ical/china__zh_cn@holiday.calendar.google.com/public/basic.ics');
+#             'http://ical.mac.com/ical/China32Holidays.ics');
 open (OUT, '>', "$ENV{HOME}/.calendar/cal-holidays") or die "Cannot open file: $!\n";
-say OUT "#ifndef _holidays_\n#define _holidays_\n\n";
-for my $file (keys %files)
-{
-	open (IN, '>', $file) or die "Cannot open $file: $!\n";
-	print IN get $files{$file};
-	close IN;
-	tie my %events, 'Tie::iCal', $file or die "Failed to tie file!\n";
-	my @items = map { $events{$_}->[1] } keys(%events);
-	untie(%events);
-	@items = sort { $a->{'DTSTART'}->[1] cmp $b->{'DTSTART'}->[1] } @items;
-	for my $item (@items)
-	{
-		my $date=$item->{'DTSTART'}->[1];
-		$date=~/($year)(\d{2})(\d{2})/ or next;
-		$date=int($2)."/".int($3);
-		my $holiday = $item->{SUMMARY};
-		$holiday =~ s/^.+\((.+)\)\s*$/\1/;
-		$holiday =~ s/\[.+\]//g;
-                $holiday =~ s/&/&amp;/g;
-		say OUT "$date\t$holiday";
-	}
+say OUT "#ifndef _holidays_convert_ics_\n#define _holidays_convert_ics_\n\n";
+my @content = split /\n/,get 'http://ical.mac.com/ical/China32Holidays.ics';
+
+my $print = 1;
+for (@content) {
+    when (/^END:VEVENT/) {
+        say OUT '' if $print;
+        $print = 1;#reset $print value
+    }
+    when (/^DTSTART;VALUE=DATE:(\d{4})(\d{2})(\d{2})$/) {
+        #$date=int($1).'/'int($2).'/'.int($3);
+        $print = 0 if $year != int $1;#只打印今年的
+        print OUT "$2/$3\t" if $print;
+    }
+    when (/^SUMMARY:/) {
+        print OUT $' if $print;
+    }
+    when (/^RESOURCES;LANGUAGE=EN:/) {
+        print OUT " ($')" if $print;
+    }
 }
-say OUT "\n#endif /* _holidays_ */";
+
+say OUT "\n#endif /* _holidays_convert_ics_ */";
 
 close OUT;
