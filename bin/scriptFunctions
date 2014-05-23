@@ -2,10 +2,6 @@
 
 true "${scriptName:=$(basename $0)}"
 
-# Gettext
-TEXTDOMAINDIR=/usr/share/locale
-TEXTDOMAIN="$scriptName"
-
 # Exit codes {{{
 Ec_FileNotFound=128
 Ec_CannotRun=127
@@ -38,11 +34,6 @@ LINE_UP="\e[A"
 SET_COLS="\e[${STAT_COLS}G"
 # }}}
 
-i18n()
-{
-    gettext -- "$@"
-}
-
 # I/O Functions {{{
 
 #echo()
@@ -54,72 +45,59 @@ i18n()
 
 echog()
 {
-    local format=$1
-    shift 1
-    printf " \b$(i18n "$format")\n" "$@"
+    printf -- "$@"
 }
 
 warn()
 {
-    local format=$1
-    shift 1
-    printf " \b${_YELLOW}* ${NORMAL}$format${NORMAL}\n" "$@"
+    local format="$1"
+    shift
+    printf -- "${_YELLOW}* ${NORMAL}$format${NORMAL}\n" "$@"
 }
 
 warng()
 {
-    local format=$1
-    shift 1
-    printf " \b${_YELLOW}* ${NORMAL}$(i18n "$format")${NORMAL}\n" "$@"
+    warn "$@"
 }
 
 die()
 {
-    local ec=$1 format=$2
+    local ec="$1" format="$2"
     [ "$ec" ] || exit "$Ec_ProgrammingError"
     shift 2
-    printf " \b${_RED}* ${NORMAL}$format${NORMAL}\n" "$@"
+    printf -- "${_RED}* ${NORMAL}$format${NORMAL}\n" "$@"
     checkInteger "$ec" || exit "$Ec_ProgrammingError"
     exit "$ec"
 }
 
 dieg()
 {
-    local ec=$1 format=$2
-    shift 2
-    printf " \b${_RED}* ${NORMAL}$(i18n "$format")${NORMAL}\n" "$@"
-    checkInteger "$ec" || exit "$Ec_ProgrammingError"
-    exit "$ec"
+    die "$@"
 }
 
 msg()
 {
-    local format=$1
-    shift 1
-    printf " \b${_GREEN}* ${NORMAL}${format}${NORMAL}\n" "$@"
+    local format="$1"
+    shift
+    printf -- "${_GREEN}* ${NORMAL}${format}${NORMAL}\n" "$@"
 }
 
 msgg()
 {
-    local format=$1
-    shift 1
-    printf " \b${_GREEN}* ${NORMAL}$(i18n "${format}")${NORMAL}\n" "$@"
+    msg "$@"
 }
 
 ask()
 {
     local _var=$1 format=$2
     shift 2
-    printf " \b${_BLUE}* ${NORMAL}$format${NORMAL} " "$@"
+    printf -- "${_BLUE}* ${NORMAL}$format${NORMAL} " "$@"
     read $_var
 }
 
 askg()
 {
-    local _var=$1 format=$2
-    shift 2
-    printf " \b${_BLUE}* ${NORMAL}$(i18n "$format")${NORMAL} " "$@"
-    read $_var
+    ask "$@"
 }
 
 # }}}
@@ -171,23 +149,22 @@ inArgList()
 {
     local item="$1"
     shift 1
-    for i in "$@" ; do [ "x$item" = "x$i" ] && return 0 ; done
-    return 1
+    for i in "$@" ; do [[ "$item" = "$i" ]] && return 0 ; done
 }
 
 isTrue()
-{
-	if [[ $2 = n ]] ; then
-		case "$1" in
-			[Yy]|[Yy][Ee][Ss])return $Ec_Well;;
-			*)return $Ec_DataError;;
-		esac
-	else
-		case "$1" in
-			[Nn]|[Nn][Oo])return $Ec_DataError;;
-			*)return $Ec_Well;;
-		esac
-	fi
+{ #修复了 用tab缩进的bug
+    if [[ $2 = n ]] ; then
+	case "$1" in
+            [Yy]|[Yy][Ee][Ss])return $Ec_Well;;
+            *)return $Ec_DataError;;
+        esac
+    else
+        case "$1" in
+            [Nn]|[Nn][Oo])return $Ec_DataError;;
+            *)return $Ec_Well;;
+        esac
+    fi
 }
 
 checkInteger()
@@ -208,21 +185,7 @@ forever()
     done
 }
 
-# Paths {{{
-# 如何使用config??
-#xdgConf="${XDG_CONFIG_HOME-$HOME/.config}/"
-#configDir="${xdgConf}Scripts/"
-#xdgCache="${XDG_CACHE_HOME-$HOME/.cache}/"
-#cacheDir="${xdgCache}Scripts/"
-#Scripts=$HOME/应用/脚本/
-#ConfDir="$configDir"
-#DefConfDir=$HOME/应用/默认配置/
-#ConfDirs=($DefConfDir $ConfDir)
-#Libraries=$HOME/应用/库/脚本/
-#Manuals=$HOME/应用/手册/
-#Pictures=$HOME/媒体/图片/
-#Service=$HOME/应用/服务/
-#ServiceLibraries=${Service}库/
-#DataDir=$HOME/应用/数据/
-# }}}
+# Paths
+# 不再提供支持了。参见 config.perl
+c() { config.perl "$@" ; }
 

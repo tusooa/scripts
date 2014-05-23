@@ -24,17 +24,13 @@ sub new
     my $class = shift;
     my $file = shift;
     my $default = shift;
-    my ($config,$errors) = parseConf (
+    my $config = parseConf (
         fn => $file,
         defc => $default,
     );
-    bless [$config,$errors], $class;
+    bless $config, $class;
 }
-my %errors = (
-    0 => "No errors.",
-    1 => "Not enough args.",
-);
-
+#去除errors
 =comment parseConf
 my $ref = Scripts::Configure::parseConf (%args);
 args:
@@ -62,7 +58,6 @@ sub parseConf
 {
     my %args = (@_);
     my @conf;
-    my $errors = [0];
     if ($args{fn})
     {
         my (@defconf, @userconf);
@@ -93,8 +88,7 @@ sub parseConf
     }
     else
     {
-        $errors = [1];
-        return (undef, $errors);
+        return undef;
     }
     #say @conf;
     # parse @conf
@@ -153,19 +147,19 @@ sub parseConf
     }
     #use Data::Dumper;
     #print Dumper ($ret);
-    return ($ret, $errors);
+    return $ret;
 }
 
 sub hash
 {
     my $self = shift;
-    %{$self->[0]};
+    %{$self};
 }
 
 sub hashref
 {
     my $self = shift;
-    $self->[0];
+    $self;
 }
 
 =comment get
@@ -176,8 +170,7 @@ $config->get ($group, $subg, $var);
 sub get
 {
     my $self = shift;
-    my $confhash;
-    %$confhash= $self->hash;
+    my $confhash = $self->hashref;
     my $ret;
     #my $arg = \undef; # make $$arg false
     #if (ref $_[-1]) # a ref to command line arg var.
@@ -209,12 +202,13 @@ sub get
 sub runHooks
 {
     my ($self, $hookName) = @_;
-    ref $self->[0]->{Hooks} eq 'HASH' or return undef;
-    ref $self->[0]->{Hooks}->{$hookName} eq 'HASH' or return undef;
-    for (keys %{ $self->[0]->{Hooks}->{$hookName} })
+    my $confhash = $self->hashref;
+    ref $confhash->{Hooks} eq 'HASH' or return undef;
+    ref $confhash->hashref->{Hooks}->{$hookName} eq 'HASH' or return undef;
+    for (keys %{ $confhash->{Hooks}->{$hookName} })
     {
         say "$hookName hook => $_";
-        system $self->[0]->{Hooks}->{$hookName}->{$_};
+        system $confhash->{Hooks}->{$hookName}->{$_};
     }
 }
 
