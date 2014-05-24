@@ -74,3 +74,5 @@ media-libs/clutter-gst ~amd64
 # required by @world (argument)
 =dev-cpp/yaml-cpp-0.5.1 ~amd64
 >=perl-core/ExtUtils-Manifest-1.630.0 ~amd64
+
+>=dev-perl/YAML-LibYAML-0.410.0 ~amd64

@@ -31,6 +31,8 @@ app-i18n/fcitx-rime
 app-i18n/kcm-fcitx
 app-i18n/lunar
 app-misc/calendar
+app-misc/devtodo
+app-misc/mtail
 app-misc/screen
 app-office/libreoffice-bin
 app-portage/eix
@@ -44,10 +46,13 @@ app-text/sdcv
 app-text/stardict
 dev-lang/perl
 dev-lang/python:2.7
+dev-lang/rakudo
 dev-libs/glib
 dev-lisp/sbcl
+dev-perl/File-ShareDir
 dev-perl/Gtk3
 dev-perl/IO-String
+dev-perl/Moose
 dev-perl/Net-DBus
 dev-perl/TermReadKey
 dev-perl/Tie-iCal
@@ -56,6 +61,7 @@ dev-perl/WWW-Mechanize
 dev-perl/X11-Protocol
 dev-perl/XML-Atom
 dev-perl/XML-Feed
+dev-perl/YAML-LibYAML
 dev-perl/libwww-perl
 dev-perl/rename
 dev-perl/yaml
