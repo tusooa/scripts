@@ -74,6 +74,7 @@ my_accounts=(
 )
 zstyle ':completion:*:my-accounts' users-hosts $my_accounts
 
+compdef ColorMake=make
 # 补全吾的脚本
 #_ds()
 #{
