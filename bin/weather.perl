@@ -7,11 +7,14 @@ use Encode qw/encode_utf8/;
 use Date::Parse qw/str2time/;
 use Getopt::Long qw/:config gnu_getopt/;
 
+sub printFunc;
+
 my $cfg = conf 'weather';
 my $uri = $cfg->get ('weather-uri');
 my $reload = 'DEFAULT';
 my $quiet = 0;
 my $conky = -t STDOUT ? 0 : 1;
+my $help = 0;
 
 GetOptions (
     'c|conky' => \$conky,
@@ -20,7 +23,24 @@ GetOptions (
     'f|force|reload' => \$reload,
     'F|noforce|noreload' => sub { $reload = 0; },
     'q|quiet' => \$quiet,
+    'help' => \$help,
 );
+if ($help) {
+    say
+q{Usage: weather.perl [options]
+Options:
+    -c, --conky                       print conky format
+    -t, --term                        print terminal format
+    -u, --uri=''                      use <uri> instead of that in the config file
+    -f, --force, --reload             Force reload
+    -F, --noforce, --noreload         Use local record file
+    -q, --quiet                       Do not print anything
+    --help                            What you are reading now
+Default:
+    Print weather information with the format depending on the result of `-t STDOUT'.
+};
+    exit;
+}
 #print $reload;
 my $oldUri;
 my $logf = "${cacheDir}weather";
@@ -37,9 +57,9 @@ if ($reload eq 'DEFAULT') {
     $reload = !( ($oldUri eq $uri) and ($fileday eq $today) );
 }
 
-my $termColorCmd = (!$conky) ?
-    sub { s/^>/\e[1;33m/;s/^ /\e[0m/;s/^-/\e[32m/; } :
-              sub { s/°C\t.*/°C/g; s/20..-//g; s/^>\t/\${color1}/; s/^\ \t/\${color}/; s/^-\t/\${color3}/; s/\t(?=\d)/\${alignr}/;s/C\t.+$/C/; };
+#my $termColorCmd = (!$conky) ?
+#    sub { s/^>/\e[1;33m/;s/^ /\e[0m/;s/^-/\e[32m/; } :
+#              sub { s/°C\t.*/°C/g; s/20..-//g; s/^>\t/\${color1}/; s/^\ \t/\${color}/; s/^-\t/\${color3}/; s/\t(?=\d)/\${alignr}/;s/C\t.+$/C/; };
 #    sub { s/^>\s+/\${color3}/;s/^ \s+//;s/^-\s+/\${color2}/;
 #          s/\}\d{4}-/}/;my @weather = split /\t/;$_ = $weather[0].'${tab 60 0}'.$weather[1].'${alignr}'.$weather[2]."\n"; } ;
 
@@ -49,8 +69,7 @@ if (!$reload) {
     $quiet and exit;
     for (@_) {
         next if /^\s*$/;
-        $termColorCmd->();
-        print;
+        printFunc;
     }
     exit;
 }
@@ -88,9 +107,33 @@ for (@_) {
     }
     $_.="\n";
     print REC;
-    if (!$quiet) {
-        $termColorCmd->();
-        print;
-    }
+    printFunc;
+
 }
 close REC;
+
+sub printFunc
+{
+    if (!$quiet) {
+        if ($conky) {
+            s/°C\t.*/°C/g; s/20..-//g; s/^>\t/\${color1}/; s/^\ \t/\${color}/; s/^-\t/\${color3}/; s/\t(?=\d)/\${alignr}/;s/C\t.+$/C/;
+        } else {
+            s/^>/\e[1;33m/;s/^ /\e[0m/;s/^-/\e[32m/;
+        }
+        s/(\d)-/$1,/g;#s/ , / - /;
+        print;
+
+=comment
+        my ($start, $date, $weather, $temp, $wind) = split /\t/;
+        print $start;
+        #say STDERR $date;
+        my ($y, $m, $d) = split /-/, $date;
+        format STDOUT = 
+@>>>,@>,@>@>>>>>>>>@<<<<<<<<<<<<<<<<<<<< @<<<<<<<<<<<<<<<<<<<< @<<<<<<<<<<<<<<<<<<<<
+$y, $m, $d,"\t", $weather, $temp, $wind
+.
+        write;
+=cut
+
+    }
+}
