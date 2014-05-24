@@ -31,12 +31,7 @@ alias ']'=''
 alias 'tlcr:'=':' #这一行都是提示符.
 
 # Aliases for todo and remind
-alias t=todo
-#alias t=todo.sh
-#alias tc='todo.sh ls @code'
-#tn() { todo.sh ls "$@" | 'egrep' -v 'maybe|wait' ;}
-#tp() { todo.sh ls "$@" | 'egrep' 'maybe|wait' ;}
-alias wt='remind -w$(tput cols) -c+lc2 ~/.reminders'
+# removed, (replaced by calendar)
 
 # 后缀别名
 alias -g A='|awk'

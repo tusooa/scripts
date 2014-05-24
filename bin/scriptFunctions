@@ -27,11 +27,11 @@ for color in RED GREEN YELLOW BLUE PINK GREENBLUE WHITE ; do
 done
 unset color
 
-COLS="$(stty size)"
-COLS="${COLS#* }"
-STAT_COLS=$[COLS-13]
-LINE_UP="\e[A"
-SET_COLS="\e[${STAT_COLS}G"
+#COLS="$(stty size)"
+#COLS="${COLS#* }"
+#STAT_COLS=$[COLS-13]
+#LINE_UP="\e[A"
+#SET_COLS="\e[${STAT_COLS}G"
 # }}}
 
 # I/O Functions {{{
