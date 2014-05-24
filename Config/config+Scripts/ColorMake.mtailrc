@@ -43,7 +43,7 @@ files: stdin
    #    white, brightblack, brightred, brightgreen, brightyellow, brightblue,
    #    brightmagenta, and brightcyan.
    colors:
-      /^.*$/ white
+      #/^.*$/ white
       /^make.*:.*$/    brightblue
       /^make.*:.* Error [0-9]*$/    brightred
       /[ \t]-o [^ ]*/           cyan
@@ -54,6 +54,11 @@ files: stdin
       /^.*[Ww]arning.*$/       brightyellow
 #      /.*[Ee]rror.*/         brightred
       /:[0-9]*:/ brightwhite
+#CMake
+#      /Generating .+$/     brightblue
+#      /Scanning dependencies of .+$/ brightmagenta
+#      /Building .+$/ green
+#      /Linking .+$/ brightyellow
 
 # a simple config to use for everything not covered above. if no default
 # config is given, the default defaults to empty (no colors, no filters).

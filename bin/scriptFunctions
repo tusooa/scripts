@@ -1,4 +1,4 @@
-#!/bin/bash --source
+#!/bin/bash
 
 true "${scriptName:=$(basename $0)}"
 
@@ -176,6 +176,7 @@ checkInteger()
 # 显示的函数 {{{
 quiet() { "$@" &>/dev/null ; }
 no-err() { "$@" 2>/dev/null ; }
+all-stdout() { "$@" 2>&1 ; }
 # }}}
 
 forever()
@@ -186,6 +187,11 @@ forever()
 }
 
 # Paths
+# from scriptFunctions.pm
+[[ ${XDG_CONFIG_HOME} ]] && xdgConf="${XDG_CONFIG_HOME}/" || xdgConf="${HOME}/.config/";
+configDir="${xdgConf}Scripts/";
+[[ ${XDG_CACHE_HOME} ]] && xdgCache="${XDG_CACHE_HOME}/" || xdgCache="${HOME}/.cache/";
+cacheDir="${xdgCache}Scripts/";
 # 不再提供支持了。参见 config.perl
 c() { config.perl "$@" ; }
 

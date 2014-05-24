@@ -7,7 +7,7 @@ alias ls='ls -h --color=always -X --time-style="+[33m[[1;34m%Y,%_m,%_d (%u) [
 alias l='ls -l'
 alias la='ls -A'
 alias sed='sed -r'
-#alias make=ColorMake
+alias make=ColorMake
 alias grep='egrep'
 alias egrep="GREP_COLOR=\"\$(echo 3\$[\$(date +%N)%6+1]';1;4;40')\" egrep --color=always"
 alias less='less -R'
