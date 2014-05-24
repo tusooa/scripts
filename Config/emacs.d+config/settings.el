@@ -60,7 +60,7 @@
  ;;显示列号
  column-number-mode t
  ;;标题栏显示 %f 缓冲区完整路径 %p 页面百分数 %l 行号
- frame-title-format "%f"
+ ;frame-title-format "%f"
  ;; 编辑器设定
  ;;不生成临时文件(3x)
  ;;(setq-default make-backup-files nil)
@@ -76,12 +76,12 @@
  ;; title
  frame-title-format "emacs : %b"
 
- user-full-name "tusooa"
- user-mail-address "tusooa@gmail.com"
+ user-full-name "ThisTusooa"
+ user-mail-address "tusooa@vista.aero"
  browse-url-generic-program "/usr/bin/firefox"
  browse-url-browser-function 'browse-url-generic
 )
-(mapc '(lambda (x) (add-to-list 'auto-mode-alist x))
+(mapc #'(lambda (x) (add-to-list 'auto-mode-alist x))
       '(
         ("~/.fvwm/\\(config\\|f\\..+\\)" . fvwm-mode)
         ("\\.fvwm\\'" . fvwm-mode)
