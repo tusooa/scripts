@@ -34,7 +34,8 @@ pathprepend PATH "$HOME/Apps/bin/$(distro)-aliases"
 pathprepend PATH "$HOME/Install/bin"
 pathprepend LD_LIBRARY_PATH "$HOME/Install/lib"
 pathprepend PKG_CONFIG_PATH "$HOME/Install/lib/pkgconfig"
-
+# Perl 6
+pathprepend PATH "$HOME/.perl6/2014.04/bin"
 # Compile-Program
 #pathprepend "$HOME/应用/源码/gcode-svn/compile-program"
 
