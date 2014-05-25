@@ -7,7 +7,6 @@ use LWP::Simple;
 #use Date::Parse;
 #use Getopt::Long qw/:config gnu_getopt/;
 #sub printFunc;
-
 my $cfg = conf 'weather';
 my $uri = $cfg.get('weather-uri');
 my $reload = 'DEFAULT';
@@ -15,6 +14,8 @@ my $quiet = 0;
 my $conky = $*OUT ~~ :t ?? 0 !! 1;
 my $help = 0;
 
+#sub MAIN (:$conky, :term($conky but False), :$reload, :$quiet, :$noreload, :$uri, :$help, *@args)
+#{
 ### TODO ###
 #GetOptions (
 #    'c|conky' => \$conky,
@@ -116,7 +117,7 @@ for @log {
 
 }
 close $rec;
-
+#}
 sub printFunc ($line is rw)
 {
     given $line {
