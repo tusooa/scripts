@@ -12,8 +12,7 @@
     graph = %Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset
 [alias]
     c = commit -a
-    p = push origin master
-    pd = push origin develop
+    p = push origin HEAD
     s = status
     a = !git.perl
     clog = log --color --graph --pretty=graph --abbrev-commit --
