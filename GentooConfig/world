@@ -63,6 +63,7 @@ dev-perl/XML-Atom
 dev-perl/XML-Feed
 dev-perl/YAML-LibYAML
 dev-perl/libwww-perl
+dev-perl/perltidy
 dev-perl/rename
 dev-perl/yaml
 dev-python/pyopenssl
