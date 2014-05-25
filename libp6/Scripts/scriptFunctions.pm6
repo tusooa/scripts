@@ -32,13 +32,9 @@ our $scriptsDir is export= $pathConf.get('scriptsDir') // "{$appsDir}bin/";
 our $libDir    is export = $pathConf.get('libDir') // "{$appsDir}lib/";
 our $defConfDir is export= $pathConf.get('defConfDir') // "{$appsDir}default-cfg/";
 
-sub time2date is export
+sub time2date ($date = DateTime.now) is export
 {
-    my @t = @_; #// localtime;
-    my $year = @t[5] + 1900;
-    my $month = @t[4] + 1;
-    my $day = @t[3];
-    "{$year}-{$month}-{$day}";
+    "{$date.year}-{$date.month}-{$date.day}";
 }
 
 sub multiArgs is export
