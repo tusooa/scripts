@@ -7,7 +7,10 @@ use DateTime::Format;
 
 #chdir $config->get ('gitDir');
 %*ENV<LC_ALL> = 'C';#git变成中文的了,倒不好作了
-my @status = qqx<git status>;
+# bug of Rakudo
+# see http://planeteria.org/perl6/
+## just as I was writing this, rurban started fixing a nasty regression that made changes to %*ENV not propagate to qx (execute shell commands and return the output as a string) on Rakudo for Parrot.
+my @status = qqx<git status>;say @status;
 if (@status[*-1] ~~ m:P5/nothing (added )?to commit/) #fix highlight:
 {
     say '本地无更新，自动获取远程更新。';

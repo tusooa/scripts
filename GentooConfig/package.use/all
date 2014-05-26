@@ -42,3 +42,4 @@ net-misc/networkmanager ppp
 # required by amarok (argument)
 =dev-db/mysql-5.1.70 embedded
 app-editors/emacs imagemagick
+#dev-lang/nqp moar

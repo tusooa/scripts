@@ -36,10 +36,13 @@ pathprepend LD_LIBRARY_PATH "$HOME/Install/lib"
 pathprepend PKG_CONFIG_PATH "$HOME/Install/lib/pkgconfig"
 # Perl 6
 pathprepend PATH "$HOME/.perl6/2014.04/bin"
+#pathprepend PERL6LIB "$HOME/Apps/libp6"
+#pathappend PATH "$HOME/Install/perl6/bin" "$HOME/Install/perl6/languages/perl6/site/bin"
 # Compile-Program
 #pathprepend "$HOME/应用/源码/gcode-svn/compile-program"
 
 export PATH
+export PERL6LIB
 export PKG_CONFIG_PATH
 export LD_LIBRARY_PATH
 

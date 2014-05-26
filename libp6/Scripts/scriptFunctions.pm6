@@ -1,7 +1,7 @@
 module Scripts::scriptFunctions;
 #use Exporter;
-use Scripts::Configure;
 use v6;
+use Scripts::Configure;
 #use File::Basename qw/basename/;
 #our $VERSION = 0.1;
 #our @ISA = qw/Exporter/;
