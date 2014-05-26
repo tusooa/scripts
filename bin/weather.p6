@@ -1,34 +1,33 @@
 #!/usr/bin/env perl6
 
-use Scripts::scriptFunctions;
 use v6;
+use Scripts::scriptFunctions;
 use LWP::Simple;
 #use Encode;
 #use Date::Parse;
-#use Getopt::Long qw/:config gnu_getopt/;
+use Getopt::Long;
 #sub printFunc;
 my $cfg = conf 'weather';
-my $uri = $cfg.get('weather-uri');
-my $reload = 'DEFAULT';
-my $quiet = 0;
-my $conky = $*OUT ~~ :t ?? 0 !! 1;
-my $help = 0;
+my Str $uri = $cfg.get('weather-uri');
+my Bool $reload = False but 'DEFAULT';
+my Bool $quiet = False;
+my Bool $conky = $*OUT ~~ :t ?? False !! True;
+my Bool $help = False;
 
 #sub MAIN (:$conky, :term($conky but False), :$reload, :$quiet, :$noreload, :$uri, :$help, *@args)
 #{
 ### TODO ###
-#GetOptions (
-#    'c|conky' => \$conky,
-#    't|term' => sub { $conky = 0 },
-#    'u|uri=s' => \$uri,
-#    'f|force|reload' => \$reload,
-#    'F|noforce|noreload' => sub { $reload = 0; },
-#    'q|quiet' => \$quiet,
-#    'help' => \$help,
-#);
-if ($help) {
+my @options := ('c'|'conky'), $conky,
+    ('t'|'term'), sub { $conky = 0 },
+    ('u'|'uri'), $uri,
+    ('f'|'force'|'reload'), $reload,
+    ('F'|'noforce'|'noreload'), sub { $reload = 0; },
+    ('q'|'quiet'), $quiet,
+    'help', $help;
+GetOptions @options;
+if $help {
     say
-q{Usage: weather.perl [options]
+q{Usage: weather.p6 [options]
 Options:
     -c, --conky                       print conky format
     -t, --term                        print terminal format
@@ -55,7 +54,7 @@ if (my $rec = open $logf) {
 my $fileday = time2date DateTime.new($logf.IO.modified);
 my $today = time2date;
 
-if ($reload eq 'DEFAULT') {
+if ($reload ~~ 'DEFAULT') {
     $reload = !( ($oldUri eq $uri) and ($fileday eq $today) );
     #say "reload : $reload";
 }
@@ -88,9 +87,9 @@ if ($_) {
     s:P5:g/ 星期(一|二|三|四|五|六|日)//;#::
     @log = .split("\n");
     @log = grep { !m:P5/^\s*$/ }, @log;#:
-    say ~@log;
+    #say ~@log;
 } else {
-    say ~@log;
+    #say ~@log;
     @log or die "无网页,无log.退出.\n";
     warn "无网页,使用本地log.\n";
 }
@@ -98,15 +97,18 @@ if ($_) {
 $rec = open $logf, :w or die "Cannot open $logf: $!\n";
 $rec.say($uri);
 for @log {
-    .say;
     s:P5/^.\t//;#重读入的情况时，去掉原始的标记。::
     next if m:P5/^\s*$/;#:
     if (m:P5/$today/) {#:
         $_ = ">\t$_";
     } else {
         my ($day) = .split("\t");
-        my $dt = DateTime.new($day);# 检查下星期
-        if $dt.weekday == (0|6)  {
+        my ($y,$m,$d) = $day.split: '-';
+        if $m < 10 { $m = '0' ~ $m }
+        if $d < 10 { $d = '0' ~ $d }
+        my $date-str = "$y-$m-{$d}T00:00:00+0800";
+        my $dt = DateTime.new($date-str);# 检查下星期
+        if $dt.day-of-week == (6|7)  {
             $_="-\t$_";
         } else {
             $_=" \t$_";
