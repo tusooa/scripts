@@ -11,7 +11,11 @@ my $cfg = conf 'weather';
 my Str $uri = $cfg.get('weather-uri');
 my Bool $reload = False but 'DEFAULT';
 my Bool $quiet = False;
-my Bool $conky = $*OUT ~~ :t ?? False !! True;
+#my $stty-out = qx{stty size -F/dev/stdout 2>/dev/null};
+#$stty-out.chomp;say so $stty-out;
+my Bool $conky= False;#$stty-out ?? False !! True;
+#try { $conky = $*OUT ~~ :t ?? False !! True;
+#CATCH { $conky 
 my Bool $help = False;
 
 #sub MAIN (:$conky, :term($conky but False), :$reload, :$quiet, :$noreload, :$uri, :$help, *@args)

@@ -1,3 +1,16 @@
 #!/bin/bash
 
-PERL6LIB="$(dirname "$0")${PERL6LIB+:$PERL6LIB}" perl6 -e "use $(basename "$0" .perl);" "$@"
+dn="$(dirname "$0")"
+bn="$(basename "$0" .perl)"
+
+# moarvm
+if [ -e "${dn}/${bn}.moarvm" ]; then
+    export PERL6LIB="${dn}${PERL6LIB+:$PERL6LIB}"
+    exec /usr/bin/perl6 -e "use ${bn};" "$@"
+# parrot
+#if [ -e "${dn}/${bn}.pir" ] ; then
+#    export PERL6LIB="${dn}${PERL6LIB+:$PERL6LIB}"
+#    exec /usr/bin/perl6 -e "use ${bn};" "$@"
+else
+    exec perl6 "$dn/$bn.p6" "$@"
+fi
