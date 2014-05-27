@@ -9,6 +9,8 @@ use File::Basename;
 use 5.012;
 use Scripts::scriptFunctions;
 use Scripts::EnvConf;
+use utf8;
+use Encode qw/_utf8_on _utf8_off/;
 
 my (@files, @regex);
 my $help = 0;
@@ -23,6 +25,8 @@ my $commentStart = '#';
 my $showColor = 1;
 my $ignoreCase = 0;
 my $fixed = 0;
+my $invent = 0;
+
 GetOptions (
     'help' => \$help,
     'version' => \$showVersion,
@@ -42,6 +46,8 @@ GetOptions (
     'no-ignore-case|I' => sub { $ignoreCase = 0 },
     'fixed|F' => \$fixed,
     'no-fixed|r' => sub { $fixed = 0 },
+    'v|invent' => \$invent,
+    'V|no-invent' => sub { $invent = 0 },
 );
 
 my $scriptName = 'grep.perl';
@@ -149,13 +155,19 @@ for my $file (@files) {
     #s/\e\[[0-9;]*[mK]//g;
     LINE:
     while (<$fh>) {
+        _utf8_on ($_); #修复了用/./来匹配，会造成乱码的错误
         for my $i (0..$#regex) {
             $regex[$i] or next; #解决了如下bug:
             # ● git diff G -lnf /dev/stdin --end '' #嗯，准确说是 g ''。当regex为空时的问题。
 
             #print STDERR $regex[$i];
-            s{($regex[$i])}{$col[$i]$1$nocol}g or next LINE;
+            if ($invent) {
+                /$regex[$i]/ and next LINE;
+            } else {
+                s{($regex[$i])}{$col[$i]$1$nocol}g or next LINE;
+            }
         }
+        _utf8_off ($_);
         print "${filenameColor}${file}:$nocol" if $fn;
         # 行号,具体参见 ● perldoc -v '$.'
         print "${lineNumColor}${.}:$nocol" if $ln;
