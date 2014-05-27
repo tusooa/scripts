@@ -88,7 +88,7 @@ prompt_pwd () # 截短路径
 }
 
 setopt promptsubst
-_DATE_NOW="${_BLUE}%D{%Y-%m-%d} %T"
+_DATE_NOW="${_BLUE}%D{%Y,%-m,%-d (%u)} ${_MAGENTA}%D{%H,%M,%S}"
 _HOSTNAME="${_WHITE}${bg_CYAN}%m${NOCOL}"
 _TLCR="%(?!${_GREEN}tlcr: \$?${NOCOL}!${_RED}tlcr: \$?${NOCOL})"
 #jobs-check ()
