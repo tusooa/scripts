@@ -1,0 +1,32 @@
+#!/bin/bash
+
+compile-tree()
+{
+    local dir="$1"
+    if [ -f "$dir" ]; then
+        compile-file "$dir"
+        return
+    fi
+    for i in "${dir:+$dir/}"*; do
+        if [ -d "$i" ]; then
+            compile-tree "$i"
+        elif [ -f "$i" ]; then
+            compile-file "$i"
+        fi
+    done
+}
+compile-file()
+{
+    local dn="$(dirname "$1")" bn="$(basename "$1")" target
+    [ "${bn%.p6}" = "$bn" ] && [ "${bn%.pm6}" = "$bn" ] && return
+    [ "$dn" = "." ] && dn=
+    target="${dn:+$dn/}${bn%.*}.moarvm"
+    echo -e "\e[1;34m\t$1 ==> $target\e[0m"
+    perl6 --target=mbc --output="$target" "$1"
+}
+
+if [ "$*" ]; then
+    for dir in "$@" ; do compile-tree "$dir" ; done
+else
+    compile-tree
+fi

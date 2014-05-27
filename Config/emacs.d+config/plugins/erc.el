@@ -9,7 +9,7 @@
 ;       erc-enable-logging nil
 ;       erc-ignore-list (quote ("^ls\\(\\s+-[aA]\\)?$" "^while\\s+:\\s*;\\s*do\\s+ls\\(\\s+-[aA]\\)?\\s*;\\s*done$"))
 ;       erc-log-channels-directory "~/个人/记录/IRC/ERC"
-      erc-nick "tusooa"
+      erc-nick "thistusooa"
       erc-nick-uniquifier "-"
       erc-part-reason 'erc-part-reason-normal
       erc-port 8001

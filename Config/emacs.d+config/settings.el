@@ -86,7 +86,7 @@
         ("~/.fvwm/\\(config\\|f\\..+\\)" . fvwm-mode)
         ("\\.fvwm\\'" . fvwm-mode)
 ;        ("/home/tusooa/\\(应用\\|Apps\\)/\\(源码\\|Source-Code\\)/GitHub/tusooa/Apps/Config/\\.fvwm\\+c.+" . fvwm-mode)
-        ("\\.\\(perl\\|pl\\|pm\\)\\'" . cperl-mode)
+        ("\\.\\(perl\\|p6\\|pm6\\)\\'" . cperl-mode)
         ("~/\\.config/Scripts/" . conf-unix-mode)
         ("/home/tusooa/GitHub/Apps/Config/Scripts/" . conf-unix-mode)
         ("/home/tusooa/GitHub/Apps/DefaultConfig/" . conf-unix-mode)
