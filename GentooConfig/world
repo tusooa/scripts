@@ -44,7 +44,6 @@ app-shells/zsh-completion
 app-text/dos2unix
 app-text/sdcv
 app-text/stardict
-dev-lang/moarvm
 dev-lang/nqp
 dev-lang/parrot
 dev-lang/perl
