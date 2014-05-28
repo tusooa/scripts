@@ -2,6 +2,7 @@ app-accessibility/festival
 app-admin/conky
 app-admin/sudo
 app-admin/syslog-ng
+app-arch/lzip
 app-arch/p7zip
 app-arch/zip
 app-crypt/gnupg

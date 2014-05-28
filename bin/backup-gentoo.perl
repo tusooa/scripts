@@ -16,7 +16,7 @@ system qw@rsync -rv /etc/make.conf /etc/hosts
     /etc/portage/package.mask
     /etc/portage/package.unmask
     /etc/portage/package.use 
-    /etc/rc.conf /etc/conf.d@, $backupDir;
+    /etc/rc.conf /etc/conf.d /etc/local.d@, $backupDir;
 
 # Kernel Config
 for my $kernel (</usr/src/linux-*/>) {
@@ -28,4 +28,10 @@ for my $kernel (</usr/src/linux-*/>) {
 }
 
 #crontab
-system qq{EDITOR=cat crontab -e > "${backupDir}cron-tab"};
+$ENV{EDITOR} = 'cat';
+open CRON, '-|', 'crontab', '-e';
+open CRONTAB, '>', "${backupDir}cron-tab";
+print CRONTAB while <CRON>;
+#system qq{EDITOR=cat crontab -e > "${backupDir}cron-tab"};
+close CRON;
+close CRONTAB;
