@@ -1,5 +1,6 @@
 .#*
-#*
+# 终于解决了emacs临时文件不能忽略的问题
+\#*
 *~
 *.elc
 Config/.config+Scripts/countup.cache

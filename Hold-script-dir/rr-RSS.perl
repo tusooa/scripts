@@ -4,17 +4,14 @@ use 5.012;
 use XML::Feed;
 use Scripts::scriptFunctions;
 use LWP::UserAgent;
-use Encode qw/decode_utf8/;
-use encoding 'utf8';
-use utf8;
-use Getopt::Long qw/:config bundling no_ignore_case/;
+use Encode qw/_utf8_on _utf8_off encode_utf8 decode_utf8/;
+#use encoding 'utf8';
+#use utf8;
+use Getopt::Long qw/:config gnu_getopt/;
 
 sub help
 {
-    say qq{\
-rr-RSS.perl，still in development版。
-
-用法:
+    say qq{用法:
 rr-RSS.perl [options] 网站名 # 或
 rr-RSS.perl [options] <--custom|-u> 标题 uri
 
@@ -26,17 +23,7 @@ rr-RSS.perl [options] <--custom|-u> 标题 uri
 -a, --user-agent=STR    指定使用的User-Agent(UA)。
 -r, --rss               强制使用RSS格式(通常不必)
 -o, --atom              强制使用Atom格式(通常不必)
---help                  就是你现在看到的东西。
-
-网站名在配置文件里定义的。配置文件通常是${configDir}rr-RSS.perl。
-配置文件格式：
-[Feeds]:网站名
-full-name = 标题
-uri = feed地址
-num = 每次执行的时候，获取多少条Feed
-proxy = 代理，(可选)
-
-};
+--help                  就是你现在看到的东西。};
 }
 
 my $conky = -t STDOUT ? 0 : 1;
@@ -68,7 +55,8 @@ my %colors = (
 my ($uri, $fullName, $maxNum);
 if (! $custom) #if !易读。
 {
-    my $webName = decode_utf8 shift @ARGV;
+    my $webName = shift @ARGV;
+    #_utf8_off $webName;
     help,die "没有指定网站名\n" if ! $webName;
     $uri = $config->get ('Feeds', $webName, 'uri')
         or die "从配置中找不到所谓的 $webName Feed。\n";
@@ -114,7 +102,7 @@ for my $item ($rss->entries)
 {
     $num < $maxNum or last;
     $num++;
-    say decode_utf8 $item->title;
+    say $item->title;
 }
 
 
