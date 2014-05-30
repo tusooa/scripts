@@ -155,7 +155,7 @@ inArgList()
 isTrue()
 { #修复了 用tab缩进的bug
     if [[ $2 = n ]] ; then
-	case "$1" in
+        case "$1" in
             [Yy]|[Yy][Ee][Ss])return $Ec_Well;;
             *)return $Ec_DataError;;
         esac

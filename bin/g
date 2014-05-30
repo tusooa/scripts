@@ -125,7 +125,12 @@ if ($showColor) {
     my $gColors = Scripts::EnvConf->new ($ENV{G_COLORS});
     $filenameColor = $gColors->{fn} ? "\e[".($gColors->{fn})."m" : "\e[33m";
     $lineNumColor = $gColors->{ln} ? "\e[".($gColors->{ln})."m" : "\e[32m";
+    # 这不科学！为什么用`\t'作正则匹配的时候，显示的颜色会不一样呢?!!!
     @col = map "\e[1;4;3".(int rand(6) +1).';40m', @regex;
+    # 在终端里边，选中了一下，再取消选择，发现居然正常了
+    # 是不是urxvt的问题呢？
+    # xterm, mate-terminal 都显不出\e[4m的下划线。操。
+    #say "$col[0]\t\e[0m" for 1..10;
     $nocol = "\e[0m";
 }
 no strict 'refs';
@@ -166,6 +171,7 @@ for my $file (@files) {
             } else {
                 s{($regex[$i])}{$col[$i]$1$nocol}g or next LINE;
             }
+            #say $i;
         }
         _utf8_off ($_);
         print "${filenameColor}${file}:$nocol" if $fn;
