@@ -44,6 +44,10 @@ while (<>) {
                     push @aliasName, $name;#say eval $args =~ s/\Q${name}\E=//r;
                     push @aliasReplace, eval $args =~ s/\Q${name}\E=//r;
                 }
+                when ('def-var') {
+                    my $name = (split /=/, $args)[0];
+                    $vars{$name} = eval $args =~ s/\Q${name}\E=//r;
+                }
             }
             next;
         }
