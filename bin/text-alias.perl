@@ -1,8 +1,32 @@
 #!/usr/bin/env perl
 
 use Scripts::scriptFunctions;
-use 5.014;
-#use re 'eval';
+use Getopt::Long qw/:config gnu_getopt/;
+use 5.014;#才能使用s///r
+
+my $fh;
+my $file;
+my $help;
+GetOptions
+  (
+   'o|output-file=s' => \$file,
+   'c|stdout' => sub { $file = '' },
+   'help' => \$help,
+  );
+
+if ($help) {
+    print
+qq{text-alias.perl [opts] file1 [file2 ...]
+-o, --output-file='' set output file instead of stdout
+-c, --stdout         print to stdout
+--help               what you are reading now
+};
+}
+if ($file) {
+    open $fh, '>', $file;
+} else {
+    $fh = 'STDOUT';
+}
 my @aliasName;
 my @aliasReplace;
 my %vars;
@@ -52,8 +76,7 @@ while (<>) {
             next;
         }
         next when /^#/;
-        default
-        {
+        default {
             #say 'simple';
             # 注意！因为这个奇葩的特性，前边定义的alias，可以使用后边的alias，而反过来就不能。
             for my $num (0..$#aliasName)
@@ -67,7 +90,7 @@ while (<>) {
                 my $result = eval $cmd;
                 s/{{{\Q$cmd\E}}}/$result/;
             }
-            say;
+            $fh->say ($_);
         }
     }
 }
