@@ -1,7 +1,6 @@
 (mapc 'require
       '(ibuffer redo fvwm-mode cmake-mode php-mode highlight-tail ;gentoo-syntax
-                linum tramp haskell-mode)
-)
+                linum tramp haskell-mode colorize))
 
 ; linum
 (global-linum-mode t)
@@ -21,8 +20,10 @@
 (highlight-tail-mode t)
 ; outline
 (setq outline-minor-mode-prefix [(control o)])
-
+;(add-hook 'css-mode-hook #'(lambda () (hexcolour-mode t)))
 ; workgroups
 ;(setq wg-prefix-key (kbd "C-c C-w"))
 ;(wg-create-workgroup "tusooa")
 ;(workgroups-mode 100)
+
+(global-colorize-mode t);例如#6cf这样的文字，显示对应的颜色。
