@@ -27,4 +27,4 @@
  '(erc-my-nick-face ((t (:foreground "brown" :weight bold))))
  '(erc-nick-default-face ((t (:weight bold))))
  '(erc-pal-face ((t (:foreground "LightBlue" :weight bold))))
- '(font-lock-comment-face ((t (:foreground "#bb66ff")))))
+ '(font-lock-comment-face ((t (:foreground "#bb66ff" :slant normal)))))

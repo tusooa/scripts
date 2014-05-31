@@ -1,3 +1,7 @@
+; 来自 https://github.com/lilydjwg/colorizer
+;      http://www.emacswiki.org/emacs/hexcolour.el
+;      http://www.emacswiki.org/emacs/HexColour
+; 及   http://www.emacswiki.org/emacs/hexrgb.el
 (defvar colorize-mode nil)
 (defvar hexcolor-keywords
         '(("#[abcdef[:digit:]]\\{3,6\\}"
