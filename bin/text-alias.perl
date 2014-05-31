@@ -31,19 +31,20 @@ my @aliasName;
 my @aliasReplace;
 my %vars;
 
+LINE:
 while (<>) {
     chomp;
     #s/^\s+//;s/\s+$//;
     #say;
     #next if /^$/;
     #my $new;
-    given ($_) {
+    for ($_) {
         when (/^(#==?>\s+)/) {
             #say 'cmd';
             my $str = s/$1//r;
             my $command = (split /\s+/, $str)[0];
             my $args = $str =~ s/\Q$command\E\s+//r;
-            given ($command) {
+            for ($command) {
                 when ('alias') {
                     my $name = (split /=/, $args)[0];
                     push @aliasName, $name;
@@ -73,9 +74,9 @@ while (<>) {
                     $vars{$name} = eval $args =~ s/\Q${name}\E=//r;
                 }
             }
-            next;
+            next LINE;
         }
-        next when /^#/;
+        next LINE when /^#/;
         default {
             #say 'simple';
             # 注意！因为这个奇葩的特性，前边定义的alias，可以使用后边的alias，而反过来就不能。
