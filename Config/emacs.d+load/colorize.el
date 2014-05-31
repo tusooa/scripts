@@ -40,6 +40,6 @@
         (t (font-lock-remove-keywords nil hexcolor-keywords))))
 (defun colorize-on ()
   (unless (minibufferp)
-    (colorize-mode 1)))
+    (unless (string= major-mode "erc-mode") (colorize-mode 1)))); erc-mode里，会导致本来该有颜色的，没有颜色。原因未知。只能先去掉。
 (define-globalized-minor-mode global-colorize-mode colorize-mode colorize-on)
 (provide 'colorize)
