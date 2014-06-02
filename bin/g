@@ -25,7 +25,7 @@ my $commentStart = '#';
 my $showColor = 1;
 my $ignoreCase = 0;
 my $fixed = 0;
-my $invent = 0;
+my $invert = 0;
 
 GetOptions (
     'help' => \$help,
@@ -46,8 +46,8 @@ GetOptions (
     'no-ignore-case|I' => sub { $ignoreCase = 0 },
     'fixed|F' => \$fixed,
     'no-fixed|r' => sub { $fixed = 0 },
-    'v|invent' => \$invent,
-    'V|no-invent' => sub { $invent = 0 },
+    'v|invert' => \$invert,
+    'V|no-invert' => sub { $invert = 0 },
 );
 
 my $scriptName = 'grep.perl';
@@ -166,7 +166,7 @@ for my $file (@files) {
             # ● git diff G -lnf /dev/stdin --end '' #嗯，准确说是 g ''。当regex为空时的问题。
 
             #print STDERR $regex[$i];
-            if ($invent) {
+            if ($invert) {
                 /$regex[$i]/ and next LINE;
             } else {
                 s{($regex[$i])}{$col[$i]$1$nocol}g or next LINE;

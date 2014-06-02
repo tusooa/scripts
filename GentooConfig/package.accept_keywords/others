@@ -60,3 +60,4 @@ games-util/springlobby ~amd64
 #required by stardict-lazyworm-en-zh-big5 (argument)
 >=app-dicts/stardict-lazyworm-en-zh-big5-2.4.2 ~amd64
 =gnome-base/gnome-keyring-3.4.1-r1 ~amd64
+>=games-mud/gnome-mud-0.11.2 ~amd64
