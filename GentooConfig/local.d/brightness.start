@@ -2,4 +2,4 @@
 
 # from maplebeats
 # https://github.com/maplebeats/Scripts/blob/master/init_brightness.c
-echo 2970 > /sys/class/backlight/intel_backlight/brightness
+dog /home/test/brightness > /sys/class/backlight/intel_backlight/brightness

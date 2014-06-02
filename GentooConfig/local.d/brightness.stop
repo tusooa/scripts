@@ -1,0 +1,4 @@
+#!/bin/bash
+# -*- shell-script -*-
+
+dog /sys/class/backlight/intel_backlight/brightness > /home/test/brightness
