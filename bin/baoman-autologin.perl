@@ -17,10 +17,9 @@ if ($@) {
 $m->get ('http://baozou.com/login');
 if ($m->uri eq 'http://baozou.com/login') {
     say "正在登录...";
-    eval {
-        my $button = $m->xpath ('//button', one => 1);
-        $button->click;
-    };
+    my $button = $m->xpath ('//button', one => 1);
+    $m->click ($button);
+    $m->content;
     say "完成!开始我们的战争(Date)吧---";
 } else {
     say "已经登录过了";
