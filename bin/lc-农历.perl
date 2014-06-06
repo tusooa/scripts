@@ -3,6 +3,8 @@
 use 5.012;
 
 use Getopt::Long;
+use Scripts::scriptFunctions;
+
 my $num;
 GetOptions(
     number => \$num,
@@ -17,16 +19,16 @@ my %en2cn = (
     "26"=>"廿六", "27"=>"廿七", "28"=>"廿八", "29"=>"廿九", "30"=>"三十"
 );
 
-my $date;
+my @date;
 if (@ARGV == 3)
 {
-    $date = "$ARGV[0] $ARGV[1] $ARGV[2]";
+    @date = @ARGV;
 }
 else
 {
-    chomp ($date = `date "+%Y %m %d"`);
+    @date = split '-', time2date;
 }
-open LUNAR, "lunar --utf8 $date|";
+open LUNAR, '-|', 'lunar', '--utf8', @date;
 
 my ($year,$nyear,$leap,$month,$day);
 while (<LUNAR>)

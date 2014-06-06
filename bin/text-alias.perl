@@ -86,11 +86,7 @@ while (<>) {
                 #say "DEBUG=>$aliasName[$num],$aliasReplace[$num],line= $_";
                 s(\Q$aliasName[$num]\E)($aliasReplace[$num])g;
             }
-            while (/{{{(.+?)}}}/) { #再次注意！如果使用了layout，这里的某些变量，可能会和预期的不一样。比如，$ARGV
-                my $cmd = $1;
-                my $result = eval $cmd;
-                s/{{{\Q$cmd\E}}}/$result/;
-            }
+            s/{{{(.+?)}}}/eval $1/ge;#再次注意！如果使用了layout，这里的某些变量，可能会和预期的不一样。比如，$ARGV
             $fh->say ($_);
         }
     }
