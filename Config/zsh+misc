@@ -91,12 +91,4 @@ mkcd()
     mkdir -p "$1" && cd "$1"
 }
 
-ls-dir-when-press-enter()
-{
-    if [ -d ${~BUFFER} ]; then
-        BUFFER="ls $BUFFER"
-    fi
-    zle accept-line
-}
-zle -N ls-dir-when-press-enter
-bindkey "\r" ls-dir-when-press-enter
+
