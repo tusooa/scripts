@@ -54,6 +54,7 @@ command_not_found_handler()
     return 127
 }
 
+: <<'COMMENT'
 export RM_DESTDIR="$HOME/.del/"
 rm()
 {
@@ -84,7 +85,7 @@ rm()
         esac
     done
 }
-
+COMMENT
 mkcd()
 {
     mkdir -p "$1" && cd "$1"

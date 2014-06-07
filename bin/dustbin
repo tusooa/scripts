@@ -1,0 +1,18 @@
+#!/usr/bin/env perl
+# -*- perl -*-
+
+use 5.012;
+if (@ARGV) {
+    for (@ARGV) {
+        if (-e or -l) {
+            say "  \e[1;31mdelete\e[0m =>\t\e[1;4;39;49m$_";
+            system 'kioclient', 'move', $_, 'trash:/';
+        } else {
+            say "  \e[1;33mnot found\e[0m =>\t\e[1;4;39;49m$_";
+        }
+    }
+}
+# else {
+#    system 'dolphin', 'trash:/'
+#}
+
