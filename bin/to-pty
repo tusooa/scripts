@@ -1,0 +1,13 @@
+#!/usr/bin/env perl
+# -*- perl -*-
+
+# 来自 lilydjwg
+# https://github.com/lilydjwg/stdoutisatty/blob/master/stdoutisatty.c
+# http://lilydjwg.is-programmer.com/2013/7/9/pretend-that-stdout-is-a-tty.39922.html
+use 5.012;
+use IPC::Run qw/run/;
+@ARGV or die "Not enough args\n";
+my $out;
+run \@ARGV, '>pty>', \$out;
+print $out;
+

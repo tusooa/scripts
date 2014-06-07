@@ -64,7 +64,7 @@ done)&
 while : ; do
     #echo "$(cat "$file")"
     if [[ "$(cat "$file")" -gt $maxtemp ]]; then
-        sudo -u tusooa env DISPLAY=:0 /home/tusooa/Apps/Scripts/notice-msg "Temp $1 > $maxtemp"
+        sudo -u tusooa env DISPLAY=:0 /home/tusooa/Apps/bin/notice-msg "Temp $1 > $maxtemp"
         sleep 120
     fi
     sleep 1

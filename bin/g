@@ -136,6 +136,7 @@ if ($showColor) {
 no strict 'refs';
 for my $file (@files) {
     my $fh = $file;
+    next if -B $file;
     if ($file eq '-' #or $file eq '/dev/stdin' #不再特殊处理这些。只保留-
         #or $file eq '/proc/self/fd/0' # 等等高级写法...
        ) {
