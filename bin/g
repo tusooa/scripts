@@ -136,13 +136,17 @@ if ($showColor) {
 no strict 'refs';
 for my $file (@files) {
     my $fh = $file;
-    next if -B $file;
     if ($file eq '-' #or $file eq '/dev/stdin' #不再特殊处理这些。只保留-
         #or $file eq '/proc/self/fd/0' # 等等高级写法...
        ) {
         $fh = 'STDIN'; # \*STDIN => GLOB(0x1bb76a8)
         $file = "(Standard Input)";
     } else {
+        #next unless -T $file;
+        # 这一句绝对不能有
+        # ● g -f /dev/stdin
+        # 如果有 -T 的话，会先读/dev/stdin，然后，呵呵，你C-d C-d，`LINE:'什么都不知道
+        # 操着卵了
         if (!open $fh, '<', $fh) {
             say STDERR "Cannot open `$file': $!";
             next;
@@ -171,6 +175,12 @@ for my $file (@files) {
                 /$regex[$i]/ and next LINE;
             } else {
                 s{($regex[$i])}{$col[$i]$1$nocol}g or next LINE;
+                #有些情况下，有问题
+                # 例如 my $scriptName = 'grep.perl';
+                # ● g grep p.p -f bin/g
+                # 就得不到期望的结果
+                # 因为，这一句的时候，把/grep/替换成了`\e[...mgrep\e[0m'，那么，原先匹配`p.p'的/p.p/并不能匹配`p\e[0m.p'，导致没有输出
+                # 但是 当我看到common grep的-e，是`选择'关系的时候，我就呵呵了
             }
             #say $i;
         }
