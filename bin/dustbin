@@ -1,6 +1,8 @@
 #!/usr/bin/env perl
 # -*- perl -*-
 
+# 来自 eexpress
+# https://github.com/eexpress/eexp-bin/commit/4b32d57a3e61ea133515a6bc8bff85c002b031ed
 use 5.012;
 if (@ARGV) {
     for (@ARGV) {
