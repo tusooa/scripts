@@ -12,6 +12,7 @@ if ($status[-1] =~ /nothing (added )?to commit/)
 {
     say '本地无更新，自动获取远程更新。';
     system 'git', 'pull';
+    final;
     exit;
 }
 @status = grep /:\s+(?!$)/, @status;
@@ -41,4 +42,5 @@ if (@status)
     #system 'git', 'pull';
     system 'git', 'p';#use git p instead of git push
     #git p -> git push origin master
+    final;
 }

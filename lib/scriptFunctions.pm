@@ -11,7 +11,7 @@ $configDir $cacheDir $dataDir
 $accountDir $scriptsDir $libDir
 $verbose verbose $debug debug
 conf $pathConf $defg $scriptName
-multiArgs time2date
+multiArgs time2date final
 /;
 
 our $scriptName= basename $0;
@@ -65,6 +65,10 @@ sub conf
     $conf;
 }
 
+sub final
+{
+    say "完成!开始我们的战争(Date)吧---";
+}
 $pathConf = conf 'scriptpath'; #不加这，cairo-w就会出错。
 #原因是之前没有指明默认配置在哪里
 

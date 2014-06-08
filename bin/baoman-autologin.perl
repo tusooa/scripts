@@ -2,9 +2,10 @@
 
 use 5.012;
 use WWW::Mechanize::Firefox;
-use POSIX qw/strftime/;
+#use POSIX qw/strftime/;
 #use utf8;
-use Encode qw/_utf8_on _utf8_off/;
+#use Encode qw/_utf8_on _utf8_off/;
+use Scripts::scriptFunctions;
 my $m;
 eval { $m = WWW::Mechanize::Firefox->new };
 if ($@) {
@@ -20,7 +21,7 @@ if ($m->uri eq 'http://baozou.com/login') {
     my $button = $m->xpath ('//button', one => 1);
     $m->click ($button);
     $m->content;
-    say "完成!开始我们的战争(Date)吧---";
+    final;
 } else {
     say "已经登录过了";
 }
