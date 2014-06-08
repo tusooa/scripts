@@ -43,3 +43,30 @@ net-misc/networkmanager ppp
 =dev-db/mysql-5.1.70 embedded
 app-editors/emacs imagemagick
 #dev-lang/nqp moar
+kde-base/kdm -consolekit
+x11-themes/light-themes gtk3
+# required by virtual/mysql-5.5
+# required by media-sound/amarok-2.8.0-r2
+# required by @selected
+# required by @world (argument)
+>=dev-db/mysql-5.5.37-r1 embedded
+# required by sys-devel/prelink-20130503
+# required by app-emulation/wine-1.7.19-r1[prelink]
+# required by @selected
+# required by @world (argument)
+>=dev-libs/elfutils-0.158 static-libs
+# required by virtual/ffmpeg-9
+# required by media-video/mplayer2-2.0_p20131009
+# required by media-video/smplayer-14.3.0
+# required by @selected
+# required by @world (argument)
+=media-video/ffmpeg-2.2.3 threads
+# required by media-video/mplayer2-2.0_p20131009
+# required by media-video/smplayer-14.3.0
+# required by @selected
+# required by @world (argument)
+>=virtual/ffmpeg-9 threads
+# required by media-sound/amarok-2.8.0-r2
+# required by @selected
+# required by @world (argument)
+>=virtual/mysql-5.5 embedded

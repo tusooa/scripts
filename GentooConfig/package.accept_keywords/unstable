@@ -1,0 +1,4 @@
+=app-text/dos2unix-6.0.5 -~amd64
+=app-text/dos2unix-6.0.4 -~amd64
+>=sys-apps/texinfo-5.1 -~amd64
+#>=app-i18n/fcitx-9999 -~amd64

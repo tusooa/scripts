@@ -21,16 +21,14 @@ app-emacs/emacs-w3m
 app-emacs/emms
 app-emacs/haskell-mode
 app-emulation/aqemu
-app-emulation/playonlinux
 app-emulation/qemu
-app-emulation/wine
-app-emulation/winetricks
 app-i18n/fbterm
 app-i18n/fcitx
 app-i18n/fcitx-configtool
 app-i18n/fcitx-rime
 app-i18n/kcm-fcitx
 app-i18n/lunar
+app-laptop/thinkfan
 app-misc/calendar
 app-misc/devtodo
 app-misc/mtail
@@ -55,6 +53,8 @@ dev-lisp/sbcl
 dev-perl/File-ShareDir
 dev-perl/Gtk3
 dev-perl/IO-String
+dev-perl/IO-Tty
+dev-perl/IPC-Run
 dev-perl/Moose
 dev-perl/Net-DBus
 dev-perl/TermReadKey
@@ -86,6 +86,7 @@ kde-base/kdebase-startkde
 kde-base/kdepimlibs
 kde-base/kdeplasma-addons
 kde-base/kdm
+kde-base/kmix
 kde-base/kolourpaint
 kde-base/ksnapshot
 kde-base/kstyles
@@ -119,6 +120,8 @@ net-misc/axel
 net-misc/dhcpcd
 net-misc/networkmanager
 net-misc/networkmanager-pptp
+net-misc/ntp
+net-misc/ntpclient
 net-misc/proxychains
 net-misc/whois
 net-p2p/transmission
@@ -139,10 +142,12 @@ sys-apps/dbus
 sys-apps/dog
 sys-apps/help2man
 sys-apps/kexec-tools
+sys-apps/lm_sensors
 sys-apps/man-db
 sys-apps/memtest86+
 sys-apps/mlocate
 sys-apps/shadow
+sys-apps/systemd
 sys-auth/polkit
 sys-block/gparted
 sys-boot/grub
@@ -159,7 +164,6 @@ virtual/perl-Attribute-Handlers
 virtual/perl-MIME-Base64
 virtual/perl-digest-base
 www-client/firefox-bin
-www-client/google-chrome
 www-client/w3m
 www-plugins/adobe-flash
 x11-base/xorg-drivers
@@ -179,6 +183,8 @@ x11-misc/xlockmore
 x11-misc/xsel
 x11-terms/rxvt-unicode
 x11-terms/xterm
+x11-themes/crystal
+x11-themes/dekorator
 x11-themes/dmz-cursor-theme
 x11-themes/gnome-icon-theme
 x11-themes/gnome-themes
@@ -188,6 +194,7 @@ x11-themes/hicolor-icon-theme
 x11-themes/humanity-icon-theme
 x11-themes/light-themes
 x11-themes/qtcurve
+x11-themes/smaragd
 x11-themes/sound-theme-freedesktop
 x11-themes/ubuntu-mono
 x11-wm/fvwm
