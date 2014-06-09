@@ -1,5 +1,6 @@
 app-accessibility/festival
 app-admin/conky
+app-admin/eselect
 app-admin/sudo
 app-admin/syslog-ng
 app-arch/lzip
@@ -146,6 +147,8 @@ sys-apps/lm_sensors
 sys-apps/man-db
 sys-apps/memtest86+
 sys-apps/mlocate
+sys-apps/portage
+sys-apps/portage::gentoo
 sys-apps/shadow
 sys-apps/systemd
 sys-auth/polkit

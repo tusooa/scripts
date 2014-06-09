@@ -70,3 +70,6 @@ x11-themes/light-themes gtk3
 # required by @selected
 # required by @world (argument)
 >=virtual/mysql-5.5 embedded
+#app-arch/p7zip -kde
+#>=media-gfx/exiv2-0.24 xmp
+#>=dev-java/swt-3.7.2-r1:3.7 cairo
