@@ -1,6 +1,6 @@
 (mapc 'require
       '(ibuffer redo fvwm-mode cmake-mode php-mode highlight-tail ;gentoo-syntax
-                linum tramp haskell-mode colorize))
+                linum tramp haskell-mode colorize rainbow-delimiters))
 
 ; linum
 (global-linum-mode t)
@@ -27,3 +27,11 @@
 ;(workgroups-mode 100)
 
 (global-colorize-mode t);例如#6cf这样的文字，显示对应的颜色。
+;rainbow
+; 把括号都给加上颜色
+; https://github.com/luochen1990/rainbow (vim)
+; https://duckduckgo.com/?q=Parentheses%20color+site%3Aemacswiki.org
+; http://www.emacswiki.org/emacs/RainbowDelimiters
+(global-rainbow-delimiters-mode)
+; 彩虹之色，见custom.el
+; 由于本身有九个，所以我添加了浅绿和暗紫。
