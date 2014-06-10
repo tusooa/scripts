@@ -538,7 +538,7 @@ Used by jit-lock for dynamic highlighting."
     (let ((depth (rainbow-delimiters-depth start)))
       (while (and (< (point) end)
                   (re-search-forward rainbow-delimiters-delim-regex end t))
-        ;(backward-char) ; re-search-forward places point after delim; go back.
+        (backward-char) ; re-search-forward places point after delim; go back.
         (unless (rainbow-delimiters-char-ineligible-p (point))
           (let ((delim (match-string-no-properties 0))
                 (beg (match-beginning 0))
@@ -549,9 +549,10 @@ Used by jit-lock for dynamic highlighting."
                   ((match-in-list delim rainbow-delimiters-delim-end)
                    (rainbow-delimiters-apply-color depth beg end)
                    (setq depth (or (and (<= depth 0) 0) ; unmatched paren
-                                   (1- depth)))))))))))
+                                   (1- depth)))))))
+        (forward-char)))))
         ;; move past delimiter so re-search-forward doesn't pick it up again
-        ;(forward-char)
+        ;
 
 (defun rainbow-delimiters-unpropertize-region (start end)
   "Remove highlighting from delimiters between START and END."
