@@ -425,7 +425,7 @@ not really affect the buffer's content."
              (unless ,modified
                (restore-buffer-modified-p nil))))))))
 
-(defsubst rainbow-delimiters-propertize-delimiter (loc depth)
+(defsubst rainbow-delimiters-propertize-delimiter (beg end depth)
   "Highlight a single delimiter at LOC according to DEPTH.
 
 LOC is the location of the character to add text properties to.
@@ -439,15 +439,15 @@ Sets text properties:
                           'rainbow-delimiters-unmatched-face
                         (rainbow-delimiters-depth-face depth))))
       ;; (when (eq depth -1) (message "Unmatched delimiter at char %s." loc))
-      (add-text-properties loc (1+ loc)
+      (add-text-properties beg end
                            `(font-lock-face ,delim-face
                              rear-nonsticky t)))))
 
 
-(defsubst rainbow-delimiters-unpropertize-delimiter (loc)
+(defsubst rainbow-delimiters-unpropertize-delimiter (beg end)
   "Remove text properties set by rainbow-delimiters mode from char at LOC."
   (with-silent-modifications
-    (remove-text-properties loc (1+ loc)
+    (remove-text-properties beg end
                             '(font-lock-face nil
                               rear-nonsticky nil))))
 
@@ -489,7 +489,7 @@ Returns t if char at loc meets one of the following conditions:
           (funcall rainbow-delimiters-escaped-char-predicate loc)))))
 
 
-(defsubst rainbow-delimiters-apply-color (delim depth loc)
+(defsubst rainbow-delimiters-apply-color (depth beg end)
   "Apply color for DEPTH to DELIM at LOC following user settings.
 
 DELIM is a string specifying delimiter type.
@@ -497,17 +497,33 @@ DEPTH is the delimiter depth, or corresponding face # if colors are repeating.
 LOC is location of character (delimiter) to be colorized."
   (and
    ;; Ensure user has enabled highlighting of this delimiter type.
-   (symbol-value (intern-soft
-                  (concat "rainbow-delimiters-highlight-" delim "s-p")))
-   (rainbow-delimiters-propertize-delimiter loc
-                                            depth)))
+   ;(symbol-value (intern-soft
+   ;               (concat "rainbow-delimiters-highlight-" delim "s-p")))
+   (rainbow-delimiters-propertize-delimiter beg end depth)))
 
 
 ;;; JIT-Lock functionality
 
 ;; Used to skip delimiter-by-delimiter `rainbow-delimiters-propertize-region'.
-(defconst rainbow-delimiters-delim-regex "\\(\(\\|\)\\|\\[\\|\\]\\|\{\\|\}\\)"
-  "Regex matching all opening and closing delimiters the mode highlights.")
+;(defconst rainbow-delimiters-delim-regex "\\(\(\\|\)\\|\\[\\|\\]\\|\{\\|\}\\)"
+;  "Regex matching all opening and closing delimiters the mode highlights.")
+(defvar rainbow-delimiters-delim-start '("(" "\\[" "{" "（"))
+(defvar rainbow-delimiters-delim-end '(")" "\\]" "}" "）"))
+(defvar rainbow-delimiters-alist
+  '((html-mode
+     ("<[^>]+[^/]>")
+     ("</[^>]+>"))
+    (default
+      ("(" "\\[" "{" "（")
+      (")" "\\]" "}" "）")))) ; different delimiters for different modes
+(defvar rainbow-delimiters-delim-regex "")
+(setq rainbow-delimiters-delim-regex
+      (concat
+       "\\("
+       (mapconcat #'(lambda (v) v) rainbow-delimiters-delim-start "\\|")
+       "\\|"
+       (mapconcat #'(lambda (v) v) rainbow-delimiters-delim-end "\\|")
+       "\\)"));"\\(\(\\|\)\\|\\[\\|\\]\\|\{\\|\}\\|（\\|）\\)")
 
 ;; main function called by jit-lock:
 (defsubst rainbow-delimiters-propertize-region (start end)
@@ -522,32 +538,20 @@ Used by jit-lock for dynamic highlighting."
     (let ((depth (rainbow-delimiters-depth start)))
       (while (and (< (point) end)
                   (re-search-forward rainbow-delimiters-delim-regex end t))
-        (backward-char) ; re-search-forward places point after delim; go back.
+        ;(backward-char) ; re-search-forward places point after delim; go back.
         (unless (rainbow-delimiters-char-ineligible-p (point))
-          (let ((delim (char-after (point))))
-            (cond ((eq ?\( delim)       ; (
+          (let ((delim (match-string-no-properties 0))
+                (beg (match-beginning 0))
+                (end (match-end 0)))
+            (cond ((match-in-list delim rainbow-delimiters-delim-start)
                    (setq depth (1+ depth))
-                   (rainbow-delimiters-apply-color "paren" depth (point)))
-                  ((eq ?\) delim)       ; )
-                   (rainbow-delimiters-apply-color "paren" depth (point))
+                   (rainbow-delimiters-apply-color depth beg end))
+                  ((match-in-list delim rainbow-delimiters-delim-end)
+                   (rainbow-delimiters-apply-color depth beg end)
                    (setq depth (or (and (<= depth 0) 0) ; unmatched paren
-                                   (1- depth))))
-                  ((eq ?\[ delim)       ; [
-                   (setq depth (1+ depth))
-                   (rainbow-delimiters-apply-color "bracket" depth (point)))
-                  ((eq ?\] delim)       ; ]
-                   (rainbow-delimiters-apply-color "bracket" depth (point))
-                   (setq depth (or (and (<= depth 0) 0) ; unmatched bracket
-                                   (1- depth))))
-                  ((eq ?\{ delim)       ; {
-                   (setq depth (1+ depth))
-                   (rainbow-delimiters-apply-color "brace" depth (point)))
-                  ((eq ?\} delim)       ; }
-                   (rainbow-delimiters-apply-color "brace" depth (point))
-                   (setq depth (or (and (<= depth 0) 0) ; unmatched brace
-                                   (1- depth)))))))
+                                   (1- depth)))))))))))
         ;; move past delimiter so re-search-forward doesn't pick it up again
-        (forward-char)))))
+        ;(forward-char)
 
 (defun rainbow-delimiters-unpropertize-region (start end)
   "Remove highlighting from delimiters between START and END."
@@ -556,7 +560,7 @@ Used by jit-lock for dynamic highlighting."
     (while (and (< (point) end)
                 (re-search-forward rainbow-delimiters-delim-regex end t))
       ;; re-search-forward places point 1 further than the delim matched:
-      (rainbow-delimiters-unpropertize-delimiter (1- (point))))))
+      (rainbow-delimiters-unpropertize-delimiter (match-beginning 0) (match-end 0)))))
 
 
 ;;; Minor mode:
