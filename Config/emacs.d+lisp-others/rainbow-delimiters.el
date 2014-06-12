@@ -370,23 +370,49 @@ major-mode. The syntax table is constructed by the function
 ;; syntax-table: used with syntax-ppss for determining current depth.
 (defun rainbow-delimiters-make-syntax-table (syntax-table)
   "Inherit SYNTAX-TABLE and add delimiters intended to be highlighted by mode."
-  (let ((table (copy-syntax-table syntax-table)))
-    (modify-syntax-entry ?\( "()  " table)
-    (modify-syntax-entry ?\) ")(  " table)
-    (modify-syntax-entry ?\[ "(]" table)
-    (modify-syntax-entry ?\] ")[" table)
-    (modify-syntax-entry ?\{ "(}" table)
-    (modify-syntax-entry ?\} "){" table)
+  (let ((table (copy-syntax-table syntax-table))
+        (s (rainbow-delimiters-delim-start))
+        (e (rainbow-delimiters-delim-end))
+        (n 0))
+    (while (< n (length s))
+      (let ((this-s (nth n s))
+            (this-e (nth n e)))
+        (modify-syntax-entry
+         (string-to-char this-s)
+         (concat "(" this-e)
+         table)
+        (modify-syntax-entry
+         (string-to-char this-e)
+         (concat ")" this-s)
+         table))
+      (setq n (1+ n)))
+;    (modify-syntax-entry ?\( "()  " table)
+;    (modify-syntax-entry ?\) ")(  " table)
+;    (modify-syntax-entry ?\[ "(]" table)
+;    (modify-syntax-entry ?\] ")[" table)
+;    (modify-syntax-entry ?\{ "(}" table)
+;    (modify-syntax-entry ?\} "){" table))
     table))
 
 (defsubst rainbow-delimiters-depth (loc)
   "Return # of nested levels of parens, brackets, braces LOC is inside of."
-  (let ((depth
+  ;(save-excursion
+    (let ((depth; 0))
          (with-syntax-table rainbow-delimiters-syntax-table
            (car (rainbow-delimiters-syntax-ppss loc)))))
+;    (goto-char (point-min))
+;    (while (re-search-forward (rainbow-delimiters-delim-regex) loc t)
+;      (backward-char) ; re-search-forward places point after delim; go back.
+;      (unless (rainbow-delimiters-char-ineligible-p (point))
+;        (let ((delim (match-string-no-properties 0)))
+;            (cond ((match-in-list delim (rainbow-delimiters-delim-start))
+;                   (setq depth (1+ depth));(message (concat "depth: " depth delim))
+;                  ((match-in-list delim (rainbow-delimiters-delim-end))
+;                   (setq depth (1- depth))
+;        (forward-char)))
     (if (>= depth 0)
         depth
-      0))) ; ignore negative depths created by unmatched closing parens.
+      0)));))))) ; ignore negative depths created by unmatched closing parens.
 
 
 ;;; Text properties
@@ -507,22 +533,41 @@ LOC is location of character (delimiter) to be colorized."
 ;; Used to skip delimiter-by-delimiter `rainbow-delimiters-propertize-region'.
 ;(defconst rainbow-delimiters-delim-regex "\\(\(\\|\)\\|\\[\\|\\]\\|\{\\|\}\\)"
 ;  "Regex matching all opening and closing delimiters the mode highlights.")
-(defvar rainbow-delimiters-delim-start '("(" "\\[" "{" "（"))
-(defvar rainbow-delimiters-delim-end '(")" "\\]" "}" "）"))
-(defvar rainbow-delimiters-alist
-  '((html-mode
-     ("<[^>]+[^/]>")
-     ("</[^>]+>"))
-    (default
-      ("(" "\\[" "{" "（")
-      (")" "\\]" "}" "）")))) ; different delimiters for different modes
-(defvar rainbow-delimiters-delim-regex "")
-(setq rainbow-delimiters-delim-regex
+;(defvar rainbow-delimiters-delim-start '("(" "\\[" "{" "（"))
+;(defvar rainbow-delimiters-delim-end '(")" "\\]" "}" "）"))
+(defun rainbow-delimiters-delim-start ()
+  (let ((p1 (or (cdr (assoc major-mode rainbow-delimiters-alist))
+               (cdr (assoc 'default rainbow-delimiters-alist))))
+        (p2 (cdr (assoc 'all rainbow-delimiters-alist))))
+    (concatenate 'list (car p1) (car p2))
+    ))
+(defun rainbow-delimiters-delim-end ()
+  (let ((p1 (or (cdr (assoc major-mode rainbow-delimiters-alist))
+               (cdr (assoc 'default rainbow-delimiters-alist))))
+        (p2 (cdr (assoc 'all rainbow-delimiters-alist))))
+    (concatenate 'list (cdr p1) (cdr p2))
+    ))
+(defun match-in-list (arg list)
+ (assoc-string arg list))
+(defvar rainbow-delimiters-alist '())
+(setq rainbow-delimiters-alist
+  '(;(html-mode .
+    ;           (("<[A-Za-z0-9]\\([^>]*[^/>]\\|\\)>") .
+    ;            ("</[^>]+>"))) ; will not work, because of the syntax table
+    ;                             does not allow multi-chars delimiters
+    (perl-mode .
+               (("(" "{") .
+                (")" "}")))
+    (all .
+        (("(" "[" "{") .
+         (")" "]" "}"))))) ; different delimiters for different modes
+;(defvar rainbow-delimiters-delim-regex "")
+(defun rainbow-delimiters-delim-regex ()
       (concat
        "\\("
-       (mapconcat #'(lambda (v) v) rainbow-delimiters-delim-start "\\|")
+       (regexp-opt (rainbow-delimiters-delim-start));(mapconcat #'(lambda (v) v) (rainbow-delimiters-delim-start) "\\|")
        "\\|"
-       (mapconcat #'(lambda (v) v) rainbow-delimiters-delim-end "\\|")
+       (regexp-opt (rainbow-delimiters-delim-end));(mapconcat #'(lambda (v) v) (rainbow-delimiters-delim-end) "\\|")
        "\\)"));"\\(\(\\|\)\\|\\[\\|\\]\\|\{\\|\}\\|（\\|）\\)")
 
 ;; main function called by jit-lock:
@@ -537,19 +582,21 @@ Used by jit-lock for dynamic highlighting."
     ;; START can be anywhere in buffer; determine the nesting depth at START loc
     (let ((depth (rainbow-delimiters-depth start)))
       (while (and (< (point) end)
-                  (re-search-forward rainbow-delimiters-delim-regex end t))
+                  (re-search-forward (rainbow-delimiters-delim-regex) end t))
         (backward-char) ; re-search-forward places point after delim; go back.
         (unless (rainbow-delimiters-char-ineligible-p (point))
           (let ((delim (match-string-no-properties 0))
                 (beg (match-beginning 0))
                 (end (match-end 0)))
-            (cond ((match-in-list delim rainbow-delimiters-delim-start)
-                   (setq depth (1+ depth))
+            (cond ((match-in-list delim (rainbow-delimiters-delim-start))
+                   (setq depth (1+ depth));(message (concat "depth: " depth delim))
                    (rainbow-delimiters-apply-color depth beg end))
-                  ((match-in-list delim rainbow-delimiters-delim-end)
+                  ((match-in-list delim (rainbow-delimiters-delim-end))
                    (rainbow-delimiters-apply-color depth beg end)
                    (setq depth (or (and (<= depth 0) 0) ; unmatched paren
-                                   (1- depth)))))))
+                                   (1- depth)))
+                   ;(message (concat "depth end: " depth delim))
+                   ))))
         (forward-char)))))
         ;; move past delimiter so re-search-forward doesn't pick it up again
         ;
@@ -559,7 +606,7 @@ Used by jit-lock for dynamic highlighting."
   (save-excursion
     (goto-char start)
     (while (and (< (point) end)
-                (re-search-forward rainbow-delimiters-delim-regex end t))
+                (re-search-forward (rainbow-delimiters-delim-regex) end t))
       ;; re-search-forward places point 1 further than the delim matched:
       (rainbow-delimiters-unpropertize-delimiter (match-beginning 0) (match-end 0)))))
 

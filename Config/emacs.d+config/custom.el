@@ -16,7 +16,8 @@
  '(max-specpdl-size 3000)
  '(org-agenda-files (quote ("~/Private/todo.org")))
  '(org-startup-truncated nil)
- '(pop3-connection-type (quote ssl)))
+ '(pop3-connection-type (quote ssl))
+ '(rainbow-identifiers-face-count 10))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -38,4 +39,15 @@
  '(rainbow-delimiters-depth-7-face ((t (:foreground "blue" :weight bold))))
  '(rainbow-delimiters-depth-8-face ((t (:foreground "magenta" :weight bold))))
  '(rainbow-delimiters-depth-9-face ((t (:foreground "dark violet" :weight bold))))
- '(rainbow-delimiters-unmatched-face ((t (:background "red" :foreground "gray100" :weight bold)))))
+ '(rainbow-delimiters-unmatched-face ((t (:background "red" :foreground "gray100" :weight bold))))
+ '(rainbow-identifiers-identifier-1 ((t (:foreground "#c98286"))))
+ '(rainbow-identifiers-identifier-2 ((t (:foreground "#c58764"))))
+ '(rainbow-identifiers-identifier-3 ((t (:foreground "#ad924b"))))
+ '(rainbow-identifiers-identifier-4 ((t (:foreground "#8d9c55"))))
+ '(rainbow-identifiers-identifier-5 ((t (:foreground "#5ca386"))))
+ '(rainbow-identifiers-identifier-6 ((t (:foreground "#49a3a2"))))
+ '(rainbow-identifiers-identifier-7 ((t (:foreground "#529ebd"))))
+ '(rainbow-identifiers-identifier-8 ((t (:foreground "#8095c6"))))
+ '(rainbow-identifiers-identifier-9 ((t (:foreground "#a88abd"))))
+ '(rainbow-identifiers-identifier-10 ((t (:foreground "#c183a0"))))
+ '(show-paren-match ((t (:background "#6cf" :foreground "#eeeeee")))))

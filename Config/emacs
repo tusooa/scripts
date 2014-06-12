@@ -1,5 +1,11 @@
-(add-to-list 'load-path "~/.emacs.d/load/")
-(add-to-list 'load-path "~/.emacs.d/el-get/el-get/")
-(add-to-list 'load-path "~/.emacs.d/lisp-others/")
+; -*- emacs-lisp -*-
+(defun add-to-load-path (files)
+  (mapc (lambda (f)
+          (if (listp f)
+              (add-to-load-path f)
+            (and (file-directory-p f)
+                 (add-to-list 'load-path f))))
+        files))
+(add-to-load-path '("~/.emacs.d/load/" "~/.emacs.d/lisp-others/"))
 (mapc 'load (directory-files "~/.emacs.d/config/" t "^[a-zA-Z0-9].*.el$"))
 
