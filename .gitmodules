@@ -1,0 +1,3 @@
+[submodule "Config/emacs.d+lisp-others/rainbow-identifiers"]
+	path = Config/emacs.d+lisp-others/rainbow-identifiers
+	url = /home/tusooa/.emacs.d/lisp-others/rainbow-identifiers
