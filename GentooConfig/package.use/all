@@ -73,3 +73,8 @@ x11-themes/light-themes gtk3
 #app-arch/p7zip -kde
 #>=media-gfx/exiv2-0.24 xmp
 #>=dev-java/swt-3.7.2-r1:3.7 cairo
+=media-video/ffmpeg-2.2.3-r1 threads
+>=media-gfx/exiv2-0.24 xmp
+>=dev-java/swt-3.7.2-r1:3.7 cairo
+#>=virtual/libgudev-208 static-libs
+#=sys-apps/systemd-214 gudev

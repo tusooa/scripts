@@ -31,3 +31,4 @@
 >=app-i18n/fcitx-9999
 =app-text/dos2unix-6.0.5
 =app-text/dos2unix-6.0.4
+=sys-fs/eudev-1.5.3-r1

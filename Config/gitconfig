@@ -16,3 +16,4 @@
     s = status
     a = !git.perl
     clog = log --color --graph --pretty=graph --abbrev-commit --
+	d = diff
