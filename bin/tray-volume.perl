@@ -5,6 +5,7 @@ use Gtk2 qw/-init/;
 use Scripts::scriptFunctions;
 use utf8;
 use Encode;
+no if $] >= 5.018, warnings => "experimental";
 my $conf = conf 'tray-volume.perl';
 my $vol= $conf->get ('control') // 'Master';
 my $left = $conf->get ('left') // 1;
@@ -17,7 +18,7 @@ my $rightTop = 100*$right;
 my $top = $left ? $leftTop : $rightTop;
 
 my @pixbuf;
-my $iconDir = decode_utf8 $pathConf->get ('iconDir');
+my $iconDir = $pathConf->get ('iconDir');
 for (0..4)
 {
     $pixbuf[$_] = Gtk2::Gdk::Pixbuf->new_from_file ("${iconDir}sound/$_.png");
@@ -64,7 +65,7 @@ sub setIcon
     #my @stat = getStat;
     #print chooseIcon;
     $icon->set_from_pixbuf ($pixbuf[chooseIcon @volume]);
-    $icon->set_tooltip (decode_utf8 ($volume[0] ? (($left?$volume[1]:$volume[2])*$top/100).'%' : '靜音'));
+    $icon->set_tooltip (($volume[0] ? (($left?$volume[1]:$volume[2])*$top/100).'%' : 'Silent'));
 }
 sub click
 {
