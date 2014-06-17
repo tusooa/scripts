@@ -11,22 +11,23 @@ $configDir $cacheDir $dataDir
 $accountDir $scriptsDir $libDir
 $verbose verbose $debug debug
 conf $pathConf $defg $scriptName
-multiArgs time2date final
+multiArgs time2date final ln
 /;
 
+my $home = $^O eq 'MSWin32' ? "C:\\Users\\tusooa" : $ENV{HOME};
 our $scriptName= basename $0;
 our $verbose   = 0;
 our $debug     = 0;
-my $xdgConf   = $ENV{XDG_CONFIG_HOME} ? "$ENV{XDG_CONFIG_HOME}/" : "$ENV{HOME}/.config/";
+my $xdgConf   = $ENV{XDG_CONFIG_HOME} ? "$ENV{XDG_CONFIG_HOME}/" : "$home/.config/";
 our $configDir = "${xdgConf}Scripts/";
-my $xdgCache  = $ENV{XDG_CACHE_HOME} ? "$ENV{XDG_CACHE_HOME}/" : "$ENV{HOME}/.cache/";
+my $xdgCache  = $ENV{XDG_CACHE_HOME} ? "$ENV{XDG_CACHE_HOME}/" : "$home/.cache/";
 our $cacheDir  = "${xdgCache}Scripts/";
 
 our $pathConf = Scripts::Configure->new($configDir.'scriptpath', '/dev/null');
 
-our $appsDir   = $pathConf->get ($defg, 'appsDir') // "$ENV{HOME}/应用/";
+our $appsDir   = $pathConf->get ($defg, 'appsDir') // "$home/应用/";
 our $dataDir   = $pathConf->get ($defg, 'dataDir') // "${appsDir}数据/";
-our $accountDir= $pathConf->get ($defg, 'accountDir')// "$ENV{HOME}/个人/账号/";
+our $accountDir= $pathConf->get ($defg, 'accountDir')// "$home/个人/账号/";
 our $scriptsDir= $pathConf->get ($defg, 'scriptsDir') // "${appsDir}脚本/";
 our $libDir    = $pathConf->get ($defg, 'libDir') // "${appsDir}库/脚本/";
 our $defConfDir= $pathConf->get ($defg, 'defConfDir') // "${appsDir}默认配置/";
@@ -63,6 +64,19 @@ sub conf
     $file = $file // $scriptName;
     my $conf = Scripts::Configure->new ($configDir.$file, $defConfDir.$file);
     $conf;
+}
+
+sub ln
+{
+    if ($^O eq 'MSWin32') {
+        my ($target, $name) = @_; # use windows-style path
+        $target =~ s</><\\>g;
+        $name =~ s</><\\>g;
+        system 'mklink', $name, $target;
+    } else {
+        my ($target, $name) = @_;
+        symlink $target, $name;
+    }
 }
 
 sub final
