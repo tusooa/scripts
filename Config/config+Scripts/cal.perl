@@ -13,8 +13,8 @@ regular = #f9fa04
 #holiday = #c93344
 ##11374f
 [Fonts]
-regular = DejaVu Sans YuanTi
-monospace = Ubuntu Mono
+regular = Microsoft YaHei
+monospace = Microsoft YaHei
 size = 16
 [Language]
 chinese = 1
