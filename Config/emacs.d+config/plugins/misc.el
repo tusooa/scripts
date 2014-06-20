@@ -1,6 +1,6 @@
 (mapc 'require
       '(ibuffer redo fvwm-mode cmake-mode php-mode highlight-tail ;gentoo-syntax
-                linum tramp haskell-mode colorize rainbow-identifiers rainbow-delimiters))
+                linum tramp colorize rainbow-identifiers rainbow-delimiters))
 
 ; linum
 (global-linum-mode t)

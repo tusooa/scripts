@@ -3,7 +3,6 @@ use Exporter;
 use Scripts::Configure qw/$defg/;
 use 5.012;
 use File::Basename qw/basename/;
-use Encode qw/encode decode/;
 our $VERSION = 0.1;
 our @ISA = qw/Exporter/;
 our @EXPORT_OK = qw/$appsDir/;
@@ -14,7 +13,7 @@ $verbose verbose $debug debug
 conf $pathConf $defg $scriptName
 multiArgs time2date final ln term
 /;
-
+use if $^O eq 'MSWin32', "Scripts::WindowsSupport";
 my $home = $^O eq 'MSWin32' ? "C:\\Users\\tusooa" : $ENV{HOME};
 our $scriptName= basename $0;
 our $verbose   = 0;
@@ -70,10 +69,7 @@ sub conf
 sub ln
 {
     if ($^O eq 'MSWin32') {
-        my ($target, $name) = @_; # use windows-style path
-        $target =~ s</><\\>g;
-        $name =~ s</><\\>g;
-        system 'mklink', $name, $target;
+        $winFunc{ln}->(@_);
     } else {
         my ($target, $name) = @_;
         symlink $target, $name;
@@ -82,15 +78,10 @@ sub ln
 
 sub term #蛋痛的euc-cn <=> utf-8 转换。只有闻道死才需要。操。
 {
-    my $str = join '', @_;
     if ($^O eq 'MSWin32') {
-        my $ret;
-        eval { $ret = encode 'euc-cn', decode 'utf-8', $str };
-        eval { $ret = encode 'euc-cn', $str } if $@;
-        die "error: $@, @_" if $@;
-        $ret;
+        $winFunc{term}->(@_);
     } else {
-        $str;
+        join '', @_;
     }
 }
 

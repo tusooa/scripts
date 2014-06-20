@@ -1,3 +1,4 @@
+(when (not (eq system-type 'windows-nt)) ; 暂时在闻道死下不支持emms
 (add-to-list 'load-path "~/.emacs.d/lisp-others/emms/lisp")
 (mapc 'require 
       '(emms emms-playlist-mode emms-setup
@@ -33,4 +34,5 @@
          (list (kbd "C-c C-m x") 'emms-stop)
          (list (kbd "C-c C-m a") 'emms-add-file)
         )
+)
 )
