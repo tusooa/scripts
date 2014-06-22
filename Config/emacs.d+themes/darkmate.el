@@ -86,7 +86,7 @@ Created by wwliu <wenstream@gmail.com>, 2009-02-09."
      (underline ((t (:underline t))))
      (toolbar ((t (nil))))
      (setnu-line-number-face ((t (:background "Grey15" :foreground "#555753" :bold t))))
-     (show-paren-match-face ((t (:background "#bb66ff" :foreground "#eeeeee" :bold t))))
+     (show-paren-match-face ((t (:background "#6cf" :foreground "#eeeeee" :bold t))))
 
 ; for terminal-emulator "term"
      (term-default-bg ((t (nil))))

@@ -9,7 +9,7 @@ use Scripts::scriptFunctions;
 my $m;
 eval { $m = WWW::Mechanize::Firefox->new };
 if ($@) {
-    say 'Firefox is not started, starting now...';
+    say term 'Firefox is not started, starting now...';
     system 'firefox -repl & sleep 2';
     $m = WWW::Mechanize::Firefox->new;
 }
@@ -17,11 +17,11 @@ if ($@) {
 #system '';
 $m->get ('http://baozou.com/login');
 if ($m->uri eq 'http://baozou.com/login') {
-    say "正在登录...";
+    say term "正在登录...";
     my $button = $m->xpath ('//button', one => 1);
     $m->click ($button);
     $m->content;
     final;
 } else {
-    say "已经登录过了";
+    say term "已经登录过了";
 }

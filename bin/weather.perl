@@ -26,7 +26,7 @@ GetOptions (
     'help' => \$help,
 );
 if ($help) {
-    say
+    say term
 q{Usage: weather.perl [options]
 Options:
     -c, --conky                       print conky format
@@ -44,7 +44,7 @@ Default:
 #print $reload;
 my $oldUri;
 my $logf = "${cacheDir}weather";
-if (open REC, '<', $logf) {
+if (open REC, '<', term $logf) {
     @_ = <REC>;
     chomp ($oldUri = shift @_);
     close REC;
@@ -85,11 +85,11 @@ if ($_) {
     @_ = split "\n", $_;
     @_ = grep { !/^\s*$/ } @_;
 } else {
-    @_ or die "无网页,无log.退出.\n";
-    warn "无网页,使用本地log.\n";
+    @_ or die term "无网页,无log.退出.\n";
+    warn term "无网页,使用本地log.\n";
 }
 
-open REC,'>', $logf or die "Cannot open $logf: $!\n";
+open REC, '>', term $logf or die term "Cannot open $logf: $!\n";
 say REC $uri;
 for (@_) {
     s/^.\t//;#重读入的情况时，去掉原始的标记。
@@ -118,10 +118,10 @@ sub printFunc
         if ($conky) {
             s/°C\t.*/°C/g; s/20..-//g; s/^>\t/\${color1}/; s/^\ \t/\${color}/; s/^-\t/\${color3}/; s/\t(?=\d)/\${alignr}/;s/C\t.+$/C/;
         } else {
-            s/^>/\e[1;33m/;s/^ /\e[0m/;s/^-/\e[32m/;
+            s/^>/\e[1;33m/;s/^ /\e[0m/;s/^-/\e[0;32m/;
         }
         s/(\d)-/$1,/g;#s/ , / - /;
-        print;
+        print term $_;
 
 =comment
         my ($start, $date, $weather, $temp, $wind) = split /\t/;
