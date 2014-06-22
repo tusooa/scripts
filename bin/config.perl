@@ -2,6 +2,7 @@
 
 use Scripts::scriptFunctions;
 use 5.012;
+no if $] >= 5.018, warnings => "experimental";
 
 my $groupColor = "\e[1;32m";
 my $entryColor = "\e[1;36m";

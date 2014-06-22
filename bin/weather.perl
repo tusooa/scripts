@@ -118,7 +118,7 @@ sub printFunc
         if ($conky) {
             s/°C\t.*/°C/g; s/20..-//g; s/^>\t/\${color1}/; s/^\ \t/\${color}/; s/^-\t/\${color3}/; s/\t(?=\d)/\${alignr}/;s/C\t.+$/C/;
         } else {
-            s/^>/\e[1;33m/;s/^ /\e[0m/;s/^-/\e[32m/;
+            s/^>/\e[1;33m/;s/^ /\e[0m/;s/^-/\e[0;32m/;
         }
         s/(\d)-/$1,/g;#s/ , / - /;
         print;

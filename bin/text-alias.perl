@@ -3,6 +3,7 @@
 use Scripts::scriptFunctions;
 use Getopt::Long qw/:config gnu_getopt/;
 use 5.014;#才能使用s///r
+no if $] >= 5.018, warnings => "experimental";
 
 my $fh;
 my $file;
