@@ -551,7 +551,7 @@ LOC is location of character (delimiter) to be colorized."
  (assoc-string arg list))
 (defvar rainbow-delimiters-alist '())
 (setq rainbow-delimiters-alist
-  '(;(html-mode .
+  '((html-mode . (("<") . (">")))
     ;           (("<[A-Za-z0-9]\\([^>]*[^/>]\\|\\)>") .
     ;            ("</[^>]+>"))) ; will not work, because of the syntax table
     ;                             does not allow multi-chars delimiters

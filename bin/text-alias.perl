@@ -3,34 +3,39 @@
 use Scripts::scriptFunctions;
 use Getopt::Long qw/:config gnu_getopt/;
 use 5.014;#才能使用s///r
-
+no if $] >= 5.018, warnings => "experimental";
+my $debug = 0;
 my $fh;
 my $file;
 my $help;
+#say for @ARGV;die;
 GetOptions
   (
    'o|output-file=s' => \$file,
    'c|stdout' => sub { $file = '' },
+   'd|debug' => \$debug,
    'help' => \$help,
   );
 
 if ($help) {
-    print
+    print term
 qq{text-alias.perl [opts] file1 [file2 ...]
 -o, --output-file='' set output file instead of stdout
 -c, --stdout         print to stdout
 --help               what you are reading now
 };
+    exit;
 }
 if ($file) {
-    open $fh, '>', $file;
+    open $fh, '>', term $file;
 } else {
     $fh = 'STDOUT';
 }
 my @aliasName;
 my @aliasReplace;
 my %vars;
-
+say qq{@ARGV} if $debug;
+#@ARGV = map { term $_ } @ARGV;
 LINE:
 while (<>) {
     chomp;
@@ -46,12 +51,14 @@ while (<>) {
             my $args = $str =~ s/\Q$command\E\s+//r;
             for ($command) {
                 when ('alias') {
+                    say 'alias' if $debug;
                     my $name = (split /=/, $args)[0];
                     push @aliasName, $name;
                     push @aliasReplace, $args =~ s/\Q${name}\E=//r;
                     #say "$name, $aliases{$name}";
                 }
                 when ('block') {
+                    say 'block' if $debug;
                     push @aliasName, $args;
                     my $block;
                     while (<>) {
@@ -62,14 +69,22 @@ while (<>) {
                     chomp $block;
                     push @aliasReplace, $block;
                 }
-                push @ARGV, $args when 'layout';
-                push @ARGV, eval $args when 'eval-layout';
+                when ('layout') {
+                    say 'layout' if $debug;
+                    push @ARGV, term $args;
+                }
+                when ('eval-layout') {
+                    say 'eval-layout' if $debug;
+                    push @ARGV, term eval $args;
+                }
                 when ('eval-alias') {
+                    say 'eval-alias' if $debug;
                     my $name = (split /=/, $args)[0];
                     push @aliasName, $name;#say eval $args =~ s/\Q${name}\E=//r;
                     push @aliasReplace, eval $args =~ s/\Q${name}\E=//r;
                 }
                 when ('def-var') {
+                    say 'def-var' if $debug;
                     my $name = (split /=/, $args)[0];
                     $vars{$name} = eval $args =~ s/\Q${name}\E=//r;
                 }
@@ -78,7 +93,7 @@ while (<>) {
         }
         next LINE when /^#/;
         default {
-            #say 'simple';
+            say 'simple' if $debug;
             # 注意！因为这个奇葩的特性，前边定义的alias，可以使用后边的alias，而反过来就不能。
             for my $num (0..$#aliasName)
             {
@@ -86,8 +101,9 @@ while (<>) {
                 #say "DEBUG=>$aliasName[$num],$aliasReplace[$num],line= $_";
                 s(\Q$aliasName[$num]\E)($aliasReplace[$num])g;
             }
-            s/{{{(.+?)}}}/eval $1/ge;#再次注意！如果使用了layout，这里的某些变量，可能会和预期的不一样。比如，$ARGV
-            $fh->say ($_);
+            # 不要尝试在 {{{ }}} 块里做一些奇怪的事情哟。
+            s/{{{(.+?)}}}/eval $1/ges;#再次注意！如果使用了layout，这里的某些变量，可能会和预期的不一样。比如，$ARGV
+            $fh->say (-t $fh ? term $_ : $_);
         }
     }
 }

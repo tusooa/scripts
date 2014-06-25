@@ -19,8 +19,9 @@
 ;; font
 (set-frame-font "Ubuntu Mono-13")
 (set-fontset-font (frame-parameter nil 'font)
-                  'han "DejaVu Sans YuanTi Mono"
-)
+                  'han (if (eq system-type 'windows-nt)
+                           "Microsoft YaHei" ; 在闻道死底下，DejaVu Sans YuanTi 显示很不好。
+                         "DejaVu Sans YuanTi Mono"))
 (setq
  ;;禁用启动画面
  inhibit-startup-message t
@@ -80,6 +81,7 @@
  user-mail-address "tusooa@vista.aero"
  browse-url-generic-program "/usr/bin/firefox"
  browse-url-browser-function 'browse-url-generic
+ default-buffer-file-coding-system 'utf-8-unix
 )
 (if (eq system-type 'windows-nt)
     (setq browse-url-generic-program "C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe"))
@@ -108,4 +110,13 @@
 ;(add-to-list 'interpreter-mode-alist '("perl" . cperl-mode))
 ;(add-to-list 'interpreter-mode-alist '("perl5" . cperl-mode))
 ;(add-to-list 'interpreter-mode-alist '("miniperl" . cperl-mode))
+; 强制使用Unix 行尾
+(defun no-junk-please-were-unixish ()
+  (let ((coding-str (symbol-name buffer-file-coding-system)))
+    (when (string-match "-\\(?:dos\\|mac\\)$" coding-str)
+      (setq coding-str
+            (concat (substring coding-str 0 (match-beginning 0)) "-unix"))
+      (message "CODING: %s" coding-str)
+      (set-buffer-file-coding-system (intern coding-str)) )))
 
+(add-hook 'find-file-hooks 'no-junk-please-were-unixish)

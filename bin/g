@@ -12,6 +12,7 @@ use Scripts::EnvConf;
 use utf8;
 use Encode qw/_utf8_on _utf8_off/;
 no if $] >= 5.018, warnings => "experimental";
+
 my (@files, @regex);
 my $help = 0;
 my $showVersion = 0;

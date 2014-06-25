@@ -103,5 +103,4 @@ $pathConf = conf 'scriptpath'; #不加这，cairo-w就会出错。
 #if ($0 eq 'scriptFunctions.pm') {
 #    main;
 #}
-
 1;
