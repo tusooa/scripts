@@ -18,4 +18,5 @@
     clog = log --color --graph --pretty=graph --abbrev-commit --
     d = diff
 [core]
-    eol = lf
+    autocrlf = false
+    safecrlf = false
