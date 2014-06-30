@@ -466,8 +466,9 @@ Sets text properties:
                         (rainbow-delimiters-depth-face depth))))
       ;; (when (eq depth -1) (message "Unmatched delimiter at char %s." loc))
       (add-text-properties beg end
-                           `(font-lock-face ,delim-face
-                             rear-nonsticky t)))))
+                           `(rear-nonsticky t font-lock-face ,delim-face)))))
+;      (put-text-property beg end
+;                         'rear-nonsticky t))))
 
 
 (defsubst rainbow-delimiters-unpropertize-delimiter (beg end)

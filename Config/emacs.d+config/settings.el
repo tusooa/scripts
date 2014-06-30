@@ -90,7 +90,7 @@
         ("~/.fvwm/\\(config\\|f\\..+\\)" . fvwm-mode)
         ("\\.fvwm\\'" . fvwm-mode)
 ;        ("/home/tusooa/\\(应用\\|Apps\\)/\\(源码\\|Source-Code\\)/GitHub/tusooa/Apps/Config/\\.fvwm\\+c.+" . fvwm-mode)
-        ("\\.\\(perl\\|p6\\|pm6\\)\\'" . cperl-mode)
+        ("\\.\\(perl\\|p6\\|pm6\\)\\'" . perl-mode)
         ("~/\\.config/Scripts/" . conf-unix-mode)
         ("/home/tusooa/GitHub/Apps/Config/Scripts/" . conf-unix-mode)
         ("/home/tusooa/GitHub/Apps/DefaultConfig/" . conf-unix-mode)
@@ -106,7 +106,7 @@
         ("\\..*rc\\'" . conf-space-mode)
       )
 ) ;/mapc
-(fset 'perl-mode 'cperl-mode)
+;(fset 'perl-mode 'cperl-mode)
 ;(add-to-list 'interpreter-mode-alist '("perl" . cperl-mode))
 ;(add-to-list 'interpreter-mode-alist '("perl5" . cperl-mode))
 ;(add-to-list 'interpreter-mode-alist '("miniperl" . cperl-mode))
