@@ -3,6 +3,7 @@ use Exporter;
 use Scripts::Configure qw/$defg/;
 use 5.012;
 use File::Basename qw/basename/;
+no if $] >= 5.018, warnings => "experimental";
 our $VERSION = 0.1;
 our @ISA = qw/Exporter/;
 our @EXPORT_OK = qw/$appsDir/;
@@ -12,8 +13,9 @@ $accountDir $scriptsDir $libDir
 $verbose verbose $debug debug
 conf $pathConf $defg $scriptName
 multiArgs time2date final ln term
+debug
 /;
-use if $^O eq 'MSWin32', "Scripts::WindowsSupport";
+use Scripts::WindowsSupport;
 my $home = $^O eq 'MSWin32' ? "C:\\Users\\tusooa" : $ENV{HOME};
 our $scriptName= basename $0;
 our $verbose   = 0;
@@ -31,7 +33,7 @@ our $accountDir= $pathConf->get ($defg, 'accountDir')// "$home/个人/账号/";
 our $scriptsDir= $pathConf->get ($defg, 'scriptsDir') // "${appsDir}脚本/";
 our $libDir    = $pathConf->get ($defg, 'libDir') // "${appsDir}库/脚本/";
 our $defConfDir= $pathConf->get ($defg, 'defConfDir') // "${appsDir}默认配置/";
-
+our $debug = 0;
 sub time2date
 {
     my @t = @_ ? @_ : localtime;
@@ -89,6 +91,21 @@ sub final
 {
     say term "完成!开始我们的战争(Date)吧---";
 }
+
+sub debug
+{
+    if ($debug) {
+        for (ref (my $s = shift)) {
+            when ('CODE') {
+                $s->(@_);
+            }
+            default {
+                say term $s;
+            }
+        }
+    }
+}
+
 $pathConf = conf 'scriptpath'; #不加这，cairo-w就会出错。
 #原因是之前没有指明默认配置在哪里
 

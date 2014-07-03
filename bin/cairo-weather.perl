@@ -6,9 +6,12 @@ use Gtk2;
 use Scripts::scriptFunctions;
 use 5.012;
 
+sub drawpng;
+sub drawtxt;
+sub drawframe;
+
 my $cfg = conf 'weather';
 #use Data::Dumper;print Dumper $cfg;exit;
-
 my $logf = "${cacheDir}weather";
 my $icondir = $pathConf->get ('iconDir').'天气/';
 #say $icondir;
@@ -30,8 +33,8 @@ my $shadow = $cfg->get ('show-shadow') // 1;
 # 不更新或许是path的问题.
 system "${scriptsDir}weather.perl", '-q';
 $_ = `xwininfo -root`;
-/Width:\s*\K\d+/;
-my $scrennw = $& // 1366; #不是在X之下的，怎么办?
+/Width:\s*\K(\d+)/;
+my $scrennw = $1 // 1366; #不是在X之下的，怎么办?
 my $hpos = $scrennw*0.25;
 chdir $icondir;
 -f "00.png" or die "can not fetch picture file.\n";
@@ -42,7 +45,7 @@ chdir $icondir;
 #say $size;
 my $size = $cfg->get ('size') // 90;
 open REC, '<', $logf or die "Cannot open $logf: $!\n";
-@_=<REC>; close REC;
+@_=<REC>; close REC;#say @_;
 my $surface = Cairo::ImageSurface->create ('argb32',($size*2)*$max+20,$size*4);
 my $fsize = $cfg->get ('font-size') // ($size / 5);
 my $origPicSize = 128;
@@ -56,61 +59,7 @@ my $year= (split '-', $today)[0];
 my $x0=$align;
 my $y0=$align;
 my $color;
-# functions
-sub drawpng
-{
-    my $img = Cairo::ImageSurface->create_from_png ($_[0]); 
-    my $cr = Cairo::Context->create ($surface);
-    #my $pattern = Cairo::SurfacePattern->create ($img);
-    #my $resize = Cairo::Matrix->init(0.5,0.5,0.5,0.5,$_[1], $_[2]);
-    #$resize->scale($origPicSize/$psize, $origPicSize/$psize);
-    #$resize->translate($_[1],$_[2]);
-    #$pattern->set_matrix($resize);
-    #my $resized = Cairo::ImageSurface->create_for_data($img->get_data, $img->get_format, $psize, $psize, $img->get_stride);
-    #$pattern->move_to($_[1], $_[2]);
-    #$cr->set_source($pattern);
-    #say "$_[1] $_[2]";
-    #$cr->move_to($_[1], $_[2]);
-    $cr->set_source_surface($img,$_[1],$_[2]);
-    $cr->scale($psize/$origPicSize,$psize/$origPicSize);
-    $cr->paint;
-}
 
-sub drawtxt
-{
-    my $cr = Cairo::Context->create ($surface);
-    my $pango_layout = Gtk2::Pango::Cairo::create_layout ($cr);
-    my $fontSize = $_[4];
-    my $font_desc = Gtk2::Pango::FontDescription->from_string("$font $fontSize"); 
-    $pango_layout->set_font_description($font_desc); 
-    $pango_layout->set_markup (decode("utf-8", "$_[0]"));
-    my ($r,$g,$b,$a)=split ',',$_[3];
-    $cr->set_source_rgba($r/256,$g/256,$b/256,$a/256);	#缺省白色字体
-    $cr->move_to($_[1],$_[2]);
-    Gtk2::Pango::Cairo::show_layout ($cr, $pango_layout); 
-    $cr->show_page;
-}
-
-sub drawframe
-{
-    my ($x,$r,$c)=@_;
-    my ($R,$G,$B,$A)=split ',',$c;
-    my $w=$w0;
-    my $h=3.7*$size;
-    my $cr = Cairo::Context->create ($surface);
-#$PI=3.1415926/180;
-    $cr->move_to($x+$r,0);
-    $cr->rel_line_to($w-2*$r,0);
-    $cr->rel_curve_to(0,0,$r,0,$r,$r);
-    $cr->rel_line_to(0,$h-2*$r);
-    $cr->rel_curve_to(0,0,0,$r,-$r,$r);
-    $cr->rel_line_to(-($w-2*$r),0);
-    $cr->rel_curve_to(0,0,-$r,0,-$r,-$r);
-    $cr->rel_line_to(0,-($h-2*$r));
-    $cr->rel_curve_to(0,0,0,-$r,$r,-$r);
-    $cr->set_source_rgba($R/256,$G/256,$B/256,$A/256); $cr->fill;
-}
-# /functions
 for (@_)
 {
     next if ! /$today/ && ! $is;
@@ -193,8 +142,62 @@ for (@_)
 #drawstamp($week[$tweek],$size,$size*2.5,5);
 #drawstamp($year." ", $w0*$max/2, $size*3.5,1.8,-0.2);
 $surface->write_to_png ($outputfile);
+final;
 #---------------------------------
 #`$ENV{HOME}/bin/conky/weather-log2txt.pl`;
 #`habak $bgfile -mp 360,60 -hi $outputfile`;
 #---------------------------------
+# functions
+sub drawpng
+{
+    my $img = Cairo::ImageSurface->create_from_png ($_[0]); 
+    my $cr = Cairo::Context->create ($surface);
+    #my $pattern = Cairo::SurfacePattern->create ($img);
+    #my $resize = Cairo::Matrix->init(0.5,0.5,0.5,0.5,$_[1], $_[2]);
+    #$resize->scale($origPicSize/$psize, $origPicSize/$psize);
+    #$resize->translate($_[1],$_[2]);
+    #$pattern->set_matrix($resize);
+    #my $resized = Cairo::ImageSurface->create_for_data($img->get_data, $img->get_format, $psize, $psize, $img->get_stride);
+    #$pattern->move_to($_[1], $_[2]);
+    #$cr->set_source($pattern);
+    #say "$_[1] $_[2]";
+    #$cr->move_to($_[1], $_[2]);
+    $cr->set_source_surface($img,$_[1],$_[2]);
+    $cr->scale($psize/$origPicSize,$psize/$origPicSize);
+    $cr->paint;
+}
 
+sub drawtxt
+{
+    my $cr = Cairo::Context->create ($surface);
+    my $pango_layout = Gtk2::Pango::Cairo::create_layout ($cr);
+    my $fontSize = $_[4];
+    my $font_desc = Gtk2::Pango::FontDescription->from_string("$font $fontSize"); 
+    $pango_layout->set_font_description($font_desc); 
+    $pango_layout->set_markup (decode("utf-8", "$_[0]"));
+    my ($r,$g,$b,$a)=split ',',$_[3];
+    $cr->set_source_rgba($r/256,$g/256,$b/256,$a/256);	#缺省白色字体
+    $cr->move_to($_[1],$_[2]);
+    Gtk2::Pango::Cairo::show_layout ($cr, $pango_layout); 
+    $cr->show_page;
+}
+
+sub drawframe
+{
+    my ($x,$r,$c)=@_;
+    my ($R,$G,$B,$A)=split ',',$c;
+    my $w=$w0;
+    my $h=3.7*$size;
+    my $cr = Cairo::Context->create ($surface);
+#$PI=3.1415926/180;
+    $cr->move_to($x+$r,0);
+    $cr->rel_line_to($w-2*$r,0);
+    $cr->rel_curve_to(0,0,$r,0,$r,$r);
+    $cr->rel_line_to(0,$h-2*$r);
+    $cr->rel_curve_to(0,0,0,$r,-$r,$r);
+    $cr->rel_line_to(-($w-2*$r),0);
+    $cr->rel_curve_to(0,0,-$r,0,-$r,-$r);
+    $cr->rel_line_to(0,-($h-2*$r));
+    $cr->rel_curve_to(0,0,0,-$r,$r,-$r);
+    $cr->set_source_rgba($R/256,$G/256,$B/256,$A/256); $cr->fill;
+}
