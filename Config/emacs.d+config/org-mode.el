@@ -1,22 +1,36 @@
 ; Org-mode
 (require 'org)
-(defun org-config ()
-  (setq
-   org-hide-leading-stars t
-   org-log-done 'time
-  ) ;/setq
-  (setKey 'global-set-key
-          (list
-           (list "\C-ca" 'org-agenda)
-          ) ;/list--is arg of setKey
-  ) ;/setKey
-  (define-skeleton 1forbidden
-    "文字里的禁止事项.黑色背景"
-    ""
-    "\n#+BEGIN_HTML\n<span style='background-color: #000'>\n"
-    _
-    "</span>\n#+END_HTML"
-  )
-  (define-abbrev org-mode-abbrev-table "iforbidden" "" '1forbidden)
-)
-(org-config)
+(setq
+ org-hide-leading-stars t
+ org-log-done 'time)
+(setKey 'global-set-key
+        (list
+         (list "\C-ca" 'org-agenda)))
+
+;(define-skeleton 1forbidden
+;  ""
+;  "\n#+BEGIN_HTML\n<span style='background-color: #000'>\n"
+;  _
+;  "</span>\n#+END_HTML")
+;(define-abbrev org-mode-abbrev-table "iforbidden" "" '1forbidden)
+(defun insert-time-string (append)
+  (insert (format-time-string "%Y,%-m,%-d (%u) %H,%M,%S" (current-time))
+          " " append "\n"))
+(defun date-start ()
+  (interactive)
+  (insert-time-string "始"))
+(defun date-end ()
+  (interactive)
+  (insert-time-string "止"))
+(defun date-now ()
+  (interactive)
+  (insert-time-string "此"))
+(defun thistusooa-org-mode-hook ()
+  (setKey 'local-set-key
+          `((,(kbd "C-c C-s") date-start)
+            (,(kbd "C-c C-e") date-end)
+            (,(kbd "C-c C-n") date-now)))
+  (abbrev-mode t))
+
+(add-hook 'org-mode-hook 'thistusooa-org-mode-hook)
+

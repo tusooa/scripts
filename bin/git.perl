@@ -8,19 +8,18 @@ use POSIX qw/strftime/;
 #chdir $config->get ('gitDir');
 $ENV{LC_ALL} = 'C';#git变成中文的了,倒不好作了
 my @status = `git status`;
-if ($status[-1] =~ /nothing (added )?to commit/)
-{
+my $git = $^O eq 'MSWin32' ? 'F:\\Programs\\Git\\bin\\git.exe' : 'git';
+if ($status[-1] =~ /nothing (added )?to commit/) {
     say '本地无更新，自动获取远程更新。';
-    system 'git', 'pull';
+    system $git, 'pull';
     final;
     exit;
 }
 @status = grep /:\s+(?!$)/, @status;
-if (@status)
-{
+if (@status) {
     print "文件:\n@status";
     my $rows = (split /\s/, `stty size`)[0];
-    my @diff = grep /\d+m[-+]/, `git diff`;
+    my @diff = grep /\d+m[-+]/, `$git diff`;
     if (@diff < $rows) {
         print "差异:\n @diff";
     } else {
@@ -38,9 +37,9 @@ if (@status)
         $_ = strftime '%Y,%-m,%-d (%u) %H,%M,%S', localtime;
     }
     say "提交注释为 $_ 的更新。";
-    system 'git', 'c', '-m', $_; # git c -> git commit -a
+    system $git, 'c', '-m', $_; # git c -> git commit -a
     #system 'git', 'pull';
-    system 'git', 'p';#use git p instead of git push
+    system $git, 'p';#use git p instead of git push
     #git p -> git push origin master
     final;
 }

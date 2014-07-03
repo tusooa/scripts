@@ -3,7 +3,7 @@
 use Scripts::scriptFunctions;
 use 5.012;
 use LWP::Simple qw/get/;
-use Encode qw/encode_utf8/;
+use Encode qw/encode_utf8 _utf8_on _utf8_off/;
 use Date::Parse qw/str2time/;
 use Getopt::Long qw/:config gnu_getopt/;
 
@@ -15,7 +15,7 @@ my $reload = 'DEFAULT';
 my $quiet = 0;
 my $conky = -t STDOUT ? 0 : 1;
 my $help = 0;
-
+my $showCity = 0;
 GetOptions (
     'c|conky' => \$conky,
     't|term' => sub { $conky = 0 },
@@ -24,9 +24,10 @@ GetOptions (
     'F|noforce|noreload' => sub { $reload = 0; },
     'q|quiet' => \$quiet,
     'help' => \$help,
+    'C|city' => \$showCity,
 );
 if ($help) {
-    say
+    say term
 q{Usage: weather.perl [options]
 Options:
     -c, --conky                       print conky format
@@ -43,10 +44,12 @@ Default:
 }
 #print $reload;
 my $oldUri;
+my $city;
 my $logf = "${cacheDir}weather";
-if (open REC, '<', $logf) {
+if (open REC, '<', term $logf) {
     @_ = <REC>;
     chomp ($oldUri = shift @_);
+    chomp ($city = shift @_);
     close REC;
 }
 
@@ -62,7 +65,9 @@ if ($reload eq 'DEFAULT') {
 #              sub { s/°C\t.*/°C/g; s/20..-//g; s/^>\t/\${color1}/; s/^\ \t/\${color}/; s/^-\t/\${color3}/; s/\t(?=\d)/\${alignr}/;s/C\t.+$/C/; };
 #    sub { s/^>\s+/\${color3}/;s/^ \s+//;s/^-\s+/\${color2}/;
 #          s/\}\d{4}-/}/;my @weather = split /\t/;$_ = $weather[0].'${tab 60 0}'.$weather[1].'${alignr}'.$weather[2]."\n"; } ;
-
+if ($showCity) {
+    say term $city;
+}
 
 if (!$reload) {
     #是今天取得的现成数据。直接输出。
@@ -77,6 +82,9 @@ if (!$reload) {
 $_ = get $uri;
 if ($_) {
     $_ = encode_utf8 $_;#print;
+    #_utf8_on $_;
+    #print term $_;
+    /"(.+)天气预报"/ and $city = $1;#die term $city;
     s/.*?(?=\d{4}-\d)//s;s/\n.*//s; #去掉头尾无用信息。
     s{<br/><br/><b>}/\n/g;s{<br/><br/>}{}g; s{<br/>}/\t/g; s{</b>}//g; s/<b>//g;
     s/C/°C/g;#s/℃/°C/g;
@@ -85,12 +93,13 @@ if ($_) {
     @_ = split "\n", $_;
     @_ = grep { !/^\s*$/ } @_;
 } else {
-    @_ or die "无网页,无log.退出.\n";
-    warn "无网页,使用本地log.\n";
+    @_ or die term "无网页,无log.退出.\n";
+    warn term "无网页,使用本地log.\n";
 }
 
-open REC,'>', $logf or die "Cannot open $logf: $!\n";
+open REC, '>', term $logf or die term "Cannot open $logf: $!\n";
 say REC $uri;
+say REC $city;
 for (@_) {
     s/^.\t//;#重读入的情况时，去掉原始的标记。
     next if /^\s*$/;
@@ -121,7 +130,7 @@ sub printFunc
             s/^>/\e[1;33m/;s/^ /\e[0m/;s/^-/\e[0;32m/;
         }
         s/(\d)-/$1,/g;#s/ , / - /;
-        print;
+        print term $_;
 
 =comment
         my ($start, $date, $weather, $temp, $wind) = split /\t/;

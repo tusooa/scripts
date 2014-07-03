@@ -1,7 +1,7 @@
 # -*- conf-unix -*-
 [user]
-	name = ThisTusooa
-	email = tusooa@vista.aero
+    name = ThisTusooa
+    email = tusooa@vista.aero
     signingkey = tusooa@gmail.com
 [color]
     ui = always
@@ -16,4 +16,7 @@
     s = status
     a = !git.perl
     clog = log --color --graph --pretty=graph --abbrev-commit --
-	d = diff
+    d = diff
+[core]
+    autocrlf = false
+    safecrlf = false

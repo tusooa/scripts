@@ -466,8 +466,9 @@ Sets text properties:
                         (rainbow-delimiters-depth-face depth))))
       ;; (when (eq depth -1) (message "Unmatched delimiter at char %s." loc))
       (add-text-properties beg end
-                           `(font-lock-face ,delim-face
-                             rear-nonsticky t)))))
+                           `(rear-nonsticky t font-lock-face ,delim-face)))))
+;      (put-text-property beg end
+;                         'rear-nonsticky t))))
 
 
 (defsubst rainbow-delimiters-unpropertize-delimiter (beg end)
@@ -551,7 +552,7 @@ LOC is location of character (delimiter) to be colorized."
  (assoc-string arg list))
 (defvar rainbow-delimiters-alist '())
 (setq rainbow-delimiters-alist
-  '(;(html-mode .
+  '((html-mode . (("<") . (">")))
     ;           (("<[A-Za-z0-9]\\([^>]*[^/>]\\|\\)>") .
     ;            ("</[^>]+>"))) ; will not work, because of the syntax table
     ;                             does not allow multi-chars delimiters

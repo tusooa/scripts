@@ -31,7 +31,7 @@ my $shadow = $cfg->get ('show-shadow') // 1;
 system "${scriptsDir}weather.perl", '-q';
 $_ = `xwininfo -root`;
 /Width:\s*\K\d+/;
-my $scrennw = $&;
+my $scrennw = $& // 1366; #不是在X之下的，怎么办?
 my $hpos = $scrennw*0.25;
 chdir $icondir;
 -f "00.png" or die "can not fetch picture file.\n";
