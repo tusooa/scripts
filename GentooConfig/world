@@ -79,6 +79,8 @@ dev-util/strace
 dev-vcs/git
 games-misc/cowsay
 games-roguelike/nethack
+gnome-base/gnome
+gnome-extra/gnome-tweak-tool
 gnome-extra/nm-applet
 gnome-extra/zenity
 kde-base/dolphin
