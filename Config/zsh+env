@@ -37,16 +37,6 @@ export G_COLORS='fn=1;33:ln=1;32'
 [[ -x $(whence -cp src-hilite-lesspipe.sh 2>/dev/null) ]] && export LESSOPEN="| src-hilite-lesspipe.sh %s"
 [ -x /usr/share/source-highlight/src-hilite-lesspipe.sh ] && export LESSOPEN="| /usr/share/source-highlight/src-hilite-lesspipe.sh %s" || :
 
-# Ctrl+@ 设置标记，标记和光标点之间为 region
-colors=(red green yellow blue magenta cyan)
-num=$[$RANDOM % ${#colors}]
-color=${colors[(num-1) % ${#colors} +2]}
-zle_highlight=(
-    region:bg=magenta
-    special:bold,fg=magenta # 特殊
-    isearch:underline # ???
-    default:bold,fg=$color # 输入
-)
 
 # Perl Brew
 

@@ -1,3 +1,4 @@
+# -*- shell-script -*-
 #color{{{
 autoload colors 
 colors

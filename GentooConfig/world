@@ -23,6 +23,7 @@ app-emacs/emms
 app-emacs/haskell-mode
 app-emulation/aqemu
 app-emulation/qemu
+app-emulation/wine
 app-i18n/fbterm
 app-i18n/fcitx
 app-i18n/fcitx-configtool
@@ -34,6 +35,7 @@ app-misc/calendar
 app-misc/devtodo
 app-misc/mtail
 app-misc/screen
+app-misc/tmux
 app-office/libreoffice-bin
 app-portage/eix
 app-portage/gentoolkit
