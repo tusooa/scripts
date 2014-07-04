@@ -19,7 +19,7 @@ menu2ctrl.bash &
 fcitx &
 stardict &
 #xcompmgr -CF &
-urxvt -e env TERM=rxvt-unicode screen &
+urxvt -e tmux &
 tray-volume.perl &
 (waitForNetwork.perl && cairo-wallpaper.perl )&
 #plasma-desktop

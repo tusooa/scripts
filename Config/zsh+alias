@@ -63,10 +63,10 @@ alias run-help >&/dev/null && unalias run-help
 autoload run-help
 
 # Screen Aliases
-if [ "$TERM" = screen ] ; then
-    alias mutt='screen -t email mutt'
+#if [ "$TERM" = screen ] ; then
+#    alias mutt='screen -t email mutt'
 #    alias irssi='screen -t chat Irssi-Alias'
-fi
+#fi
 
 #进入相应的路径时只要 cd ~xxx
 hash -d dw="$HOME/Download"
