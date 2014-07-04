@@ -5,21 +5,26 @@ use 5.012;
 use Scripts::scriptFunctions;
 use Cairo;
 use warnings;
+use Getopt::Long;
+GetOptions ('d|debug' => \$Scripts::scriptFunctions::debug);
+my $conf = conf 'wallpaper';
+my $bg = $conf->get ('background') // "$home/.fvwm/desktop.png";
+my %extra = %{ $conf->{extra} };
+debug sub { use Data::Dumper; print Dumper %extra; };
+my $surface = Cairo::ImageSurface->create_from_png ($bg);
+my $output = $conf->get ('output') // "${cacheDir}wallpaper/1.png";
+my @habak = (q/habak/, q/-mp/, q/0,0/, $bg);
+for (keys %extra) {
+    system $conf->get ('extra', $_, 'command');
+    my $this = Cairo::ImageSurface->create_from_png ($_);
+    my $context = Cairo::Context->create ($surface);
+    my $pos = $conf->get ('extra', $_, 'position');
+    $context->set_source_surface ($this, split /\s*,\s*/, $pos);
+    $context->paint;
+    push @habak, '-mp', $pos, $_;
+}
 
-system "${scriptsDir}cal.perl", '-p';
-system "${scriptsDir}cairo-weather.perl", '-f';
-my $home = $^O eq 'MSWin32' ? 'C:\\Users\\tusooa' : $ENV{HOME};
-my $weather = Cairo::ImageSurface->create_from_png ("${cacheDir}weather.png");
-my $calendar = Cairo::ImageSurface->create_from_png ("${cacheDir}cal.png");
-my $surface = Cairo::ImageSurface->create_from_png ("$home/.fvwm/desktop.png");
-#print $surface->write_to_png ("${cacheDir}wallpaper/1.png");
-#__END__
-my $context = Cairo::Context->create ($surface);
-$context->set_source_surface ($weather, 100, 400);
-$context->paint;
-#print $surface->write_to_png ("${cacheDir}wallpaper/1.png");
-$context = Cairo::Context->create ($surface);
-$context->set_source_surface ($calendar, 700, 30);
-$context->paint;
-$surface->write_to_png ("${cacheDir}wallpaper/1.png");
-system 'habak', '-mp','0,0', "$home/.fvwm/desktop.png", '-mp', '100,400', "${cacheDir}weather.png", '-mp', '700,30', "${cacheDir}cal.png";
+$surface->write_to_png ($output);
+debug join ' ', @habak;
+system @habak;
+final;

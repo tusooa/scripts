@@ -7,16 +7,15 @@ no if $] >= 5.018, warnings => "experimental";
 our $VERSION = 0.1;
 our @ISA = qw/Exporter/;
 our @EXPORT_OK = qw/$appsDir/;
-our @EXPORT = qw/
+our @EXPORT = qw/$home
 $configDir $cacheDir $dataDir
 $accountDir $scriptsDir $libDir
 $verbose verbose $debug debug
 conf $pathConf $defg $scriptName
 multiArgs time2date final ln term
-debug
 /;
 use Scripts::WindowsSupport;
-my $home = $^O eq 'MSWin32' ? "C:\\Users\\tusooa" : $ENV{HOME};
+our $home = $^O eq 'MSWin32' ? "C:\\Users\\tusooa" : $ENV{HOME};
 our $scriptName= basename $0;
 our $verbose   = 0;
 our $debug     = 0;
@@ -33,7 +32,6 @@ our $accountDir= $pathConf->get ($defg, 'accountDir')// "$home/个人/账号/";
 our $scriptsDir= $pathConf->get ($defg, 'scriptsDir') // "${appsDir}脚本/";
 our $libDir    = $pathConf->get ($defg, 'libDir') // "${appsDir}库/脚本/";
 our $defConfDir= $pathConf->get ($defg, 'defConfDir') // "${appsDir}默认配置/";
-our $debug = 0;
 sub time2date
 {
     my @t = @_ ? @_ : localtime;

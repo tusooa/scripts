@@ -150,6 +150,8 @@ sys-apps/portage
 sys-apps/portage::gentoo
 sys-apps/shadow
 sys-apps/systemd
+sys-auth/fingerprint-gui
+sys-auth/fprintd
 sys-auth/polkit
 sys-block/gparted
 sys-boot/grub
@@ -182,6 +184,7 @@ x11-misc/xbindkeys
 x11-misc/xcompmgr
 x11-misc/xdotool
 x11-misc/xlockmore
+x11-misc/xscreensaver
 x11-misc/xsel
 x11-terms/rxvt-unicode
 x11-terms/xterm

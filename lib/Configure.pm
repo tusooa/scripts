@@ -211,5 +211,18 @@ sub runHooks
         system $confhash->{Hooks}->{$hookName}->{$_};
     }
 }
-
+=comment
+sub forEachGroup
+{
+    my $group = shift;
+    my $s = shift;
+    if (ref $s ne 'CODE') {
+        say STDERR term 'forEachGroup ($group, $s[, ...]): $s is not a code ref, doing nothing---';
+        return undef;
+    }
+    for (keys %{ $conf->{$group} }) {
+        $s->(@_);
+    }
+}
+=cut
 1;

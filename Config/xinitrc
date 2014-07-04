@@ -1,4 +1,3 @@
-# ~/.xinitrc
 # -*- shell-script -*-
 
 # Jump to X11 env
@@ -12,7 +11,7 @@ export QT_IM_MODULE=fcitx GTK_IM_MODULE=fcitx
 export PATH="$HOME/Apps/bin:$HOME/Install/perl6/bin:$HOME/Install/perl6/languages/perl6/site/bin:$PATH"
 xrdb ~/.Xresource
 #exec /usr/bin/fvwm
-#exec ck-launch-session /usr/bin/fvwm
-#export KDEWM=fvwm
 exec /usr/bin/startkde
 #exec /usr/bin/mate-session
+#exec /usr/bin/gnome-session -a "$HOME/.config/autostart/"
+

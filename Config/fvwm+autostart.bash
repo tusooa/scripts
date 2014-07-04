@@ -18,7 +18,7 @@ menu2ctrl.bash &
 罗技鼠标-m525.bash &
 fcitx &
 stardict &
-xcompmgr -CF &
+#xcompmgr -CF &
 urxvt -e env TERM=rxvt-unicode screen &
 tray-volume.perl &
 (waitForNetwork.perl && cairo-wallpaper.perl )&
