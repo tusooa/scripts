@@ -108,9 +108,11 @@ media-gfx/feh
 media-gfx/fontforge
 media-gfx/gimp
 media-gfx/scrot
+media-libs/mutagen
 media-plugins/alsa-plugins
 media-sound/alsa-utils
 media-sound/amarok
+media-sound/moc
 media-sound/pulseaudio
 media-sound/timidity++
 media-video/gnome-mplayer
@@ -119,6 +121,7 @@ media-video/smplayer
 net-dns/bind-tools
 net-ftp/filezilla
 net-im/skype
+net-im/wineqq
 net-mail/getmail
 net-misc/axel
 net-misc/dhcpcd

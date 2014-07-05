@@ -20,9 +20,9 @@ my @args;
 
 my $pictureDir = $pathConf->get ('picDir');
 #"/usr/bin/import $args \"${Pictures}${file}\""
-system 'import', @args, "$pictureDir$file";
-
-system 'notice-msg', "截图完成，文件名: $pictureDir$file";
+#system 'import', @args, "$pictureDir$file";
+system 'ksnapshot', '--region';
+#system 'notice-msg', "截图完成，文件名: $pictureDir$file";
 
 sub help ()
 {

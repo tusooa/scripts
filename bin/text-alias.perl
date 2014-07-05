@@ -5,6 +5,8 @@ use Getopt::Long qw/:config gnu_getopt/;
 use 5.014;#才能使用s///r
 no if $] >= 5.018, warnings => "experimental";
 
+sub parseFile;
+sub output;
 my $debug = 0;
 my $fh;
 my $file;
@@ -36,79 +38,94 @@ my @aliasName;
 my @aliasReplace;
 my %vars;
 say qq{@ARGV} if $debug;
+my @text;
 #@ARGV = map { term $_ } @ARGV;
+parseFile shift;
+output for @text;
+
+sub parseFile
+{
+    my $filename = shift;
+    open my $in, '<', $filename;
 LINE:
-while (<>) {
-    chomp;
-    #s/^\s+//;s/\s+$//;
-    #say;
-    #next if /^$/;
-    #my $new;
-    for ($_) {
-        when (/^(#==?>\s+)/) {
-            #say 'cmd';
-            my $str = s/$1//r;
-            my $command = (split /\s+/, $str)[0];
-            my $args = $str =~ s/\Q$command\E\s+//r;
-            for ($command) {
-                when ('alias') {
-                    say 'alias' if $debug;
-                    my $name = (split /=/, $args)[0];
-                    push @aliasName, $name;
-                    push @aliasReplace, $args =~ s/\Q${name}\E=//r;
-                    #say "$name, $aliases{$name}";
-                }
-                when ('block') {
-                    say 'block' if $debug;
-                    push @aliasName, $args;
-                    my $block;
-                    while (<>) {
-                        last if /^#==?>\s+end-block\s+\Q$args\E$/;
-                        next if /^#/;
-                        $block = $block.$_;
+    while (<$in>) {
+        chomp;
+        #s/^\s+//;s/\s+$//;
+        #say;
+        #next if /^$/;
+        #my $new;
+        for ($_) {
+            when (/^(#==?>\s+)/) {
+                #say 'cmd';
+                my $str = s/$1//r;
+                my $command = (split /\s+/, $str)[0];
+                my $args = $str =~ s/\Q$command\E\s+//r;
+                for ($command) {
+                    when ('alias') {
+                        say 'alias' if $debug;
+                        my $name = (split /=/, $args)[0];
+                        push @aliasName, $name;
+                        push @aliasReplace, $args =~ s/\Q${name}\E=//r;
+                        #say "$name, $aliases{$name}";
                     }
-                    chomp $block;
-                    push @aliasReplace, $block;
+                    when ('block') {
+                        say 'block' if $debug;
+                        push @aliasName, $args;
+                        my $block;
+                        while (<$in>) {
+                            last if /^#==?>\s+end-block\s+\Q$args\E$/;
+                            next if /^#/;
+                            $block = $block.$_;
+                        }
+                        chomp $block;
+                        push @aliasReplace, $block;
+                    }
+                    when ('layout') {
+                        say 'layout' if $debug;
+                        parseFile $args;
+                    }
+                    when ('eval-layout') {
+                        say 'eval-layout' if $debug;
+                        parseFile eval $args;
+                    }
+                    when ('eval-alias') {
+                        say 'eval-alias' if $debug;
+                        my $name = (split /=/, $args)[0];
+                        push @aliasName, $name;#say eval $args =~ s/\Q${name}\E=//r;
+                        push @aliasReplace, eval $args =~ s/\Q${name}\E=//r;
+                    }
+                    when ('def-var') {
+                        say 'def-var' if $debug;
+                        my $name = (split /=/, $args)[0];
+                        $vars{$name} = eval $args =~ s/\Q${name}\E=//r;
+                    }
                 }
-                when ('layout') {
-                    say 'layout' if $debug;
-                    push @ARGV, term $args;
-                }
-                when ('eval-layout') {
-                    say 'eval-layout' if $debug;
-                    push @ARGV, term eval $args;
-                }
-                when ('eval-alias') {
-                    say 'eval-alias' if $debug;
-                    my $name = (split /=/, $args)[0];
-                    push @aliasName, $name;#say eval $args =~ s/\Q${name}\E=//r;
-                    push @aliasReplace, eval $args =~ s/\Q${name}\E=//r;
-                }
-                when ('def-var') {
-                    say 'def-var' if $debug;
-                    my $name = (split /=/, $args)[0];
-                    $vars{$name} = eval $args =~ s/\Q${name}\E=//r;
-                }
+                next LINE;
             }
-            next LINE;
-        }
-        next LINE when /^#/;
-        default {
-            say 'simple' if $debug;
-            # 注意！因为这个奇葩的特性，前边定义的alias，可以使用后边的alias，而反过来就不能。
-            for my $num (0..$#aliasName)
-            {
-                #say $alias;
-                #say "DEBUG=>$aliasName[$num],$aliasReplace[$num],line= $_";
-                s(\Q$aliasName[$num]\E)($aliasReplace[$num])g;
+            next LINE when /^#/;
+            default {
+                    say 'simple' if $debug;
+                    push @text, $_;
             }
-            # 不要尝试在 {{{ }}} 块里做一些奇怪的事情哟。
-            s/{{{(.+?)}}}/eval $1/ges;#再次注意！如果使用了layout，这里的某些变量，可能会和预期的不一样。比如，$ARGV
-            $fh->say (-t $fh ? term $_ : $_);
         }
     }
+    close $in;
 }
 
+sub output
+{
+    #my $_ = shift;
+    # 注意！因为这个奇葩的特性，前边定义的alias，可以使用后边的alias，而反过来就不能。
+    for my $num (0..$#aliasName)
+    {
+        #say $alias;
+        #say "DEBUG=>$aliasName[$num],$aliasReplace[$num],line= $_";
+        s(\Q$aliasName[$num]\E)($aliasReplace[$num])g;
+    }
+    # 不要尝试在 {{{ }}} 块里做一些奇怪的事情哟。
+    s/{{{(.+?)}}}/eval $1/ges;#再次注意！如果使用了layout，这里的某些变量，可能会和预期的不一样。比如，$ARGV
+    $fh->say (-t $fh ? term $_ : $_);
+}
 =comment example
 # file-- layout
 #=> alias $this=FooBar

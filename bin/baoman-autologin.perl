@@ -6,6 +6,10 @@ use WWW::Mechanize::Firefox;
 #use utf8;
 #use Encode qw/_utf8_on _utf8_off/;
 use Scripts::scriptFunctions;
+
+my $net = "${scriptsDir}waitForNetwork.perl";
+system { $net } $net;
+
 my $m;
 eval { $m = WWW::Mechanize::Firefox->new };
 if ($@) {
