@@ -1,7 +1,6 @@
 package Scripts::Configure;
-require Exporter;
-
 use 5.012;
+use Exporter;
 
 our @ISA = qw/Exporter/;
 our @EXPORT_OK = qw//;
@@ -22,12 +21,7 @@ example:
 sub new
 {
     my $class = shift;
-    my $file = shift;
-    my $default = shift;
-    my $config = parseConf (
-        fn => $file,
-        defc => $default,
-    );
+    my $config = parseConf (@_);
     bless $config, $class;
 }
 #去除errors
@@ -38,15 +32,6 @@ args:
     fh  filehandle ``
     str string ``
     arr array(ref)
-    defc if file not found, use it
-returns:
-    @array = ($hashRef, $errors)
-example:
-    my ($conf, $errors) = Scripts::Configure::parseConf (
-    fn => "${configDir}weather",
-    defc => "${defConfDir}weather",
-    );
-=cut
 =filestyle configure
 [group1]
 var = val
@@ -56,93 +41,54 @@ var = val
 #my $debug = 1;
 sub parseConf
 {
-    my %args = (@_);
-    my @conf;
-    if ($args{fn})
-    {
-        my (@defconf, @userconf);
-        if (open my $fh, '<', $args{defc})
-        {
-            @defconf = <$fh>;
-            close $fh;
-        }
-        if (open my $fh, '<', $args{fn})
-        {
-            @userconf = <$fh>;
-            close $fh;
-        }
-        @conf = (@defconf, "[$defg]", @userconf); #默认分组。防止默认配置里原有分组，算到用户配置里去。
-    }
-    elsif ($args{fh})
-    {
-        my $fh = $args{fh};
-        @conf = <$fh>;
-    }
-    elsif ($args{str})
-    {
-        @conf = split "\n", $args{str};
-    }
-    elsif ($args{arr})
-    {
-        @conf = @{$args{arr}};
-    }
-    else
-    {
-        return undef;
-    }
-    #say @conf;
-    # parse @conf
+    #print @_;
+    #local @ARGV = reverse (shift, shift);
+    open my $user, '<', shift;
+    open my $default, '<', shift;
     my $ret = {};
-    my $l = -1;
-    my $group = $defg;
-    my $subg;
-    # 这样,在遍历每个group的时候,如果没有main,不会加进去.
-    #$ret->{$group} = {};
-    my $cfg;# = $ret->{$group};
-    #use Data::Dumper;print Dumper ($cfg), ref($cfg);
-    #say $#conf;
-    while ($l < $#conf)
-    {
-        $l++;
-        $_ = $conf[$l];
-        #say $l;
-        #say $_;
-        chomp;
-        s/^\s+//;s/\s+$//;
-        s/^#.+$//;
-        next if /^$/;
+    for my $fh ($default, $user) {
+        $fh or next;
+        my $group = $defg;
+        my $subg;
+        # 这样,在遍历每个group的时候,如果没有main,不会加进去.
+        #$ret->{$group} = {};
+        my $cfg;# = $ret->{$group};
+        #use Data::Dumper;print Dumper ($cfg), ref($cfg);
+        #say $#conf;
+        while (<$fh>) {
+            #say $l;
+            #say $_;
+            chomp;
+            s/^\s+//;s/\s+$//;
+            s/^#.+$//;
+            next if /^$/;
 #        while (s/\\$//) # 转行
 #        {
 #            say "'\\' found at EOL.";
 #            $l++;
 #            $_ .= $conf[$l];
 #        }
-        if (/^\[(.+?)\]:(.+)/) # config group
-        {
-            #say 'config group';
-            $group = $1;
-            $subg = $2;
-            $ret->{$group} or ($ret->{$group} = {});
-            $ret->{$group}{$subg} or ($ret->{$group}{$subg} = {});
-            $cfg = $ret->{$group}{$subg};
-        }
-        elsif (/^\[(.+?)\]/) # simple group
-        {
-            #say 'simple group: '.$1;
-            $group = $1;
-            $ret->{$group} or ($ret->{$group} = {});
-            $cfg = $ret->{$group};
-        }
-        elsif (/^(.+?)\s*=\s*(.+)/) # config
-        {
-            #say "config:$1 = $2";
-            #print Dumper ($ret), ref($cfg);
-            unless ($cfg)
-            {
+            if (/^\[(.+?)\]:(.+)/) { # config group
+                #say 'config group';
+                $group = $1;
+                $subg = $2;
+                $ret->{$group} or ($ret->{$group} = {});
+                $ret->{$group}{$subg} or ($ret->{$group}{$subg} = {});
+                $cfg = $ret->{$group}{$subg};
+            } elsif (/^\[(.+?)\]/) { # simple group
+                #say 'simple group: '.$1;
+                $group = $1;
                 $ret->{$group} or ($ret->{$group} = {});
                 $cfg = $ret->{$group};
+            } elsif (/^(.+?)\s*=\s*(.+)/) { # config
+                #say "config:$1 = $2";
+                #print Dumper ($ret), ref($cfg);
+                unless ($cfg) {
+                    $ret->{$group} or ($ret->{$group} = {});
+                    $cfg = $ret->{$group};
+                }
+                $cfg->{$1} = $2;# =~ s/\$\[([^\]]+)\]/get ($ret, split '::', $1)/ger;
             }
-            $cfg->{$1} = $2;
         }
     }
     #use Data::Dumper;
@@ -177,20 +123,13 @@ sub get
     #{
     #    $arg = pop @_;
     #}
-    if (@_ == 1)
-    {
+    if (@_ == 1) {
         return $confhash->{$defg}{$_[0]};
-    }
-    elsif (@_ == 2)
-    {
+    } elsif (@_ == 2) {
         return $confhash->{$_[0]}{$_[1]};
-    }
-    elsif (@_ == 3)
-    {
+    } elsif (@_ == 3) {
         return $confhash->{$_[0]}{$_[1]}{$_[2]};
-    }
-    else
-    {
+    } else {
         return undef;
     }
 #    $ret =~ s/(^|[^\\])\$([a-zA-Z0-9_])/$1$main::$2/g;
@@ -205,24 +144,10 @@ sub runHooks
     my $confhash = $self->hashref;
     ref $confhash->{Hooks} eq 'HASH' or return undef;
     ref $confhash->hashref->{Hooks}->{$hookName} eq 'HASH' or return undef;
-    for (keys %{ $confhash->{Hooks}->{$hookName} })
-    {
-        say "$hookName hook => $_";
+    for (keys %{ $confhash->{Hooks}->{$hookName} }) {
+        say term "$hookName hook => $_";
         system $confhash->{Hooks}->{$hookName}->{$_};
     }
 }
-=comment
-sub forEachGroup
-{
-    my $group = shift;
-    my $s = shift;
-    if (ref $s ne 'CODE') {
-        say STDERR term 'forEachGroup ($group, $s[, ...]): $s is not a code ref, doing nothing---';
-        return undef;
-    }
-    for (keys %{ $conf->{$group} }) {
-        $s->(@_);
-    }
-}
-=cut
+
 1;

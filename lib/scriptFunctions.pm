@@ -1,8 +1,8 @@
 package Scripts::scriptFunctions;
 use Exporter;
 use Scripts::Configure qw/$defg/;
-use 5.012;
-use File::Basename qw/basename/;
+use 5.014;
+use File::Basename qw/basename dirname/;
 no if $] >= 5.018, warnings => "experimental";
 our $VERSION = 0.1;
 our @ISA = qw/Exporter/;
@@ -15,6 +15,14 @@ conf $pathConf $defg $scriptName
 multiArgs time2date final ln term
 /;
 use Scripts::WindowsSupport;
+sub time2date;
+sub multiArgs;
+sub conf;
+sub ln;
+sub term;
+sub final;
+sub debug;
+
 our $home = $^O eq 'MSWin32' ? "C:\\Users\\tusooa" : $ENV{HOME};
 our $scriptName= basename $0;
 our $verbose   = 0;
@@ -23,15 +31,24 @@ my $xdgConf   = $ENV{XDG_CONFIG_HOME} ? "$ENV{XDG_CONFIG_HOME}/" : "$home/.confi
 our $configDir = "${xdgConf}Scripts/";
 my $xdgCache  = $ENV{XDG_CACHE_HOME} ? "$ENV{XDG_CACHE_HOME}/" : "$home/.cache/";
 our $cacheDir  = "${xdgCache}Scripts/";
-
-our $pathConf = Scripts::Configure->new($configDir.'scriptpath', '/dev/null');
-
-our $appsDir   = $pathConf->get ($defg, 'appsDir') // "$home/应用/";
-our $dataDir   = $pathConf->get ($defg, 'dataDir') // "${appsDir}数据/";
-our $accountDir= $pathConf->get ($defg, 'accountDir')// "$home/个人/账号/";
-our $scriptsDir= $pathConf->get ($defg, 'scriptsDir') // "${appsDir}脚本/";
-our $libDir    = $pathConf->get ($defg, 'libDir') // "${appsDir}库/脚本/";
-our $defConfDir= $pathConf->get ($defg, 'defConfDir') // "${appsDir}默认配置/";
+our $defConfDir = (dirname dirname $0) . '/default-cfg/';# 硬性编码
+#say $defConfDir;
+our $pathConf = conf 'scriptFunctions' // conf 'scriptpath';
+our $appsDir   = $pathConf->get ('appsDir') // "$home/应用/";
+our $dataDir   = $pathConf->get ('dataDir') // "${appsDir}数据/";
+our $accountDir= $pathConf->get ('accountDir') // "$home/个人/账号/";
+our $scriptsDir= $pathConf->get ('scriptsDir') // "${appsDir}脚本/";
+our $libDir    = $pathConf->get ('libDir') // "${appsDir}库/脚本/";
+#our $defConfDir= $pathConf->get ('defConfDir') // "${appsDir}默认配置/";
+if (my $p = $pathConf->get ('addPath')) {
+    debug "Adding path: $p";
+    if ($^O eq 'MSWin32') {
+        $ENV{PATH} = $p =~ s!/!\\!gr . ';' . $ENV{PATH};
+    } else {
+        $ENV{PATH} = $p . ':' . $ENV{PATH};
+    }
+    debug "Path now is: $ENV{PATH}";
+}
 sub time2date
 {
     my @t = @_ ? @_ : localtime;
@@ -60,10 +77,8 @@ sub multiArgs
 
 sub conf
 {
-    my $file = shift;
-    $file = $file // $scriptName;
-    my $conf = Scripts::Configure->new ($configDir.$file, $defConfDir.$file);
-    $conf;
+    my $file = shift // $scriptName;
+    Scripts::Configure->new ($configDir.$file, $defConfDir.$file);
 }
 
 sub ln
@@ -104,7 +119,7 @@ sub debug
     }
 }
 
-$pathConf = conf 'scriptpath'; #不加这，cairo-w就会出错。
+#$pathConf = conf 'scriptpath'; #不加这，cairo-w就会出错。
 #原因是之前没有指明默认配置在哪里
 
 #sub main

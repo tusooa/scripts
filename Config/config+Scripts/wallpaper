@@ -1,4 +1,4 @@
-# -*- conf-mode -*-
+# -*- conf -*-
 background = /home/tusooa/.fvwm/desktop.png
 output = /home/tusooa/.cache/Scripts/wallpaper/1.png
 [extra]:/home/tusooa/.cache/Scripts/weather.png

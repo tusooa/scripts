@@ -12,7 +12,7 @@ sub printTree
 {
     my $hash = shift;
     my $groupStr = shift;
-    for my $name (keys %$hash) {
+    for my $name (sort { $a cmp $b } keys %$hash) {
         my $item = $hash->{$name};
         for (ref $item) {
             printTree ($item, "$groupStr$name$noColor => $groupColor") when 'HASH';
