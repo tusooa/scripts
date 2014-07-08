@@ -1,0 +1,9 @@
+# -*- conf-unix -*-
+appsDir = f:/Documents/GitHub/scripts/
+dataDir = $[appsDir]Data/
+accountDir = f:/Documents/Account/
+scriptsDir = $[appsDir]bin/
+libDir = $[appsDir]lib/
+addPath = $[appsDir]bin
+iconDir = f:/Pictures/Icon/
+picDir = f:/Pictures/
