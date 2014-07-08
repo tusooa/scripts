@@ -11,7 +11,8 @@
         colorize
         rainbow-identifiers
         rainbow-delimiters
-        text-alias-mode))
+        text-alias-mode
+        git-commit-mode))
 
 ; linum
 (global-linum-mode t)

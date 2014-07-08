@@ -43,10 +43,19 @@ sub parseConf
 {
     #print @_;
     #local @ARGV = reverse (shift, shift);
-    open my $user, '<', shift;
-    open my $default, '<', shift;
+    my ($uf, $df) = @_;
+    my ($user, $default, $userw, $defaultw);
+    if ($^O eq 'MSWin32') {
+        open $userw, '<', "${uf}.windows";
+        open $user, '<', $uf;
+        open $defaultw, '<', "${df}.windows";
+        open $default, '<', $df;
+    } else {
+        open $user, '<', $uf;
+        open $default, '<', $df;
+    }
     my $ret = {};
-    for my $fh ($default, $user) {
+    for my $fh ($default, $defaultw, $user, $userw) {
         $fh or next;
         my $group = $defg;
         my $subg;

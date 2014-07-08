@@ -6,6 +6,7 @@ use POSIX qw/strftime/;
 #my $config = conf 'gitpath';
 
 #chdir $config->get ('gitDir');
+use utf8;
 use File::Temp qw/tempfile/;
 use Getopt::Long qw/:config gnu_getopt/;
 
@@ -41,7 +42,7 @@ if (@status) {
     chomp $content;
     #print $content;
     say $fh '';
-    print $fh $content;
+    print $fh term $content;
     #print $fh "文件:\n@status";
     #print $fh "差异:\n @diff";
     say term "在提交之前。得先编辑一下提交的信息。";
