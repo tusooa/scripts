@@ -10,14 +10,13 @@ my $confColor = "\e[1;34m";
 my $noColor = "\e[0m";
 sub printTree
 {
-    my $hash = shift;
-    my $groupStr = shift;
-    for my $name (sort { $a cmp $b } keys %$hash) {
-        my $item = $hash->{$name};
+    my $topLevel = shift;
+    for my $name (sort { $a cmp $b } $topLevel->getGroups (@_)) {
+        my $item = $topLevel->getGroup (@_, $name);
         for (ref $item) {
-            printTree ($item, "$groupStr$name$noColor => $groupColor") when 'HASH';
+            printTree ($topLevel, @_, $name) when 'HASH';
             default {
-                say "$groupStr$noColor$entryColor$name$noColor => $confColor$item$noColor";
+                say $groupColor . join ("$noColor => $groupColor", @_) . "$noColor => $entryColor$name$noColor => $confColor".$topLevel->get (@_, $name)."$noColor";
             }
         }
     }
@@ -40,5 +39,5 @@ if (@ARGV) {
     say $conf->get (@ARGV);
 } else {
     my $confhash = $conf->hashref;
-    printTree $confhash, $groupColor;
+    printTree $confhash;
 }

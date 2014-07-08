@@ -1,9 +1,9 @@
 # -*- conf-unix -*-
-appsDir = /home/tusooa/Apps/
-dataDir = /home/tusooa/Apps/Data/
-accountDir = /home/tusooa/Account/
-scriptsDir = /home/tusooa/Apps/bin/
-libDir = /home/tusooa/Apps/lib/
-defConfDir = /home/tusooa/Apps/default-cfg/
-iconDir = /home/tusooa/Media/Icon/
-picDir = /home/tusooa/Media/Pic/
+appsDir = ${HOME}/Apps/
+dataDir = $[appsDir]Data/
+accountDir = ${HOME}/Account/
+scriptsDir = $[appsDir]bin/
+libDir = $[appsDir]lib/
+addPath = $[appsDir]bin
+iconDir = ${HOME}/Media/Icon/
+picDir = ${HOME}/Media/Pic/

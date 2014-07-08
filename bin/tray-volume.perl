@@ -19,9 +19,10 @@ my $top = $left ? $leftTop : $rightTop;
 
 my @pixbuf;
 my $iconDir = $pathConf->get ('iconDir');
+
 for (0..4)
 {
-    $pixbuf[$_] = Gtk2::Gdk::Pixbuf->new_from_file ("${iconDir}sound/$_.png");
+    $pixbuf[$_] = Gtk2::Gdk::Pixbuf->new_from_file ($conf->get ('icon', $_) // "${iconDir}sound/$_.png");
 }
 
 my $icon = Gtk2::StatusIcon->new;
@@ -51,8 +52,7 @@ sub chooseIcon
     return 0 if ! $stat;
     #say "==>", $volume;
     my $volume = $left ? $lvolume : $rvolume;
-    given ($volume)
-    {
+    for ($volume) {
         return 4 when int $_ > 0.66*$top;
         return 3 when int $_ > 0.33*$top;
         return 2 when int $_ > 0;

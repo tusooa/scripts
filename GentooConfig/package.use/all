@@ -83,3 +83,8 @@ gnome-base/gnome-session branding
 media-libs/libmediaart -qt4
 >=gnome-extra/evolution-data-server-3.12.3 vala
 >=media-libs/gst-plugins-base-1.2.4-r1 theora
+# required by media-video/mplayer2-2.0_p20131009
+# required by media-video/smplayer-14.3.0
+# required by @selected
+# required by @world (argument)
+=media-video/ffmpeg-2.2.4 threads

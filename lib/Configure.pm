@@ -124,18 +124,47 @@ sub get
     #    $arg = pop @_;
     #}
     if (@_ == 1) {
-        return $confhash->{$defg}{$_[0]};
+        $ret = $confhash->{$defg}{$_[0]};
     } elsif (@_ == 2) {
-        return $confhash->{$_[0]}{$_[1]};
+        $ret = $confhash->{$_[0]}{$_[1]};
     } elsif (@_ == 3) {
-        return $confhash->{$_[0]}{$_[1]}{$_[2]};
+        $ret = $confhash->{$_[0]}{$_[1]}{$_[2]};
     } else {
         return undef;
     }
 #    $ret =~ s/(^|[^\\])\$([a-zA-Z0-9_])/$1$main::$2/g;
 #    $ret =~ s/(^|[^\\])\$\{([a-zA-Z0-9_])\}/$1$main::$2/g;
 #    $ret =~ s/(^|[^\\])\$\[([a-zA-Z0-9_])\]/$1$this->{$2}/g;
-    return $ret;
+    $ret =~ s/\$\[([^\]]+)\]/$self->get (split '::', $1)/ge;
+    $ret =~ s/\${([^\]]+)}/$ENV{$1}/ge;
+    $ret;
+}
+
+sub getGroup
+{
+    my $confhash = shift->hashref;
+    if (@_ == 1) {
+        return $confhash->{$_[0]};
+    } elsif (@_ == 2) {
+        return $confhash->{$_[0]}{$_[1]};
+    } elsif (@_ == 0) {
+        return $confhash->{$defg};
+    }
+    undef;
+}
+
+sub getGroups
+{
+    my $confhash = shift->hashref;
+    if (@_ == 1) {
+        my $ret = $confhash->{ + shift };
+        if (ref $ret eq 'HASH') {
+            return keys %$ret;
+        }
+    } elsif (@_ == 0) {
+        return keys %$confhash;
+    }
+    undef;
 }
 
 sub runHooks
