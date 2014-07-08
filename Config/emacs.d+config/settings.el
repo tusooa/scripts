@@ -104,6 +104,7 @@
         ("\\.rep\\'" . lisp-mode)
         ("\\.zsh\\'" . shell-script-mode)
         ("\\..*rc\\'" . conf-space-mode)
+        ("COMMIT_EDITMSG\\'" . git-commit-mode)
       )
 ) ;/mapc
 ;(fset 'perl-mode 'cperl-mode)
