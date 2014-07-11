@@ -5,6 +5,11 @@
     signingkey = tusooa@gmail.com
 [color]
     ui = always
+[color "diff"]
+  meta = yellow bold
+  frag = magenta bold
+  old = red bold
+  new = green bold
 [gui]
     fontui = -family ZhunYuan -size 13 -weight normal -slant roman -underline 0 -overstrike 0
     fontdiff = -family Monaco -size 13 -weight normal -slant roman -underline 0 -overstrike 0

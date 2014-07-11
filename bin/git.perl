@@ -3,7 +3,7 @@
 use 5.012;
 use Scripts::scriptFunctions;
 use POSIX qw/strftime/;
-use utf8;
+#use utf8;
 use File::Temp qw/tempfile/;
 use Getopt::Long qw/:config gnu_getopt/;
 
@@ -37,8 +37,8 @@ if ($addAll) {
     @status = `$git status`;
 }
 my ($fh, $fn) = tempfile;
-my @diff = `$git diff`;
-my @diffCached = `$git diff --cached`;
+my @diff = `$git diff --no-color`;
+my @diffCached = `$git diff --cached --no-color`;
 my $content = "文件:\n@status"."差异:\n @diff @diffCached";
 $content =~ s/\e\[[0-9]*[A-Za-z]//g;
 $content =~ s/^/#/gm;

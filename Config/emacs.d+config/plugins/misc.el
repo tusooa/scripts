@@ -74,5 +74,6 @@
 ;颜色来自于孟塞尔颜色系统,见custom.el
 ;http://zh.wikipedia.org/wiki/%E5%AD%9F%E5%A1%9E%E5%B0%94%E9%A2%9C%E8%89%B2%E7%B3%BB%E7%BB%9F
 (defun thistusooa-git-commit-mode-hook ()
-  (set-buffer-file-coding-system 'utf-8-unix))
+  (if (eq system-type 'windows-nt)
+      (set-buffer-file-coding-system 'utf-8-unix)))
 (add-hook 'git-commit-mode-hook 'thistusooa-git-commit-mode-hook)
