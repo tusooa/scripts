@@ -3,20 +3,30 @@
 use Scripts::scriptFunctions;
 use 5.012;
 no if $] >= 5.018, warnings => "experimental";
-
-my $groupColor = "\e[1;32m";
-my $entryColor = "\e[1;36m";
-my $confColor = "\e[1;34m";
-my $noColor = "\e[0m";
+use Getopt::Long qw/:config gnu_getopt/;
+my $color = -t STDOUT;
+GetOptions (
+    'c|color' => \$color,
+    'C|no-color' => sub { $color = 0 },
+    'd|debug' => \$Scripts::scriptFunctions::debug,
+);
+my ($groupColor, $entryColor, $confColor, $noColor) = ('','','','');
+if ($color) {
+    $groupColor = "\e[1;32m";
+    $entryColor = "\e[1;36m";
+    $confColor = "\e[1;34m";
+    $noColor = "\e[0m";
+}
 sub printTree
 {
     my $topLevel = shift;
-    for my $name (sort { $a cmp $b } $topLevel->getGroups (@_)) {
+    #warn "printTree $topLevel @_";
+    for my $name (sort $topLevel->getGroups (@_)) {
         my $item = $topLevel->getGroup (@_, $name);
         for (ref $item) {
             printTree ($topLevel, @_, $name) when 'HASH';
             default {
-                say $groupColor . join ("$noColor => $groupColor", @_) . "$noColor => $entryColor$name$noColor => $confColor".$topLevel->get (@_, $name)."$noColor";
+                say $groupColor . join ("$noColor => $groupColor", @_) . "$noColor => $entryColor$name$noColor => $confColor".$topLevel->get (@_, $name).$noColor;
             }
         }
     }

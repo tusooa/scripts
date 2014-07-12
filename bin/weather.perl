@@ -6,6 +6,7 @@ use LWP::Simple qw/get/;
 use Encode qw/encode_utf8 _utf8_on _utf8_off/;
 use Date::Parse qw/str2time/;
 use Getopt::Long qw/:config gnu_getopt/;
+no if $] >= 5.018, warnings => "experimental";
 
 sub printFunc;
 
@@ -13,9 +14,10 @@ my $cfg = conf 'weather';
 my $uri = $cfg->get ('weather-uri');
 my $reload = 'DEFAULT';
 my $quiet = 0;
-my $conky = -t STDOUT ? 0 : 1;
+my $conky = ! -t STDOUT;
 my $help = 0;
 my $showCity = 0;
+my $printLogFile;
 GetOptions (
     'c|conky' => \$conky,
     't|term' => sub { $conky = 0 },
@@ -25,6 +27,7 @@ GetOptions (
     'q|quiet' => \$quiet,
     'help' => \$help,
     'C|city' => \$showCity,
+    'l|log-file' => \$printLogFile,
 );
 if ($help) {
     say term
@@ -43,9 +46,20 @@ Default:
     exit;
 }
 #print $reload;
+
+my %color = map { $_ => $cfg->get ('Colors', $conky ? 'conky' : 'term', $_) } qw/today other rest line-end/;
+
 my $oldUri;
 my $city;
-my $logf = "${cacheDir}weather";
+my $logDir = "${cacheDir}weather";
+
+my $logf = $logDir . join '-', $uri =~ m'^http://qq\.ip138\.com/weather/([A-Za-z]+)/([A-Za-z]+)\.wml$';
+
+if ($printLogFile) {
+    say term $logf;
+    exit;
+}
+
 if (open REC, '<', term $logf) {
     @_ = <REC>;
     chomp ($oldUri = shift @_);
@@ -114,8 +128,7 @@ for (@_) {
             $_=" \t$_";
         }
     }
-    $_.="\n";
-    print REC;
+    say REC;
     printFunc;
 
 }
@@ -123,14 +136,17 @@ close REC;
 
 sub printFunc
 {
+    chomp;
     if (!$quiet) {
         if ($conky) {
-            s/°C\t.*/°C/g; s/20..-//g; s/^>\t/\${color1}/; s/^\ \t/\${color}/; s/^-\t/\${color3}/; s/\t(?=\d)/\${alignr}/;s/C\t.+$/C/;
-        } else {
-            s/^>/\e[1;33m/;s/^ /\e[0m/;s/^-/\e[0;32m/;
+            s/°C\t.*/°C/g; s/20..-//g;
+            s/^(.)\t/$1/;
+            s/\t(?=\d)/\${alignr}/;s/C\t.+$/C/;
         }
-        s/(\d)-/$1,/g;#s/ , / - /;
-        print term $_;
+        s/^>/$color{today}/;s/^ /$color{other}/;s/^-/$color{rest}/;
+        s/(\d)-/$1,/g;
+        s/$/$color{'line-end'}/g;
+        say term $_;
 
 =comment
         my ($start, $date, $weather, $temp, $wind) = split /\t/;

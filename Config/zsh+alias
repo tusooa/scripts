@@ -23,13 +23,20 @@ alias dsame="awk '"'!a[$0]++'"'" # 累死人。
 #alias gssh='ssh -2 -p443 tusooa@shell.cjb.net ; ssh -2D7070 -p443 tusooa@shell.cjb.net'
 alias updateMail='fp -v <(gpg --decrypt ~/个人/账号/mail.gpg) -f ~/.getmail/getmailrc.in -o ~/.getmail/getmailrc; fp -v <(gpg --decrypt ~/个人/账号/mail.gpg) -f ~/.msmtprc.in -o ~/.msmtprc; chmod 600 ~/.getmail/getmailrc ~/.msmtprc'
 alias rm=dustbin
+alias clearexe='pstree G --no-color \.exe | perl -M5.012 -pe '\''system "pkill", /\|-([A-Za-z\.]+)/'\'
 # command prompt
 alias \$=''
 alias ●=''
 alias ☎=''
 alias ']'=''
 alias 'tlcr:'=':' #这一行都是提示符.
-
+alias p5='perl -M5.012'
+pd()
+{
+    local fn="$1"
+    shift
+    perl -MCarp::Always -Mdiagnostics "$(which "$fn")" "$@"
+}
 # Aliases for todo and remind
 # removed, (replaced by calendar)
 

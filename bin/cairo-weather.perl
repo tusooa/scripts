@@ -5,6 +5,7 @@ use Cairo;
 use Gtk2;
 use Scripts::scriptFunctions;
 use 5.012;
+no if $] >= 5.018, warnings => "experimental";
 
 sub drawpng;
 sub drawtxt;
@@ -12,7 +13,9 @@ sub drawframe;
 
 my $cfg = conf 'weather';
 #use Data::Dumper;print Dumper $cfg;exit;
-my $logf = "${cacheDir}weather";
+my $logDir = "${cacheDir}weather";
+my $uri = $cfg->get('weather-uri');
+my $logf = $logDir . join '-', $uri =~ m'^http://qq\.ip138\.com/weather/([A-Za-z]+)/([A-Za-z]+)\.wml$';
 my $icondir = $pathConf->get ('iconDir').'天气/';
 #say $icondir;
 my $font = $cfg->get ('font') // 'ZhunYuan';
@@ -102,29 +105,27 @@ for (@_)
     drawtxt "$y$m$d",$x0+1,$y1+1,"20,20,20,200", $fsize if $shadow;
     drawtxt "$y$m$d",$x0,$y1,$color, $fsize;
     $y1+=$fsize;
-    $_=$weather; #$x2=$x0+$size/2; $y2=$y1+$size/2;
+    do { #$x2=$x0+$size/2; $y2=$y1+$size/2;
 #    s/小到//;s/中到//;s/大到//;s/小雨/10.png/g;
 #    s/中雨/11.png/g; s/大雨/12.png/g;s/雨夹雪/07.png/g;
 #    s/小雪/13.png/g; s/中雪/14.png/g; s/大雪/15.png/g;
 #    s/多云/26.png/;s/晴/32.png/;s/阴/31.png/;s/转/-/;
 #    s/雷阵雨/17.png/;s/阵雨/09.png/;
-    s/小到//;s/中到//;s/大到//;
-    s/小雨/09.png/g; s/中雨/10.png/g; s/大雨/11.png/g;s/暴雨/12.png/g;
-    s/雨夹雪/07.png/g; s/小雪/13.png/g; s/中雪/14.png/g; s/大雪/15.png/g;
-    s/暴雪/16.png/g;s/多云/26.png/;s/晴/32.png/;s/阴/31.png/;
-    s/转/-/;s/雷阵雨/17.png/;s/阵雨/09.png/;
+        my $_ = $weather;
+        s/小到//;s/中到//;s/大到//;
+        s/小雨/09.png/g; s/中雨/10.png/g; s/大雨/11.png/g;s/暴雨/12.png/g;
+        s/雨夹雪/07.png/g; s/小雪/13.png/g; s/中雪/14.png/g; s/大雪/15.png/g;
+        s/暴雪/16.png/g;s/多云/26.png/;s/晴/32.png/;s/阴/31.png/;
+        s/转/-/;s/雷阵雨/17.png/;s/阵雨/09.png/;
 
-    if(/-/)
-    {
-        my ($img1,$img2)=split "-";
-        drawpng "$img1",$x0-$size/4,$y1;
-        drawpng "$img2",$x0+$size/4,$y1+$size/2;
-    }
-    else
-    {
-        drawpng "$_",$x0,$y1;
-    }
-    
+        if(/-/) {
+            my ($img1,$img2)=split "-";
+            drawpng $img1,$x0-$size/4,$y1;
+            drawpng $img2,$x0+$size/4,$y1+$size/2;
+        } else {
+            drawpng $_,$x0,$y1;
+        }
+    };
     #代码高深。不建议修改，或建议由exp亲自修改。
     $y1+=3*$h0;
     drawtxt $weather,$x0,$y1,$color, $fsize;

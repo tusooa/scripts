@@ -46,13 +46,13 @@ sub parseConf
     my ($uf, $df) = @_;
     my ($user, $default, $userw, $defaultw);
     if ($^O eq 'MSWin32') {
-        open $userw, '<', "${uf}.windows";
-        open $user, '<', $uf;
-        open $defaultw, '<', "${df}.windows";
-        open $default, '<', $df;
+        open $userw, '<', "${uf}.windows" or undef $userw;
+        open $user, '<', $uf or undef $user;
+        open $defaultw, '<', "${df}.windows" or undef $defaultw;
+        open $default, '<', $df or undef $default;
     } else {
-        open $user, '<', $uf;
-        open $default, '<', $df;
+        open $user, '<', $uf or undef $user;
+        open $default, '<', $df or undef $default;
     }
     my $ret = {};
     for my $fh ($default, $defaultw, $user, $userw) {
@@ -71,6 +71,7 @@ sub parseConf
             s/^\s+//;s/\s+$//;
             s/^#.+$//;
             next if /^$/;
+#            say;
 #        while (s/\\$//) # 转行
 #        {
 #            say "'\\' found at EOL.";
@@ -144,8 +145,8 @@ sub get
 #    $ret =~ s/(^|[^\\])\$([a-zA-Z0-9_])/$1$main::$2/g;
 #    $ret =~ s/(^|[^\\])\$\{([a-zA-Z0-9_])\}/$1$main::$2/g;
 #    $ret =~ s/(^|[^\\])\$\[([a-zA-Z0-9_])\]/$1$this->{$2}/g;
-    $ret =~ s/\$\[([^\]]+)\]/$self->get (split '::', $1)/ge;
-    $ret =~ s/\${([^\]]+)}/$ENV{$1}/ge;
+    do { $ret =~ s/\${([^}]+)}/($1 eq '-') ? '$' : $ENV{$1}/ge;
+         $ret =~ s/\$\[([^\]]+)\]/($1 eq '-') ? '$' : $self->get (split '::', $1)/ge; } if $ret;
     $ret;
 }
 
@@ -172,6 +173,11 @@ sub getGroups
         }
     } elsif (@_ == 0) {
         return keys %$confhash;
+    } elsif (@_ == 2) {
+        my $ret = $confhash->{ + shift }{ + shift };
+        if (ref $ret eq 'HASH') {
+            return keys %$ret;
+        }
     }
     undef;
 }
@@ -183,7 +189,7 @@ sub runHooks
     ref $confhash->{Hooks} eq 'HASH' or return undef;
     ref $confhash->hashref->{Hooks}->{$hookName} eq 'HASH' or return undef;
     for (keys %{ $confhash->{Hooks}->{$hookName} }) {
-        say term "$hookName hook => $_";
+        say "$hookName hook => $_";
         system $confhash->{Hooks}->{$hookName}->{$_};
     }
 }
