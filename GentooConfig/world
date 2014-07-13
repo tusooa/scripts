@@ -36,6 +36,7 @@ app-misc/devtodo
 app-misc/mtail
 app-misc/screen
 app-misc/tmux
+app-office/calligra
 app-office/libreoffice-bin
 app-portage/eix
 app-portage/gentoolkit
@@ -53,6 +54,8 @@ dev-lang/python:2.7
 dev-lang/rakudo
 dev-libs/glib
 dev-lisp/sbcl
+dev-perl/Carp-Always
+dev-perl/Devel-REPL
 dev-perl/File-ShareDir
 dev-perl/Gtk3
 dev-perl/IO-String
@@ -60,6 +63,9 @@ dev-perl/IO-Tty
 dev-perl/IPC-Run
 dev-perl/Moose
 dev-perl/Net-DBus
+dev-perl/Perl-Critic
+dev-perl/Term-ReadLine-Gnu
+dev-perl/Term-ReadLine-Perl
 dev-perl/TermReadKey
 dev-perl/Tie-iCal
 dev-perl/TimeDate
