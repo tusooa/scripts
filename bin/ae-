@@ -27,7 +27,7 @@ filebase="${filebase%.tar}"
 fileext="${baseName#$filebase}"
 cd "$dir"
 
-archives=('.tar' '.tar.gz' '.tgz' '.tar.bz2' '.tbz2' '.tar.lzma' '.tlz' '.tar.lzip' '.tar.lzip' '.tar.lz' '.tlzip' '.zip' '.rar' '.7z')
+archives=(.tar .tar.gz .tgz .tar.bz2 .tbz2 .tar.lzma .tlz .tar.lzip .tar.lzip .tar.lz .tlzip .zip .rar .7z .deb)
 if inArgList "$fileext" "${archives[@]}" ; then
     mkdir "$filebase" || {
         warng "Cannot mkdir $filebase."
@@ -58,6 +58,7 @@ case "$file" in
     *.xz)xzcat "$file" > "$filebase";;
     *.lzip|*.lz)lzip -dc "$file" > "$filebase";;
     *.7zip|*.7z)7z x "$file";;
+    *.deb)ar x "$file";;
     *)
         warng "无法根据文件名判断文件类型，尝试tar。"
         tar -xf "$file";;
