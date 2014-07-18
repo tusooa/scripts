@@ -83,9 +83,11 @@ dev-python/python-xlib
 dev-tcltk/expect
 dev-util/android-sdk-update-manager
 dev-util/ccache
+dev-util/debootstrap
 dev-util/strace
 dev-vcs/git
 games-misc/cowsay
+games-misc/typespeed
 games-roguelike/nethack
 gnome-base/gnome
 gnome-extra/gnome-tweak-tool
@@ -170,6 +172,7 @@ sys-block/gparted
 sys-boot/grub
 sys-boot/grub:2
 sys-boot/mbr
+sys-boot/unetbootin
 sys-devel/bc
 sys-devel/gdb
 sys-fs/dosfstools
