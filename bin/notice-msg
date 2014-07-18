@@ -1,7 +1,7 @@
 #!/bin/bash
 # 来自 eexpress: https://github.com/eexpress/eexp-bin/blob/master/msg
 
-title="计划任务提醒"
+title="子有新讯"
 #icon="/usr/share/icons/gnome/48x48/actions/system-search.png"
 icon=/usr/share/icons/oxygen/48x48/status/dialog-information.png
 case "$#" in
@@ -18,5 +18,8 @@ case "$#" in
 esac
 [ "$DISPLAY" ] || export DISPLAY=:0
 notify-send -i "$icon" "$title" "$msg" &
-[ -f "$sound" ] && { paplay $sound || canberra-gtk-play -i window-slide ; } || :
+if [ -f "$sound" ]; then
+    paplay "$sound" || canberra-gtk-play -f "$sound"
+fi
+:
 
