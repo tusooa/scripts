@@ -7,3 +7,4 @@ Config/.config+Scripts/countup.cache
 src/*/build/*
 *.pir
 *.moarvm
+GentooConfig/conf.d/._cfg*

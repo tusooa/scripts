@@ -88,3 +88,16 @@ media-libs/libmediaart -qt4
 # required by @selected
 # required by @world (argument)
 =media-video/ffmpeg-2.2.4 threads
+# required by media-video/mplayer2-2.0_p20131009
+# required by media-video/smplayer-14.3.0
+# required by @selected
+# required by @world (argument)
+=media-video/ffmpeg-2.2.5 threads
+# required by virtual/ffmpeg-9-r1
+# required by media-video/vlc-2.1.5
+# required by media-libs/phonon-vlc-0.8.0
+# required by media-libs/phonon-4.8.0[vlc]
+# required by kde-base/dolphin-4.14.1
+# required by @selected
+# required by @world (argument)
+=media-video/ffmpeg-2.2.7 threads

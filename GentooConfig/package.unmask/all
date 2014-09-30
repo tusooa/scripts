@@ -21,3 +21,43 @@
 =dev-lang/perl-5.18.2
 =sys-libs/glibc-2.19:2.2
 =sys-kernel/linux-headers-3.14
+# required by dev-lang/nqp-2014.07[parrot]
+# required by dev-lang/rakudo-2014.07
+# required by @selected
+# required by @world (argument)
+# /etc/portage/package.mask/all:
+#=sys-fs/udev-181
+#=app-emulation/virtualbox-4.1.22
+# app has bug, can't compile
+#doesnt work with gcc 4.7.3
+=dev-lang/parrot-6.2.0
+# required by @selected
+# required by @world (argument)
+# /etc/portage/package.mask/all:
+=x11-themes/light-themes-0.1.93-r4
+# required by media-libs/harfbuzz-0.9.28[icu]
+# required by net-libs/webkit-gtk-2.4.3
+# required by net-im/empathy-3.12.4
+# required by gnome-base/gnome-core-apps-3.12.0
+# required by gnome-base/gnome-3.12.0
+# required by @selected
+# required by @world (argument)
+# /etc/portage/package.mask/all:
+#=sys-fs/udev-181
+#=app-emulation/virtualbox-4.1.22
+# app has bug, can't compile
+#doesnt work with gcc 4.7.3
+=dev-libs/icu-52.1
+# required by virtual/perl-Version-Requirements-0.101.22
+# required by virtual/perl-Version-Requirements:0 (argument)
+# /usr/portage/profiles/package.mask:
+# Andreas K. Huettel <dilfridge@gentoo.org> (27 Sep 2014)
+# Masked for removal in 30 days; see e.g. bug 446376
+# Please upgrade to stable Perl 5.18
+=perl-core/Version-Requirements-0.101.22-r1
+# required by virtual/perl-Version-Requirements:0 (argument)
+# /usr/portage/profiles/package.mask:
+# Andreas K. Huettel <dilfridge@gentoo.org> (27 Sep 2014)
+# Masked for removal in 30 days; see e.g. bug 446376
+# Please upgrade to stable Perl 5.18
+=virtual/perl-Version-Requirements-0.101.22

@@ -32,3 +32,7 @@
 =app-text/dos2unix-6.0.5
 =app-text/dos2unix-6.0.4
 =sys-fs/eudev-1.5.3-r1
+=virtual/perl-Attribute-Handlers-0.940.0-r1
+=x11-base/xorg-server-1.15.99.903:0/1.15.99.903::gentoo
+=dev-libs/icu-52.1:0/52::gentoo
+=dev-lang/perl-5.18.2-r1:0/5.18::gentoo

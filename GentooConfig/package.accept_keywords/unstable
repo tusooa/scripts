@@ -3,3 +3,10 @@
 >=sys-apps/texinfo-5.1 -~amd64
 #>=app-i18n/fcitx-9999 -~amd64
 =dev-libs/openssl-1.0.2_beta1-r3 **
+# required by net-libs/gnutls-3.3.8
+# required by net-im/empathy-3.12.5
+# required by gnome-base/gnome-core-apps-3.12.0
+# required by gnome-base/gnome-3.12.0
+# required by @selected
+# required by @world (argument)
+=sys-apps/texinfo-5.2 ~amd64

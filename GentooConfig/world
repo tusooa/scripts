@@ -23,6 +23,7 @@ app-emacs/emms
 app-emacs/haskell-mode
 app-emulation/aqemu
 app-emulation/qemu
+app-emulation/virtualbox-bin
 app-emulation/wine
 app-i18n/fbterm
 app-i18n/fcitx
@@ -37,7 +38,6 @@ app-misc/mtail
 app-misc/screen
 app-misc/tmux
 app-office/calligra
-app-office/libreoffice-bin
 app-portage/eix
 app-portage/gentoolkit
 app-portage/layman
@@ -47,6 +47,7 @@ app-shells/zsh-completion
 app-text/dos2unix
 app-text/sdcv
 app-text/stardict
+dev-db/mysql
 dev-lang/nqp
 dev-lang/parrot
 dev-lang/perl
@@ -126,6 +127,7 @@ media-sound/timidity++
 media-video/gnome-mplayer
 media-video/mplayer
 media-video/smplayer
+media-video/vlc
 net-dns/bind-tools
 net-ftp/filezilla
 net-im/skype
@@ -145,14 +147,6 @@ net-proxy/privoxy
 net-wireless/bluez
 net-wireless/wireless-tools
 net-wireless/wpa_supplicant
-perl-core/Attribute-Handlers
-perl-core/File-Temp
-perl-core/IO-Zlib
-perl-core/Locale-Maketext-Simple
-perl-core/MIME-Base64
-perl-core/Package-Constants
-perl-core/digest-base
-perl-core/libnet
 sys-apps/dbus
 sys-apps/dog
 sys-apps/help2man
@@ -181,8 +175,8 @@ sys-kernel/gentoo-sources
 sys-kernel/module-rebuild
 sys-process/vixie-cron
 virtual/perl-Attribute-Handlers
+virtual/perl-Digest
 virtual/perl-MIME-Base64
-virtual/perl-digest-base
 www-client/firefox-bin
 www-client/w3m
 www-plugins/adobe-flash
@@ -192,7 +186,6 @@ x11-drivers/nvidia-drivers
 x11-drivers/xf86-input-mouse
 x11-misc/gtk2fontsel
 x11-misc/habak
-x11-misc/notify-osd
 x11-misc/shared-mime-info
 x11-misc/trayer
 x11-misc/wmctrl
@@ -202,6 +195,7 @@ x11-misc/xdotool
 x11-misc/xlockmore
 x11-misc/xscreensaver
 x11-misc/xsel
+x11-plugins/pidgin-lwqq
 x11-terms/rxvt-unicode
 x11-terms/xterm
 x11-themes/crystal
