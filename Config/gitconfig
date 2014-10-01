@@ -25,3 +25,4 @@
 [core]
     autocrlf = false
     safecrlf = false
+    quotepath = false
