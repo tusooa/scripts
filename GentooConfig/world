@@ -95,6 +95,7 @@ gnome-extra/gnome-tweak-tool
 gnome-extra/nm-applet
 gnome-extra/zenity
 kde-base/dolphin
+kde-base/gwenview
 kde-base/kdebase-cursors
 kde-base/kdebase-startkde
 kde-base/kdepimlibs
