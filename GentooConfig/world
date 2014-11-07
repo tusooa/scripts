@@ -24,6 +24,7 @@ app-emacs/haskell-mode
 app-emulation/aqemu
 app-emulation/qemu
 app-emulation/virtualbox-bin
+app-emulation/virtualbox-modules
 app-emulation/wine
 app-i18n/fbterm
 app-i18n/fcitx
@@ -38,6 +39,7 @@ app-misc/mtail
 app-misc/screen
 app-misc/tmux
 app-office/calligra
+app-office/libreoffice
 app-portage/eix
 app-portage/gentoolkit
 app-portage/layman
@@ -52,7 +54,6 @@ dev-lang/nqp
 dev-lang/parrot
 dev-lang/perl
 dev-lang/python:2.7
-dev-lang/rakudo
 dev-libs/glib
 dev-lisp/sbcl
 dev-perl/Carp-Always

@@ -31,6 +31,14 @@ alias ☎=''
 alias ']'=''
 alias 'tlcr:'=':' #这一行都是提示符.
 alias p5='perl -M5.012'
+that()
+{
+    local dir="$HOME/Logs/$(date +%Y/%m/)"
+    mkdir -pv "$dir"
+    echo "开始。"
+    arecord -f cd -t raw | lame -x -r /dev/stdin "${dir}$(date +%d,%u,%H,%M,%S)"
+    echo "完成。"
+}
 pd()
 {
     local fn="$1"

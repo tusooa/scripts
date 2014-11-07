@@ -101,3 +101,17 @@ media-libs/libmediaart -qt4
 # required by @selected
 # required by @world (argument)
 =media-video/ffmpeg-2.2.7 threads
+# required by virtual/ffmpeg-9-r1
+# required by media-video/vlc-2.1.5[avformat,avcodec,swscale]
+# required by @selected
+# required by @world (argument)
+=media-video/ffmpeg-2.2.9 threads
+# required by virtual/ffmpeg-9-r1
+# required by media-video/vlc-2.1.5[avformat,avcodec,swscale]
+# required by media-libs/phonon-vlc-0.8.1
+# required by media-libs/phonon-4.8.2[vlc]
+# required by kde-base/phonon-kde-4.14.2
+# required by kde-base/kdebase-startkde-4.11.13
+# required by @selected
+# required by @world (argument)
+=media-video/ffmpeg-2.2.10 threads
