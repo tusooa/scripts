@@ -22,6 +22,7 @@
     a = !git.perl
     clog = log --color --graph --pretty=graph --abbrev-commit --
     d = diff
+    u = pull
 [core]
     autocrlf = false
     safecrlf = false
