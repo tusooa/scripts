@@ -9,7 +9,7 @@ export PATH="$HOME/Apps/bin:$PATH"
 
 xset -b
 xrdb ~/.Xresource
-xbacklight -set 65
+xbacklight -set 45
 #/usr/libexec/polkit-gnome-authentication-agent-1 &
 #xbindkeys&
 #trayer --widthtype pixel --width 200 --edge bottom --align left --transparent true &
