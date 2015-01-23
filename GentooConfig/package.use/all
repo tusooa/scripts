@@ -115,3 +115,32 @@ media-libs/libmediaart -qt4
 # required by @selected
 # required by @world (argument)
 =media-video/ffmpeg-2.2.10 threads
+x11-drivers/nvidia-drivers gtk3
+net-print/cups -usb
+# required by virtual/ffmpeg-9-r1
+# required by media-video/vlc-2.1.5[avformat,avcodec,swscale]
+# required by media-libs/phonon-vlc-0.8.2
+# required by media-libs/phonon-4.8.3[vlc]
+# required by kde-base/dolphin-4.14.3
+# required by @selected
+# required by @world (argument)
+=media-video/ffmpeg-2.2.11 threads
+# required by x11-wm/mutter-3.14.3[kms]
+# required by gnome-base/gnome-3.14.0
+# required by @selected
+# required by @world (argument)
+>=media-libs/clutter-1.20.0 egl
+# required by media-libs/clutter-1.20.0[egl]
+# required by net-im/empathy-3.12.7
+# required by gnome-base/gnome-core-apps-3.14.0
+# required by gnome-base/gnome-3.14.0
+# required by @selected
+# required by @world (argument)
+>=media-libs/cogl-1.18.2-r1 gles2
+# required by media-libs/cogl-1.18.2-r1[gles2]
+# required by net-im/empathy-3.12.7
+# required by gnome-base/gnome-core-apps-3.14.0
+# required by gnome-base/gnome-3.14.0
+# required by @selected
+# required by @world (argument)
+>=media-libs/mesa-10.3.5-r1 gles2

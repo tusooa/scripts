@@ -44,8 +44,8 @@ app-portage/eix
 app-portage/gentoolkit
 app-portage/layman
 app-shells/fish
+app-shells/gentoo-zsh-completions
 app-shells/zsh
-app-shells/zsh-completion
 app-text/dos2unix
 app-text/sdcv
 app-text/stardict

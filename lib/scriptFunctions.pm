@@ -91,7 +91,7 @@ sub ln
     }
 }
 
-sub term #蛋痛的euc-cn <=> utf-8 转换。只有闻道死才需要。操。
+sub term #蛋痛的euc-cn <=> utf-8 转换。只有闻道死才需要。和谐。
 {
     if ($^O eq 'MSWin32') {
         $winFunc{term}->(@_);
@@ -102,7 +102,7 @@ sub term #蛋痛的euc-cn <=> utf-8 转换。只有闻道死才需要。操。
 
 sub final
 {
-    say term "完成!开始我们的战争(Date)吧---";
+    say term "-开始我们的战争\e[4D\e[1A\e[1;7;31mDate\e[0m\e[1B吧-";
 }
 
 sub debug
