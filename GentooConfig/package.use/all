@@ -144,3 +144,8 @@ net-print/cups -usb
 # required by @selected
 # required by @world (argument)
 >=media-libs/mesa-10.3.5-r1 gles2
+# required by virtual/ffmpeg-9-r1
+# required by media-video/vlc-2.1.5[avformat,avcodec,swscale]
+# required by @selected
+# required by @world (argument)
+=media-video/ffmpeg-2.2.12 threads
