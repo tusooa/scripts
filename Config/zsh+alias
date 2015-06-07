@@ -31,6 +31,8 @@ alias ☎=''
 alias ']'=''
 alias 'tlcr:'=':' #这一行都是提示符.
 alias p5='perl -M5.012'
+alias onlybird='ssh -D7070 -p8888 -Nt onlybird@ssh2015.unssh.com'
+
 that()
 {
     local dir="$HOME/Logs/$(date +%Y/%m/)"
