@@ -3,8 +3,8 @@
 \#*
 *~
 *.elc
-Config/.config+Scripts/countup.cache
-Config/.config+Scripts/show-png.perl
+Config/config+Scripts/countup.cache
+Config/config+Scripts/show-png.perl
 src/*/build/*
 *.pir
 *.moarvm
