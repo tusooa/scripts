@@ -10,18 +10,22 @@ total_run_times 0
 # Create own window instead of using desktop (required in nautilus)
 own_window yes
 own_window_argb_visual yes
-own_window_transparent yes
+own_window_transparent no
 own_window_type normal
+#own_window_colour 66ccff
+#own_window_argb_visual yes
+own_window_argb_value 100
 own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager
 # Use double buffering (reduces flicker, may not work for everyone)
 double_buffer yes
 # Minimum size of text area
-minimum_size 210 800
-maximum_width 210
+minimum_size 240 0
+maximum_width 240
 # Draw shades?
-draw_shades no
+draw_shades yes
 # Draw outlines?
 draw_outline no
+#default_outline_colour cyan
 # Draw borders around text
 draw_borders no
 # Stippled borders?
@@ -33,7 +37,7 @@ border_width 0
 # Default colors and also border colors
 default_color ffffff
 default_shade_color black
-default_outline_color black
+default_outline_color ffffff
 own_window_colour 262626
 # Text alignment, other possible values are commented
 # top_left, top_right, bottom_left, bottom_right
@@ -66,23 +70,22 @@ color7 FFFFFF
 template1 ${if_running \1}${color3}\1${alignr}${color1}\n${execp \2 \3}${color}${endif}
 template2 ${if_existing /tmp/\1}${color3}\1${alignr}${color}${endif}
 template3 ${execpi 1800 rr-RSS.perl \1}
-template4 ${color7}|${offset -7}${voffset 3}v${voffset -3}${tab 50}${color yellow}${downspeedf \1}${tab 2}Kbps\n${alignr}${color0}${downspeedgraph \1 16,150 000000 ffffff}
-template5 ${color7}|${offset -9}${voffset -3}^${voffset 3}${tab 50}${color yellow}${upspeedf \1}${tab 2}Kbps\n${alignr}${color0}${upspeedgraph \1 16,150 000000 ffffff}${color7}
+template4 ${color7}|${offset -7}${voffset 3}v${voffset -3}${tab 50}${color3}${downspeedf \1}${tab 2}Kbps\n${alignr}${color6}${downspeedgraph \1 16,150 000000 ffffff}
+template5 ${color7}|${offset -9}${voffset -3}^${voffset 3}${tab 50}${color3}${upspeedf \1}${tab 2}Kbps\n${alignr}${color6}${upspeedgraph \1 16,150 000000 ffffff}${color7}
 ●\${addr $_}\${tab 60}
 TEXT
-${font DejaVu Sans YuanTi:size=18}${color yellow}${tab 30}${time %Y,%-m,%-d (%u)}
+${font DejaVu Sans YuanTi:size=18}${color3}${tab 30}${time %Y,%-m,%-d (%u)}
 ${tab 30}${time %H,%M,%S}${font}
-${color yellow}${tab 30}${execi 300 lc-农历.perl}${color}${alignr}
-${color7}top CPU${color yellow}${alignr}${top name 1}
-${alignr}${color cyan}${top cpu 1}${top mem 1}
-${color7}top 内存${color yellow}${alignr}${top_mem name 1}
-${alignr}${color cyan}${top_mem cpu 1}${top_mem mem 1}
-${color7}CPU温度${color yellow}${alignr}${execp expr $(cat /sys/class/hwmon/hwmon0/temp1_input) / 1000}°C ,   ${execp expr $(cat /sys/class/hwmon/hwmon0/temp2_input) / 1000}°C
-${color7}风扇转速${color yellow}${alignr}${execp cat /proc/acpi/ibm/fan | awk '/speed/{print $2}'}/min
+${color3}${tab 30}${execi 300 lc-农历.perl}${color}${alignr}
+${color7}top CPU${color3}${alignr}${top name 1}
+${alignr}${color4}${top cpu 1}${top mem 1}
+${color7}top 内存${color3}${alignr}${top_mem name 1}
+${alignr}${color4}${top_mem cpu 1}${top_mem mem 1}
+${color7}CPU温度${color3}${alignr}${execp expr $(cat /sys/class/hwmon/hwmon0/temp1_input) / 1000}°C ,   ${execp expr $(cat /sys/class/hwmon/hwmon0/temp2_input) / 1000}°C
+${color7}风扇转速${color3}${alignr}${execp cat /proc/acpi/ibm/fan | awk '/speed/{print $2}'}/min
 ${execp net.perl}
 #${color4}${hr}${alignr}
 #${color0}Countup${alignr}
 #${execpi 20 countup.perl}
 #${color0}Todo${alignr}
 #${execpi 5 cat ~/.cache/Scripts/todo}
-

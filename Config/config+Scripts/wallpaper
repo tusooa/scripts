@@ -1,9 +1,10 @@
 # -*- conf -*-
-background = /home/tusooa/.fvwm/desktop.png
-output = /home/tusooa/.cache/Scripts/wallpaper/1.png
-[extra]:/home/tusooa/.cache/Scripts/weather.png
-command = cairo-weather.perl
-position = 100,400
-[extra]:/home/tusooa/.cache/Scripts/cal.png
-command = cal.perl -p
-position = 700,30
+mode = slide
+#background = /home/tusooa/.fvwm/desktop.png
+#output = /home/tusooa/.cache/Scripts/wallpaper/1.png
+#[extra]:/home/tusooa/.cache/Scripts/weather.png
+#command = cairo-weather.perl
+#position = 100,400
+#[extra]:/home/tusooa/.cache/Scripts/cal.png
+#command = cal.perl -p
+#position = 700,30

@@ -189,3 +189,20 @@ net-print/cups -usb
 # required by @selected
 # required by @world (argument)
 >=media-libs/phonon-vlc-0.8.2 qt5
+# required by virtual/mysql-5.6-r6::gentoo[embedded]
+# required by media-sound/amarok-2.8.0-r3::gentoo
+# required by @selected
+# required by @world (argument)
+>=dev-db/mysql-5.6.26-r1 client-libs
+# required by gnome-base/gnome-shell-3.16.3::gentoo
+# required by gnome-base/gdm-3.16.2::gentoo
+>=gnome-base/gnome-control-center-3.16.2-r1 networkmanager
+# required by gnome-base/gnome-keyring-3.16.0-r1::gentoo
+# required by gnome-base/gnome-shell-3.16.3::gentoo
+# required by gnome-base/gdm-3.16.2::gentoo
+>=app-crypt/pinentry-0.9.5 gnome-keyring
+sys-auth/polkit-kde-agent -linguas_zh_CN -linguas_zh_TW
+net-wireless/bluedevil -linguas_zh_CN -linguas_zh_TW
+kde-misc/networkmanagement -linguas_zh_CN -linguas_zh_TW
+kde-misc/kscreen -linguas_zh_CN -linguas_zh_TW
+kde-misc/kde-gtk-config -linguas_zh_CN -linguas_zh_TW
