@@ -27,11 +27,12 @@ our $home = $^O eq 'MSWin32' ? "C:\\Users\\tusooa" : $ENV{HOME};
 our $scriptName= basename $0;
 our $verbose   = 0;
 our $debug     = 0;
+# 目录，其名称最后一定要加上/，可能是eexp最差的一个设计了。然而却提升了伊的流动性。
 my $xdgConf   = $ENV{XDG_CONFIG_HOME} ? "$ENV{XDG_CONFIG_HOME}/" : "$home/.config/";
 our $configDir = "${xdgConf}Scripts/";
 my $xdgCache  = $ENV{XDG_CACHE_HOME} ? "$ENV{XDG_CACHE_HOME}/" : "$home/.cache/";
 our $cacheDir  = "${xdgCache}Scripts/";
-our $defConfDir = (dirname dirname $0) . '/default-cfg/';# 硬性编码
+our $defConfDir = $configDir . 'Default/';# 硬性编码
 #say $defConfDir;
 our $pathConf = conf 'scriptFunctions' // conf 'scriptpath';
 our $appsDir   = $pathConf->get ('appsDir') // "$home/应用/";

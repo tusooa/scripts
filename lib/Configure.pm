@@ -24,6 +24,25 @@ sub new
     my $config = parseConf (@_);
     bless $config, $class;
 }
+
+sub readLine
+{
+    my $orig = shift;
+    local ($_);
+    $_ = $orig;
+    chomp;
+    s/^\s+//;s/\s+$//;
+    s/^#.+$//;
+    if (/^$/) {
+        ($orig, 'comment');
+    } elsif (/^\[(.+?)\]:(.+)/) { # config group
+        ($orig, 'confg', $1, $2);
+    } elsif (/^\[(.+?)\]/) { # simple group
+        ($orig, 'simple', $1);
+    } elsif (/^(.+?)\s*=\s*(.+)/) { # config
+        ($orig, 'conf', $1, $2);
+    }
+}
 #去除errors
 =comment parseConf
 my $ref = Scripts::Configure::parseConf (%args);
@@ -67,10 +86,8 @@ sub parseConf
         while (<$fh>) {
             #say $l;
             #say $_;
-            chomp;
-            s/^\s+//;s/\s+$//;
-            s/^#.+$//;
-            next if /^$/;
+            my (undef, $result, @match) = readLine $_;
+            next if $result eq 'comment';
 #            say;
 #        while (s/\\$//) # 转行
 #        {
@@ -78,26 +95,26 @@ sub parseConf
 #            $l++;
 #            $_ .= $conf[$l];
 #        }
-            if (/^\[(.+?)\]:(.+)/) { # config group
+            if ($result eq 'confg') { # config group
                 #say 'config group';
-                $group = $1;
-                $subg = $2;
+                $group = $match[0];
+                $subg = $match[1];
                 $ret->{$group} or ($ret->{$group} = {});
                 $ret->{$group}{$subg} or ($ret->{$group}{$subg} = {});
                 $cfg = $ret->{$group}{$subg};
-            } elsif (/^\[(.+?)\]/) { # simple group
+            } elsif ($result eq 'simple') { # simple group
                 #say 'simple group: '.$1;
-                $group = $1;
+                $group = $match[0];
                 $ret->{$group} or ($ret->{$group} = {});
                 $cfg = $ret->{$group};
-            } elsif (/^(.+?)\s*=\s*(.+)/) { # config
+            } elsif ($result eq 'conf') { # config
                 #say "config:$1 = $2";
                 #print Dumper ($ret), ref($cfg);
                 unless ($cfg) {
                     $ret->{$group} or ($ret->{$group} = {});
                     $cfg = $ret->{$group};
                 }
-                $cfg->{$1} = $2;# =~ s/\$\[([^\]]+)\]/get ($ret, split '::', $1)/ger;
+                $cfg->{$match[0]} = $match[1];# =~ s/\$\[([^\]]+)\]/get ($ret, split '::', $1)/ger;
             }
         }
     }
@@ -118,6 +135,24 @@ sub hashref
     $self;
 }
 
+sub getOrigValue : lvalue
+{
+    my $self = shift;
+    my $confhash = $self->hashref;
+    if (@_ == 1) {
+        $confhash->{$defg}{$_[0]};
+    } elsif (@_ == 2) {
+        $confhash->{$_[0]}{$_[1]};
+    } elsif (@_ == 3) {
+        $confhash->{$_[0]}{$_[1]}{$_[2]};
+    }
+}
+sub modify # 似乎并没有用
+{
+    my $self = shift;
+    my $value = pop;
+    $self->getOrigValue(@_) = $value;
+}
 =comment get
 $config->get ($var); # equal to $config->get ($defg, $var);
 $config->get ($group, $var);
@@ -127,21 +162,7 @@ sub get
 {
     my $self = shift;
     my $confhash = $self->hashref;
-    my $ret;
-    #my $arg = \undef; # make $$arg false
-    #if (ref $_[-1]) # a ref to command line arg var.
-    #{
-    #    $arg = pop @_;
-    #}
-    if (@_ == 1) {
-        $ret = $confhash->{$defg}{$_[0]};
-    } elsif (@_ == 2) {
-        $ret = $confhash->{$_[0]}{$_[1]};
-    } elsif (@_ == 3) {
-        $ret = $confhash->{$_[0]}{$_[1]}{$_[2]};
-    } else {
-        return undef;
-    }
+    my $ret = $self->getOrigValue (@_);
 #    $ret =~ s/(^|[^\\])\$([a-zA-Z0-9_])/$1$main::$2/g;
 #    $ret =~ s/(^|[^\\])\$\{([a-zA-Z0-9_])\}/$1$main::$2/g;
 #    $ret =~ s/(^|[^\\])\$\[([a-zA-Z0-9_])\]/$1$this->{$2}/g;

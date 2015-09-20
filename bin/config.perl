@@ -34,13 +34,13 @@ sub printTree
 
 my $file;
 for (scalar @ARGV) {
-    $file = shift when /^[123]$/;
-    # 如下的写法怎么都不行。操。
+    $file = shift when /^[1234]$/;
+    # 如下的写法怎么都不行。
     #when (\(1...3)) {
     #    say "$file = shift";
     #}
     default {
-        die "错误。参数个数应介于1-3个，分别为：filename [[group] entry]\n";
+        die "错误。参数个数应介于1-4个，分别为：filename [[group [subgroup]] entry]\n";
     }
 }
 
