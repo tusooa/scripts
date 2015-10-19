@@ -13,7 +13,7 @@ GetOptions ('a|add-all' => \$addAll,
 if ($^O eq 'MSWin32') {
     say term "你的确应当用```GitHub for Windows'''这个软件。";
 }
-my $git = $^O eq 'MSWin32' ? 'F:\\Programs\\Git\\bin\\git.exe' : 'git';
+my $git = $^O eq 'MSWin32' ? 'C:\\Home\\usr\\Git\\bin\\git.exe' : 'git';
 my @status;
 {
     local %ENV = %ENV;

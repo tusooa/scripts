@@ -7,6 +7,7 @@ use WWW::Mechanize::Firefox;
 #use Encode qw/_utf8_on _utf8_off/;
 use Scripts::scriptFunctions;
 
+my $fx = $^O eq 'MSWin32'?'C:\Program Files (x86)\Mozilla Firefox\firefox':'firefox';
 my $net = "${scriptsDir}waitForNetwork.perl";
 system { $net } $net;
 
@@ -14,7 +15,8 @@ my $m;
 eval { $m = WWW::Mechanize::Firefox->new };
 if ($@) {
     say term 'Firefox is not started, starting now...';
-    system 'firefox -repl & sleep 2';
+    system '"'.$fx.'" -repl &';
+    sleep 2;
     $m = WWW::Mechanize::Firefox->new;
 }
 
