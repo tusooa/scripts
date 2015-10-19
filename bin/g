@@ -27,6 +27,7 @@ my $showColor = 1;
 my $ignoreCase = 0;
 my $fixed = 0;
 my $invert = 0;
+my $autoCase = 0;
 
 GetOptions (
     'help' => \$help,
@@ -43,8 +44,10 @@ GetOptions (
     'comment-startswith|s=s' => \$commentStart,
     'color' => \$showColor,
     'no-color|C' => sub { $showColor = 0 },
-    'ignore-case|i' => \$ignoreCase,
+    'ignore-case|i' => sub { $ignoreCase = 1; $autoCase = 0 },
     'no-ignore-case|I' => sub { $ignoreCase = 0 },
+    'autocase|a' => sub { $autoCase = 1; $ignoreCase = 0 },
+    'no-autocase|A' => sub { $autoCase = 0 },
     'fixed|F' => \$fixed,
     'no-fixed|r' => sub { $fixed = 0 },
     'v|invert' => \$invert,
@@ -118,6 +121,12 @@ if ($ignoreCase) {
 } else {
     @regex = map qr/$_/, @regex;
 }
+# TODO
+#if ($autoCase) {
+#    for ('a'...'z') {
+#        @regex = map 
+#    }
+#}
 my @col;
 my $nocol;
 my $filenameColor;
@@ -130,7 +139,7 @@ if ($showColor) {
     @col = map "\e[1;4;3".(int rand(6) +1).';40m', @regex;
     # 在终端里边，选中了一下，再取消选择，发现居然正常了
     # 是不是urxvt的问题呢？
-    # xterm, mate-terminal 都显不出\e[4m的下划线。操。
+    # xterm, mate-terminal 都显不出\e[4m的下划线。
     #say "$col[0]\t\e[0m" for 1..10;
     $nocol = "\e[0m";
 }
@@ -147,7 +156,6 @@ for my $file (@files) {
         # 这一句绝对不能有
         # ● g -f /dev/stdin
         # 如果有 -T 的话，会先读/dev/stdin，然后，呵呵，你C-d C-d，`LINE:'什么都不知道
-        # 操着卵了
         if (!open $fh, '<', $fh) {
             say STDERR "Cannot open `$file': $!";
             next;

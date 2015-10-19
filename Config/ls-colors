@@ -192,6 +192,7 @@ EXEC 01;32
 # Backup files
 *~ 01;30
 .bak 01;30
+*-backup 01;30
 # text
 .pdf 00;32
 .patch 00;32

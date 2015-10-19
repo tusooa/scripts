@@ -1,33 +1,13 @@
 #!/usr/bin/env perl
 
 use 5.012;
-use WWW::Mechanize::Firefox;
-#use POSIX qw/strftime/;
-#use utf8;
-#use Encode qw/_utf8_on _utf8_off/;
+use Scripts::RageComics;
 use Scripts::scriptFunctions;
-
-my $fx = $^O eq 'MSWin32'?'C:\Program Files (x86)\Mozilla Firefox\firefox':'firefox';
+no warnings qw/expermental/;
 my $net = "${scriptsDir}waitForNetwork.perl";
 system { $net } $net;
-
-my $m;
-eval { $m = WWW::Mechanize::Firefox->new };
-if ($@) {
-    say term 'Firefox is not started, starting now...';
-    system '"'.$fx.'" -repl &';
-    sleep 2;
-    $m = WWW::Mechanize::Firefox->new;
-}
-
-#system '';
-$m->get ('http://baozou.com/login');
-if ($m->uri eq 'http://baozou.com/login') {
-    say term "æ­£åœ¨ç™»å½•...";
-    my $button = $m->xpath ('//button', one => 1);
-    $m->click ($button);
-    $m->content;
-    final;
-} else {
-    say term "å·²ç»ç™»å½•è¿‡äº†";
+given (my $ret = Scripts::RageComics->new->login) {
+    say term 'ÒÑ¾­µÇÂ¼¹ıÁË' when 1;
+    final when 2;
+    default { die term 'µÇÂ¼³ö´í' }
 }

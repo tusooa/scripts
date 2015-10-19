@@ -6,8 +6,11 @@ color-rest  = 255,255,255,250
 color-other = 31,59,229,250
 back-today  = 20,20,20,100
 back-rest   = 20,20,20,50
+back-other = 255,255,255,0
 font = ZhunYuan
 font-size = 18
+show-shadow = 0
+shadow-color = 20,20,20,200
 [Colors]:conky
 today = $[-]{color1}
 other = $[-]{color2}

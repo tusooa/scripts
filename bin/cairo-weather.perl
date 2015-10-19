@@ -31,8 +31,10 @@ my %indexcolor=(
     " "=>$cfg->get ('color-other'),# 其他
     "0"=>$cfg->get ('back-today'),# 今天背景
     "1"=>$cfg->get ('back-rest'),# 周日背景
+    "2"=>$cfg->get ('back-other'),
 );
 my $shadow = $cfg->get ('show-shadow') // 1;
+my $shadowColor = $cfg->get ('shadow-color');
 # 不更新或许是path的问题.
 system "${scriptsDir}weather.perl", '-q';
 $_ = `xwininfo -root`;
@@ -91,18 +93,17 @@ for (@_)
     my $color=$indexcolor{$sign};
     #if($sign eq ">"){drawpng("bg.png",$x0-$align,$y0-$align);}
     #if($sign eq "-"){drawpng("bg-w.png",$x0-$align,$y0-$align);}
-    if ($sign eq ">")
-    {
-        drawframe( $x0-$size/6,22,$indexcolor{0} );
-    }
-    if ($sign eq "-")
-    {
-        drawframe( $x0-$size/6,22,$indexcolor{1} );
-    }
+    if ($sign eq ">") {
+        drawframe( $x0-$size/6,22,$indexcolor{0} ) if $indexcolor{0};
+    } elsif ($sign eq "-") {
+        drawframe( $x0-$size/6,22,$indexcolor{1} ) if $indexcolor{1};
+    } else {
+        drawframe( $x0-$size/6,22,$indexcolor{2} ) if $indexcolor{2};
+    } 
 
     my $y1=$y0+10;
     #my $fsize=$size/5;
-    drawtxt "$y$m$d",$x0+1,$y1+1,"20,20,20,200", $fsize if $shadow;
+    drawtxt "$y$m$d",$x0+1,$y1+1,$shadowColor, $fsize if $shadow;
     drawtxt "$y$m$d",$x0,$y1,$color, $fsize;
     $y1+=$fsize;
     do { #$x2=$x0+$size/2; $y2=$y1+$size/2;
@@ -128,13 +129,15 @@ for (@_)
     };
     #代码高深。不建议修改，或建议由exp亲自修改。
     $y1+=3*$h0;
+    drawtxt $weather,$x0+1,$y1+1,$shadowColor, $fsize if $shadow;
     drawtxt $weather,$x0,$y1,$color, $fsize;
     $y1+=$h0;# $_=$temp; #s/°C/℃/g;
-    drawtxt $temp,$x0+1,$y1+1,"20,20,20,200", $fsize if $shadow;
+    drawtxt $temp,$x0+1,$y1+1,$shadowColor, $fsize if $shadow;
     drawtxt $temp,$x0,$y1,$color, $fsize;
     $y1+=$h0;
 #    $fsize=$size/6;
     _utf8_on($wind);$wind=~s{/}{\n}g;_utf8_off($wind);
+    drawtxt $wind,$x0+1,$y1+1,$shadowColor, $fsize if $shadow;
     drawtxt $wind,$x0,$y1,$color, $fsize;
     $x0+=$w0;
 }
