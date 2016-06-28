@@ -23,7 +23,7 @@ sub term;
 sub final;
 sub debug;
 
-our $home = $^O eq 'MSWin32' ? "C:\\Users\\tusooa" : $ENV{HOME};
+our $home = $^O eq 'MSWin32' ? "C:\\Users\\tusoo" : $ENV{HOME};
 our $scriptName= basename $0;
 our $verbose   = 0;
 our $debug     = 0;

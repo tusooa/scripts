@@ -17,7 +17,7 @@
 ; emacs server
 (server-start)
 ;; font
-(set-frame-font "Ubuntu Mono-13")
+(set-frame-font "Ubuntu Mono-16")
 (set-fontset-font (frame-parameter nil 'font)
                   'han (if (eq system-type 'windows-nt)
                            "Microsoft YaHei" ; 在闻道死底下，DejaVu Sans YuanTi 显示很不好。

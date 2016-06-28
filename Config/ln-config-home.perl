@@ -8,7 +8,7 @@ use Cwd;
 my $cwd = cwd;
 my $home;
 if ($^O eq 'MSWin32' and not $ENV{HOME}) {
-    $home = 'C:\\Users\\tusooa';
+    $home = 'C:\\Users\\tusoo';
 } else {
     $home = $ENV{HOME};
 }
