@@ -12,11 +12,11 @@ my %nick;
 
 sub senderNickname
 {
-    my ($windy, $msg) = @_;
+    my ($self, $windy, $msg) = @_;
 #    debug Dumper($msg);
     my $sender = msgSender($windy, $msg);
     my $id = uid($sender);
-    $nick{$id} // uName($sender);
+    $nick{$id}->[0] // uName($sender);
 }
 
 sub loadNicknames
@@ -34,6 +34,7 @@ sub loadNicknames
 sub newNick
 {
     my ($id, $nick) = @_;
+    unshift @{$nick{$id}}, $nick;
     if (open my $f, '>>', $configDir.'windy-conf/nickname') {
         say $f $id."\t".$nick;
     }

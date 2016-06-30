@@ -4,7 +4,8 @@ use 5.012;
 use Exporter;
 use Scripts::scriptFunctions;
 use Scripts::Windy::Util;
-$Scripts::scriptFunctions::debug = 1;
+use Scripts::Windy::Expr;
+$Scripts::scriptFunctions::debug = 0;
 use List::Util qw/all/;
 no warnings 'experimental';
 use Data::Dumper;
@@ -15,62 +16,112 @@ our @EXPORT_OK = qw//;
 # d1 d2: command
 # d3 d4: plain text
 # d5 d6: regexp shortcut
-my ($d1, $d2, $d3, $d4, $d5, $d6);
-my $aliases = [];
-my $replacements = {};
+#our ($d1, $d2, $d3, $d4, $d5, $d6);
+#our $aliases = [];
+#our $replacements = {};
+=comment
 if (open my $f, '<', $configDir."windy-conf/smartmatch.pm") {
     eval join '', <$f>;
     die $@ if $@;
 } else {
     debug 'cannot open';
 }
-
-sub smartParse
+=cut
+sub new
 {
+    my $class = shift;
+    my $self = {@_};
+    $self->{d1} //= '【';
+    $self->{d2} //= '】';
+    $self->{d3} //= '{';
+    $self->{d4} //= '}';
+    $self->{d5} //= '<';
+    $self->{d6} //= '>';
+    $self->{aliases} //= [];
+    $self->{replacements} //= {};
+    bless $self, $class;
+}
+
+sub parse
+{
+    my $self = shift;
     my $text = shift;
     my @s = (); #/$d1(.*?)$d2(.*?)(?=$d2)/g;
-    my @pattern;
+    my $d1 = $self->{d1};
+    my $d2 = $self->{d2};
+    my $d5 = $self->{d5};
+    my $d6 = $self->{d6};
+    my $replacements = $self->{replacements};
     while ($text) {
         debug "text = `$text`";
         if ($text =~ s/^$d1(.*?)$d2//) {
             debug "command `$1`";
-            push @s, [$1];
+            push @s, $self->parseExpr($1);
         } elsif ($text =~ s/^(?<!$d1)(.+?)(?=$d1|$)//) {
-            debug "match `$1`";
-            push @s, $1;
+            my $ret = $1;
+            debug "match `$ret`";
+            $ret =~ s/$d5(.+)?$d6/$replacements->{$1}/e;
+            push @s, $ret;
         } else {
             die "not match";
         }
         #debug chomp ($_ = <>);
     }
-    for (@s) {
-        if (ref $_) {
-            my $t = $_->[0];
-            my $found = 0;
-Alias:      for my $a (@$aliases) {
-                debug "sm #45:" .Dumper $a;
-                if (my @matches = $t =~ $a->[0]) {
-                    debug "sm #47:".Dumper @matches;
-                    push @pattern, [$a->[1], @matches];
-                    $found = 1;
-                    last Alias;
-                }
-            }
-            push @pattern, [sub { $t }] if not $found; # Plain word(as a condition of match)
-        } else {
-            s/<(.+)?>/$replacements->{$1}/e;
-            push @pattern, $_; # Plain word(as regexp)
+    wantarray ? @s : [@s];
+}
+
+sub parseExpr
+{
+    my $self = shift;
+    my $t = shift;
+    $t =~ s/^\s+//;
+    $t =~ s/\s+$//;
+    my $found = 0;
+    my $expr;
+    debug "text is ".$t;
+    my $d3 = $self->{d3};
+    my $d4 = $self->{d4};
+    return $1 if $t =~ /^$d3(.+)$d4$/; # Plain Text
+    for my $a (@{$self->{aliases}}) {
+        debug "sm #45:" .Dumper $a;
+        if (my @matches = $t =~ $a->[0]) {
+            debug "sm #47:".Dumper @matches;
+            $expr = Scripts::Windy::Expr->new ($a->[1], map { $_ = $self->parseExpr($_) } @matches);
+            $found = 1;
+            last;
         }
     }
-    @pattern;
+    $expr = $t if not $found; # Bareword
+    $expr;
 }
-sub sm
+
+sub runExpr
 {
+    my $self = shift;
+    my $windy = shift;
+    my $msg = shift;
+    my $expr = shift;
+    debug "running expr:" . Dumper($expr);
+    ref $expr eq 'Scripts::Windy::Expr' or return $expr;
+    my @args = @{$expr->{args}};
+    if (not $expr->quoted) {
+        for (@args) {
+            debug "Arg: ". Dumper($_);
+            $_ = $self->runExpr($windy, $msg, $_);
+            debug "Changed into:".Dumper($_);
+        }
+    }
+    ($expr->{run})->($self, $windy, $msg, @args);
+}
+
+sub smartmatch
+{
+    my $self = shift;
     my $text = shift;
-    my @pattern = smartParse $text;
-    my $textMatch = join '', grep !ref $_, @pattern;
-    my @pattern = grep ref $_, @pattern;
-    sub {
+    my @pattern = $self->parse($text);
+    my $textMatch = join '', grep { not ref $_ } @pattern;
+    my @pattern = grep { ref $_ } @pattern;
+    sub { # $m->smartmatch("")->($windy, $msg);
         my $windy = shift;
         my $msg = shift;
         my $t = msgText ($windy, $msg);
@@ -78,7 +129,7 @@ sub sm
         debug 'match pattern:'.$textMatch;
         # References could be changed,
         # Be aware when using them.
-        if (@pattern ? all { debug 'sm #81'. Dumper ($_); my @arr = @$_; my $p = shift @arr; $p->($windy, $msg, @arr); } @pattern : 1) {
+        if (@pattern ? all { $self->runExpr($windy, $msg, $_); } @pattern : 1) {
             debug 'i am returning a value:';
             return $t =~ $textMatch;
         }
@@ -87,10 +138,11 @@ sub sm
     }
 }
 
-sub sr
+sub smartret
 {
+    my $self = shift;
     my $text = shift;
-    my @pattern = smartParse $text;
+    my @pattern = $self->parse($text);
     sub {
         my $windy = shift;
         my $msg = shift;
@@ -98,12 +150,28 @@ sub sr
         debug Dumper @pattern;
         # Evaluate if code
         # Plain text leave it as-is
-        join '', map { if (ref $_) { my @arr = @$_; my $p = shift @arr; $p->($windy, $msg, @arr); } else { $_ } } @pattern;
+        join '', map { $self->runExpr($windy, $msg, $_) } @pattern;
     }
 }
 
-sub expr
+
+1;
+=comment
+package Scripts::Windy::MatchObject;
+
+use 5.012;
+use Scripts::Windy::Expr;
+
+sub new
 {
-    sm $d1.shift.$d2;
+    my $class = shift;
+    my $self = [@_];
+    bless $self, $class;
 }
+
+sub newFromString
+{
+
+}
+=cut
 1;

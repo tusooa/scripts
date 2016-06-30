@@ -1,14 +1,14 @@
 package Scripts::Windy;
 
 use Scripts::scriptFunctions;
-use Scripts::Windy::Userdb;
+use Scripts::Windy::Conf::userdb;
 use 5.012;
 no warnings 'experimental';
 sub new
 {
     my $class = shift;
     my $c = conf 'windy';
-    my $self = {};
+    my $self = { startGroup => [], };
 =comment
     $self->{Addons} = [];
     if (ref $c->{Addons} ne 'HASH') {
@@ -47,7 +47,7 @@ sub parse
 {
     my $self = shift;
     my $msg = shift;
-    my $ret = Scripts::Windy::Userdb->parse($self, $msg);
+    my $ret = $database->parse($self, $msg);
     $ret->{Text};
 =comment
     for my $a (@{ $self->{Addons} }) {

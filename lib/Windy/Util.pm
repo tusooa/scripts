@@ -2,6 +2,7 @@ package Scripts::Windy::Util;
 
 use 5.012;
 use Exporter;
+use Scripts::scriptFunctions;
 #use Data::Dumper;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/isGroupMsg msgText msgGroupId msgStopping msgSender uid uName isAt/;
@@ -57,4 +58,6 @@ sub isAt
     my $msg = shift;
     $msg->is_at(@_);
 }
+
+
 1;

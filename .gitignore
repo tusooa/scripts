@@ -5,6 +5,8 @@
 *.elc
 Config/config+Scripts/countup.cache
 Config/config+Scripts/show-png.perl
+Config/config+Scripts/windy-conf/userdb.db
+Config/config+Scripts/windy-conf/nickname
 src/*/build/*
 *.pir
 *.moarvm

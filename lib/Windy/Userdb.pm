@@ -2,32 +2,45 @@ package Scripts::Windy::Userdb;
 use 5.012;
 no warnings 'experimental';
 use Scripts::scriptFunctions;
-use Scripts::Windy::SmartMatch;
+use Scripts::Windy::Util;
 use Data::Dumper;
-$Scripts::scriptFunctions::debug = 1;
-#my $conf = conf 'windy-conf/startstop';
-my $startGroup = [];
-my $words = [];
+$Scripts::scriptFunctions::debug = 0;
 
-sub parse
+sub new
 {
     my $class = shift;
+    my $self = { words => [@_] };
+    bless $self, $class;
+}
+
+sub add
+{
+    my $self = shift;
+    for (@_) {
+        push @{$self->{words}}, $_;
+    }
+}
+#my $conf = conf 'windy-conf/startstop';
+sub parse
+{
+    my $self = shift;
     my $windy = shift;
     my $msg = shift;
     my $reply = { Next => 0, Text => undef };
     debug 'userdb parsing';
-    $reply->{Text} = match ($windy, $msg);
+    $reply->{Text} = $self->match($windy, $msg);
     $reply;
 }
 
 # $words = [ [ pattern(sub), callback, (stopping = 0) ], ...];
 sub match
 {
+    my $self = shift;
     my $windy = shift;
     my $msg = shift;
     debug 'running match';
     my @ret = ();
-    for (@$words) {
+    for (@{$self->{words}}) {
 #        my $m = $words->[$_];
         debug 'word:'.Dumper ($_->[0]);
         if ((my @a = $_->[0]($windy, $msg))) {
@@ -42,11 +55,11 @@ sub match
     @ret ? $ret[int rand @ret] : undef; # 若有多个选择，随机。
 }
 
-if (open my $f, '<', $configDir."windy-conf/userdb.pm") {
-    eval join '', <$f>;
-    die $@ if $@;
-} else {
-    debug 'cannot open';
-}
+#if (open my $f, '<', $configDir."windy-conf/userdb.pm") {
+#    eval join '', <$f>;
+#    die $@ if $@;
+#} else {
+#    debug 'cannot open';
+#}
 
 1;

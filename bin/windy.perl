@@ -9,14 +9,12 @@ use Scripts::Windy;
 my $file = $accountDir.'windy';
 my %acc;
 {
-    open my $w, '<', $file or die term "无法获取账号信息$file: $!\n";
+    open my $w, '<', $file or die term "打不开文件 $file: $!\n";
     chomp ($acc{uid} = <$w>);
-    chomp ($acc{pass} = <$w>);
-    $acc{pass} = md5_sum($acc{pass});
 }
-my $t = Mojo::Webqq->new(qq => $acc{uid}, pwd => $acc{pass}, login_type => 'qrlogin');
-$t->login;
 my $windy = Scripts::Windy->new;
+my $t = Mojo::Webqq->new(qq => $acc{uid}, login_type => 'qrlogin');
+$t->login;
 sub onReceive
 {
     my ($c, $m) = @_;
