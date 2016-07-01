@@ -5,7 +5,7 @@ use Exporter;
 use Scripts::scriptFunctions;
 use Scripts::Windy::Util;
 use Scripts::Windy::Expr;
-$Scripts::scriptFunctions::debug = 0;
+$Scripts::scriptFunctions::debug = 1;
 use List::Util qw/all/;
 no warnings 'experimental';
 use Data::Dumper;

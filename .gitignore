@@ -7,6 +7,10 @@ Config/config+Scripts/countup.cache
 Config/config+Scripts/show-png.perl
 Config/config+Scripts/windy-conf/userdb.db
 Config/config+Scripts/windy-conf/nickname
+Config/config+Scripts/windy-conf/sense
+Config/config+Scripts/windy-conf/admin
+Config/config+Scripts/windy-conf/channels
+Config/config+Scripts/windy-conf/sign
 src/*/build/*
 *.pir
 *.moarvm
