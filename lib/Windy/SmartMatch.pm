@@ -5,7 +5,7 @@ use Exporter;
 use Scripts::scriptFunctions;
 use Scripts::Windy::Util;
 use Scripts::Windy::Expr;
-$Scripts::scriptFunctions::debug = 1;
+$Scripts::scriptFunctions::debug = 0;
 use List::Util qw/all/;
 no warnings 'experimental';
 use Data::Dumper;
@@ -107,11 +107,11 @@ sub runExpr
     if (not $expr->quoted) {
         for (@args) {
             debug "Arg: ". Dumper($_);
-            $_ = $self->runExpr($windy, $msg, $_);
+            $_ = $self->runExpr($windy, $msg, $_, @_);
             debug "Changed into:".Dumper($_);
         }
     }
-    ($expr->{run})->($self, $windy, $msg, @args);
+    ($expr->{run})->($self, $windy, $msg, @args, @_);
 }
 
 sub smartmatch
@@ -129,7 +129,7 @@ sub smartmatch
         debug 'match pattern:'.$textMatch;
         # References could be changed,
         # Be aware when using them.
-        if (@pattern ? all { $self->runExpr($windy, $msg, $_); } @pattern : 1) {
+        if (@pattern ? all { $self->runExpr($windy, $msg, $_, @_); } @pattern : 1) {
             debug 'i am returning a value:';
             return $t =~ $textMatch;
         }
@@ -150,7 +150,7 @@ sub smartret
         debug Dumper @pattern;
         # Evaluate if code
         # Plain text leave it as-is
-        join '', map { $self->runExpr($windy, $msg, $_) } @pattern;
+        join '', map { $self->runExpr($windy, $msg, $_, @_) } @pattern;
     }
 }
 

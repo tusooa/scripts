@@ -16,7 +16,7 @@ loadNicknames;
 loadSense;
 loadSign;
 our $match;
-my $myName = qr/(?<!风)(?:小|西)?风(?:妹(?:子|儿|砸|妹)?|儿|酱|姐{1,2})/;
+my $myName = qr/(?:(?<!风)(?:小|西)?风(?:妹(?:子|儿|砸|妹)?|儿|酱|姐{1,2})|小风姬|西风待人)/;
 my $emotion = qr/(?:哪|呐|呀|啊|w|[Qq](?:[AWwa][Qq])+[Qq]*)/;
 my $caller = qr/\s*$myName(?:$emotion)?(?:\s+|，|。|,|\.{2,})?/;
 my $If = qr/(?:(?:如)?若|如果)/;
@@ -35,16 +35,16 @@ $subs = {
 #    }),
     IfThenElse => quote(sub {
         my ($self, $windy, $msg, $m1, $m2, $m3) = @_;
-        if ($self->runExpr($windy, $msg, $m1)) {
-            $self->runExpr($windy, $msg, $m2);
+        if ($self->runExpr($windy, $msg, $m1, @_[6..$#_])) {
+            $self->runExpr($windy, $msg, $m2, @_[6..$#_]);
         } else {
-            $self->runExpr($windy, $msg, $m3);
+            $self->runExpr($windy, $msg, $m3, @_[6..$#_]);
         }
     }),
     IfThen => quote(sub {
-        my ($self, $windy, $msg, $m1, $m2, $m3) = @_;
-        if ($self->runExpr($windy, $msg, $m1)) {
-            $self->runExpr($windy, $msg, $m2);
+        my ($self, $windy, $msg, $m1, $m2) = @_;
+        if ($self->runExpr($windy, $msg, $m1, @_[5..$#_])) {
+            $self->runExpr($windy, $msg, $m2, @_[5..$#_]);
         }
     }),
     And => sub {
@@ -100,7 +100,7 @@ $subs = {
         my $s = sign($self, $windy, $msg);
         if ($s) {
             debug "sensing: $s";
-            $subs->{addSense}($self, $windy, $msg, $s);
+            $subs->{addSense}($self, $windy, $msg, $s, @_[3..$#_]);
         } else {
             debug "not sensing.";
             '';
@@ -132,8 +132,8 @@ my $aliases = [
     #[qr/^(?:随机|任选)(.+)$/s, sub { my ($self, $windy, $msg, $m1) = @_; my @arr = split /\n/, $m1; (expr $arr[int rand @arr])->($windy, $msg) } ],
     [qr/^概率(\d*\.*\d+)(.+)$/, quote(sub {
         my ($self, $windy, $msg, $m1, $m2) = @_;
-        if ($self->runExpr($windy, $msg, $m1) >= rand) {
-            $self->runExpr($windy, $msg, $m2);
+        if ($self->runExpr($windy, $msg, $m1, @_[5..$#_]) >= rand) {
+            $self->runExpr($windy, $msg, $m2, @_[5..$#_]);
         } })],
     # Functions
     [qr/^群讯$/, sub { my ($self, $windy, $msg) = @_; isGroupMsg($windy, $msg) and msgGroupId($windy, $msg) ~~ @{$windy->{startGroup}}; }],
@@ -141,34 +141,33 @@ my $aliases = [
     [qr/^(?:来讯者(?:名|的名字))$/, \&senderNickname],
     [qr/^(?:增|加|增加)(\d+)好感$/, $subs->{addSense}],
     [qr/^好感(?:度)?$/, $subs->{sense}],
-    [qr/^一等(.+)$/, quote(sub {
+    [qr/^捕获(\d+)$/, sub {
+        my $self = shift;
+        my $windy = shift;
+        my $msg = shift;
+        my $num = shift;
+        $_[$num - 1];
+     }],
+    [qr/^一等$/, sub {
+        my ($self, $windy, $msg) = @_;
+        my $s = $subs->{sense}($self, $windy, $msg);
+        $s > $sl1;
+     }],
+    [qr/^二等$/, sub {
+        my ($self, $windy, $msg) = @_;
+        my $s = $subs->{sense}($self, $windy, $msg);
+        $s <= $sl1 and $s > $sl2;
+     }],
+    [qr/^三等$/, sub {
+        my ($self, $windy, $msg) = @_;
+        my $s = $subs->{sense}($self, $windy, $msg);
+        $s <= $sl2 and $s > $sl3;
+     }],
+    [qr/^四等$/, sub {
         my ($self, $windy, $msg, $m1) = @_;
         my $s = $subs->{sense}($self, $windy, $msg);
-        if ($s > $sl1) {
-            $self->runExpr($windy, $msg, $m1);
-        }
-                           })],
-    [qr/^二等(.+)$/, quote(sub {
-        my ($self, $windy, $msg, $m1) = @_;
-        my $s = $subs->{sense}($self, $windy, $msg);
-        if ($s <= $sl1 and $s > $sl2) {
-            $self->runExpr($windy, $msg, $m1);
-        }
-                           })],
-    [qr/^三等(.+)$/, quote(sub {
-        my ($self, $windy, $msg, $m1) = @_;
-        my $s = $subs->{sense}($self, $windy, $msg);
-        if ($s <= $sl2 and $s > $sl3) {
-            $self->runExpr($windy, $msg, $m1);
-        }
-                           })],
-    [qr/^四等(.+)$/, quote(sub {
-        my ($self, $windy, $msg, $m1) = @_;
-        my $s = $subs->{sense}($self, $windy, $msg);
-        if ($s <= $sl3) {
-            $self->runExpr($windy, $msg, $m1);
-        }
-                           })],
+        $s <= $sl3;
+     }],
     [qr/^签到$/, $subs->{sign}],
     [qr/^(?:对|艾特)(?:我|你)$/, sub { my $self = shift;my $windy = shift; my $msg = shift; isAt($windy, $msg) or msgText($windy, $msg) =~ /^$caller/ }],
     ];
