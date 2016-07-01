@@ -27,7 +27,7 @@ sub msgText
 sub msgGroupId
 {
     my ($windy, $msg) = @_;
-    $msg->group_id;
+    $msg->group->gnumber;
 }
 
 sub msgStopping : lvalue
