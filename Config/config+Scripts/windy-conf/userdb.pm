@@ -63,9 +63,9 @@ sub start
         } else {
             debug "cannot open file:$!";
         }
-        $startRes1->($windy, $msg);
+        $startRes1->($windy, $msg, @_);
     } else {
-        $startRes2->($windy, $msg);
+        $startRes2->($windy, $msg, @_);
     }
 }
 
@@ -83,9 +83,9 @@ sub stop
             say $f $_ for @{$windy->{startGroup}};
             close $f;
         }
-        $stopRes1->($windy, $msg);
+        $stopRes1->($windy, $msg, @_);
     } else {
-        $stopRes2->($windy, $msg);
+        $stopRes2->($windy, $msg, @_);
     }
 }
 
@@ -94,7 +94,9 @@ my $teachRes2 = sr("诶...?QAQ");
 my $teachRes3 = sr("...");
 sub teach
 {
-    my ($windy, $msg, $ask, $ans) = @_;
+    my $windy = shift;
+    my $msg = shift;
+    my ($ask, $ans) = @_;
     debug 'teaching:';
     debug 'ques:'.$ask;
     debug 'answ:'.$ans;
@@ -109,21 +111,47 @@ sub teach
         } else {
             debug 'cannot open db for write'."$!";
         }
-        $teachRes1->($windy, $msg);
+        $teachRes1->($windy, $msg, @_);
     } elsif ($sense > $sl2) { # 
-        $teachRes2->($windy, $msg);
+        $teachRes2->($windy, $msg, @_);
     } else {
-        $teachRes3->($windy, $msg);
+        $teachRes3->($windy, $msg, @_);
     }
 }
 
 my $nickRes = sr("【截止】【来讯者名】qwq咱知道惹");
+my $nickResF = sr("【截止】诶？");
 sub newNickname
 {
-    my ($windy, $msg, $nick) = @_;
-    $subs->{newNick}(undef, $windy, $msg, $nick);
-    $nickRes->($windy, $msg);
+    my $windy = shift;
+    my $msg = shift;
+    my ($nick) = @_;
+    $subs->{newNick}(undef, $windy, $msg, $nick) ?
+        $nickRes->($windy, $msg, @_) :
+        $nickResF->($windy, $msg, @_);
 }
+
+my $assignRes1 = sr("【截止】好哒【来讯者名】w");
+my $assignRes1F = sr("【截止】咪呼w...？");
+my $assignRes2 = sr("喵...喵呼w？");
+my $assignRes3 = sr("....");
+sub assignNickname
+{
+    my $windy = shift;
+    my $msg = shift;
+    my ($id, $nick, $sticky) = @_;
+    my $sense = $subs->{sense}(undef, $windy, $msg);
+    if (msgSenderIsAdmin($windy, $msg)) {
+        $subs->{assignNick}(undef, $windy, $msg, $id, $nick, $sticky) ?
+            $assignRes1->($windy, $msg, @_) :
+            $assignRes1F->($windy, $msg, @_);
+    } elsif ($sense > $sl2) {
+        $assignRes2->($windy, $msg, @_);
+    } else {
+        $assignRes3->($windy, $msg, @_);
+    }
+}
+
 
 $database = Scripts::Windy::Userdb->new(
 [sm(qr/^<风妹>出来$/), \&start],
@@ -132,6 +160,8 @@ $database = Scripts::Windy::Userdb->new(
 [sm(qr/^<风妹>若问(.+?)即答(.+)$/), \&teach],
 [sm(qr/^<风妹>问(.+?)答(.+)$/), sub { $_[2] = '^'.$_[2].'$'; teach(@_); }],
 [sm(qr/^<风妹>(?:(?:以|今|而)后)?(?:叫|称呼|呼|唤|喊)(?:我|吾|在下|咱|人家)(?:作|为|叫)?(.+?)(?:就好|就行|就可以(?:了)?|就是(?:了)?)?$/), \&newNickname],
+[sm(qr/^<风妹>(?:(?:以|今|而)后)?(?:叫|称呼|呼|唤|喊)(\d+)(?:作|为|叫)?(.+?)(?:就好|就行|就可以(?:了)?|就是(?:了)?)?$/), \&assignNickname],
+[sm(qr/^<风妹>(?:(?:以|今|而)后)?一直(?:都)?(?:叫|称呼|呼|唤|喊)(\d+)(?:作|为|叫)?(.+?)(?:就好|就行|就可以(?:了)?|就是(?:了)?)?$/), sub { assignNickname @_, 1; }],
 );
 
 

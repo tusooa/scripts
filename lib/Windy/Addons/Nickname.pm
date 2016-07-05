@@ -18,25 +18,45 @@ sub senderNickname
     my $id = uid($sender);
     $nick{$id}->[0] // uName($sender);
 }
+my $s = 'Scripts::Windy::Addons::Nickname::Sticky';
+
+sub makeSticky
+{
+    bless shift, $s;
+}
+
+sub isSticky
+{
+    ref shift eq $s;
+}
 
 sub loadNicknames
 {
     if (open my $f, '<', $configDir.'windy-conf/nickname') {
         while (<$f>) {
             chomp;
-            /^(.+)\t(.+)$/;
-            $nick{$1} = [] if not $nick{$1};
-            unshift @{$nick{$1}}, $2;
+            my ($id, $sticky, $nickname) = /^(.+)(S?)\t(.+)$/;
+            $nick{$id} = [] if not $nick{$id};
+            if ($sticky or not isSticky $nick{$id}) {
+                unshift @{$nick{$id}}, $nickname;
+            }
+            makeSticky $nick{$id} if $sticky;
         }
     }
 }
 
 sub newNick
 {
-    my ($id, $nick) = @_;
-    unshift @{$nick{$id}}, $nick;
-    if (open my $f, '>>', $configDir.'windy-conf/nickname') {
-        say $f $id."\t".$nick;
+    my ($id, $nick, $sticky) = @_;
+    makeSticky $nick{$id} if $sticky;
+    if ($sticky or not isSticky $nick{$id}) {
+        unshift @{$nick{$id}}, $nick;
+        if (open my $f, '>>', $configDir.'windy-conf/nickname') {
+            say $f $id.($sticky ? 'S' : '')."\t".$nick;
+        }
+        $nick; # return the nickname
+    } else {
+        undef; # failed
     }
 }
 

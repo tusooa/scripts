@@ -107,10 +107,13 @@ $subs = {
         }
     },
     newNick => sub {
-        my ($self, $windy, $msg, $nick) = @_;
+        my ($self, $windy, $msg, $nick, $sticky) = @_;
         my $id = uid(msgSender($windy, $msg));
-        newNick($id, $nick);
-        $nick;
+        newNick($id, $nick, $sticky);
+    },
+    assignNick => sub {
+        my ($self, $windy, $msg, $id, $nick, $sticky) = @_;
+        newNick($id, $nick, $sticky);
     },
 };
 my $aliases = [
@@ -129,6 +132,7 @@ my $aliases = [
     [qr/^不是(.+)$/, $subs->{Not}],
     # Comparison expressions
     [qr/^(.+)((?:不)?(?:大|等|小)于|为)(.+)$/, $subs->{Op}],
+    [qr/^(.+?)(?:连上|\+|\.)(.+)$/, sub { my ($self, $windy, $msg, $m1, $m2) = @_; $m1 . $m2; }],
     #[qr/^(?:随机|任选)(.+)$/s, sub { my ($self, $windy, $msg, $m1) = @_; my @arr = split /\n/, $m1; (expr $arr[int rand @arr])->($windy, $msg) } ],
     [qr/^概率(\d*\.*\d+)(.+)$/, quote(sub {
         my ($self, $windy, $msg, $m1, $m2) = @_;
@@ -139,7 +143,7 @@ my $aliases = [
     [qr/^群讯$/, sub { my ($self, $windy, $msg) = @_; isGroupMsg($windy, $msg) and msgGroupId($windy, $msg) ~~ @{$windy->{startGroup}}; }],
     [qr/^截止$/, sub { print "i am stopping parse this message"; msgStopping($_[1], $_[2]) = 1; '' } ],
     [qr/^(?:来讯者(?:名|的名字))$/, \&senderNickname],
-    [qr/^(?:增|加|增加)(\d+)好感$/, $subs->{addSense}],
+    [qr/^(?:增|加|增加)(-?\d+)好感$/, $subs->{addSense}],
     [qr/^好感(?:度)?$/, $subs->{sense}],
     [qr/^捕获(\d+)$/, sub {
         my $self = shift;
