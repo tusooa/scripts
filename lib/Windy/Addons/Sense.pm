@@ -1,7 +1,7 @@
 package Scripts::Windy::Addons::Sense;
 use Scripts::Windy::Util;
 use Scripts::scriptFunctions;
-$Scripts::scriptFunctions::debug = 1;
+#$Scripts::scriptFunctions::debug = 1;
 use Exporter;
 use 5.012;
 our @ISA = qw/Exporter/;

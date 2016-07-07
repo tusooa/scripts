@@ -8,7 +8,7 @@ use Scripts::Windy::SmartMatch;
 use Scripts::Windy::Quote;
 use Scripts::Windy::Util;
 use Scripts::scriptFunctions;
-$Scripts::scriptFunctions::debug = 0;
+#$Scripts::scriptFunctions::debug = 0;
 use Exporter;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/$match sm sr $sl1 $sl2 $sl3 $subs/;
@@ -17,8 +17,10 @@ loadSense;
 loadSign;
 our $match;
 my $myName = qr/(?:(?<!风)(?:小|西)?风(?:妹(?:子|儿|砸|妹)?|儿|酱|姐{1,2})|小风姬|西风待人)/;
-my $emotion = qr/(?:哪|呐|呀|啊|w|[Qq](?:[AWwa][Qq])+[Qq]*)/;
-my $caller = qr/\s*$myName(?:$emotion)?(?:\s+|，|。|,|\.{2,})?/;
+my $emotion = qr/(?:w+|[Qq](?:[AWwa][Qq])+[Qq]*)/;
+my $emotion_a = qr/(?:$emotion)?/;
+my $suffix = qr/(?:哪|呐|呀|啊|$emotion)/;
+my $caller = qr/\s*$myName(?:$suffix)?(?:\s+|，|。|,|\.{2,})?/;
 my $If = qr/(?:(?:如)?若|如果)/;
 my $Then = qr/(?:则|那么)/;
 my $Else = qr/(?:不然|否则)(?:的话)?/;
@@ -131,8 +133,8 @@ my $aliases = [
     [qr/^(.+?)(?:或者|或是|或)(.+)$/, $subs->{Or}],
     [qr/^不是(.+)$/, $subs->{Not}],
     # Comparison expressions
-    [qr/^(.+)((?:不)?(?:大|等|小)于|为)(.+)$/, $subs->{Op}],
-    [qr/^(.+?)(?:连上|\+|\.)(.+)$/, sub { my ($self, $windy, $msg, $m1, $m2) = @_; $m1 . $m2; }],
+    [qr/^(.+?)(?:连上|\+)(.+)$/, sub { my ($self, $windy, $msg, $m1, $m2) = @_; $m1 . $m2; }],
+    [qr/^(.+?)((?:不)?(?:大|等|小)于|为)(.+)$/, $subs->{Op}],
     #[qr/^(?:随机|任选)(.+)$/s, sub { my ($self, $windy, $msg, $m1) = @_; my @arr = split /\n/, $m1; (expr $arr[int rand @arr])->($windy, $msg) } ],
     [qr/^概率(\d*\.*\d+)(.+)$/, quote(sub {
         my ($self, $windy, $msg, $m1, $m2) = @_;
@@ -177,6 +179,7 @@ my $aliases = [
     ];
 my $replacements = {
     '风妹' => $caller,
+    '心态' => $emotion_a,
     };
 $match = Scripts::Windy::SmartMatch->new(
     d1 => '【',

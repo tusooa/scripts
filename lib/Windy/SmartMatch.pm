@@ -5,7 +5,7 @@ use Exporter;
 use Scripts::scriptFunctions;
 use Scripts::Windy::Util;
 use Scripts::Windy::Expr;
-$Scripts::scriptFunctions::debug = 0;
+#$Scripts::scriptFunctions::debug = 1;
 use List::Util qw/all/;
 no warnings 'experimental';
 use Data::Dumper;
@@ -60,7 +60,8 @@ sub parse
         } elsif ($text =~ s/^(?<!$d1)(.+?)(?=$d1|$)//) {
             my $ret = $1;
             debug "match `$ret`";
-            $ret =~ s/$d5(.+)?$d6/$replacements->{$1}/e;
+            $ret =~ s/$d5(.+?)$d6/$replacements->{$1}/eg;
+            debug "the pattern is now: $ret";
             push @s, $ret;
         } else {
             die "not match";

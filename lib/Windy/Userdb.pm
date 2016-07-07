@@ -4,7 +4,7 @@ no warnings 'experimental';
 use Scripts::scriptFunctions;
 use Scripts::Windy::Util;
 use Data::Dumper;
-$Scripts::scriptFunctions::debug = 1;
+#$Scripts::scriptFunctions::debug = 1;
 
 sub new
 {

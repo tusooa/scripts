@@ -2,7 +2,7 @@ package Scripts::Windy::Conf::userdb;
 
 use 5.012;
 use Scripts::scriptFunctions;
-$Scripts::scriptFunctions::debug = 0;
+#$Scripts::scriptFunctions::debug = 0;
 no warnings 'experimental';
 use Scripts::Windy::Util;
 use Scripts::Windy::Userdb;
@@ -159,6 +159,7 @@ $database = Scripts::Windy::Userdb->new(
 [sm(qr/^<风妹>回去$/), \&stop],
 [sm(qr/^<风妹>若问(.+?)即答(.+)$/), \&teach],
 [sm(qr/^<风妹>问(.+?)答(.+)$/), sub { $_[2] = '^'.$_[2].'$'; teach(@_); }],
+[sm(qr/^<风妹>当问(.+?)则答(.+)$/), sub { $_[2] = '^<心态>'.$_[2].'<心态>$'; teach(@_); }],
 [sm(qr/^<风妹>(?:(?:以|今|而)后)?(?:叫|称呼|呼|唤|喊)(?:我|吾|在下|咱|人家)(?:作|为|叫)?(.+?)(?:就好|就行|就可以(?:了)?|就是(?:了)?)?$/), \&newNickname],
 [sm(qr/^<风妹>(?:(?:以|今|而)后)?(?:叫|称呼|呼|唤|喊)(\d+)(?:作|为|叫)?(.+?)(?:就好|就行|就可以(?:了)?|就是(?:了)?)?$/), \&assignNickname],
 [sm(qr/^<风妹>(?:(?:以|今|而)后)?一直(?:都)?(?:叫|称呼|呼|唤|喊)(\d+)(?:作|为|叫)?(.+?)(?:就好|就行|就可以(?:了)?|就是(?:了)?)?$/), sub { assignNickname @_, 1; }],
