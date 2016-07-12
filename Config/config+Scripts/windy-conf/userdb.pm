@@ -53,7 +53,9 @@ sub start
     my $windy = shift;
     my $msg = shift;
     #$windy->{startGroup} = [@lastGroups] if ref $windy->{startGroup} ne 'ARRAY';# 初始化.
-    if (msgSenderIsAdmin($windy, $msg) and ! grep $_ eq msgGroupId($windy, $msg), @{$windy->{startGroup}}) {
+    if ((msgSenderIsGroupAdmin($windy, $msg)
+         or msgSenderIsAdmin($windy, $msg))
+        and ! grep $_ eq msgGroupId($windy, $msg), @{$windy->{startGroup}}) {
         push @{$windy->{startGroup}}, msgGroupId($windy, $msg);
         debug "starting on ".msgGroupId($windy, $msg);
         if (open my $f, '>', $channelFile) {
@@ -77,7 +79,8 @@ sub stop
     my $windy = shift;
     my $msg = shift;
 #    $windy->{startGroup} = [@{$windy->{startGroup}}] if ref $windy->{startGroup} ne 'ARRAY';
-    if (msgSenderIsAdmin($windy, $msg)# and grep $_ eq msgGroupId($windy, $msg), @{$windy->{startGroup}}
+    if (msgSenderIsGroupAdmin($windy, $msg)
+        or msgSenderIsAdmin($windy, $msg)# and grep $_ eq msgGroupId($windy, $msg), @{$windy->{startGroup}}
         ) {
         @{$windy->{startGroup}} = grep $_ ne msgGroupId($windy, $msg), @{$windy->{startGroup}};
         if (open my $f, '>', $channelFile) {
