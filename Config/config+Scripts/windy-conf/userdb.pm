@@ -158,17 +158,37 @@ sub assignNickname
     }
 }
 
+my $blackListRes1 = sr("【截止】咱听【来讯者名】的w");
+my $blackListRes2 = sr("我不会考虑的w（笑");
+my $blackListRes3 = sr("....");
+sub blackList
+{
+    my ($windy, $msg, $id, $status) = @_;
+    my $sense = $subs->{sense}(undef, $windy, $msg);
+    if (msgSenderIsAdmin($windy, $msg)) {
+        $subs->{blackList}(undef, $windy, $msg, $id, $status);
+        $blackListRes1->($windy, $msg, @_);
+    } elsif ($sense > $sl2) {
+        $blackListRes2->($windy, $msg, @_);
+    } else {
+        $blackListRes3->($windy, $msg, @_);
+    }
+}
 
+my $nowAndThen = qr/(?:(?:以|今|而)后)?/;
 $database = Scripts::Windy::Userdb->new(
 [sm(qr/^<风妹>出来$/), \&start],
 [sm("【不是群讯】"), sr("【截止】")],
+[sm(qr/^<风妹>${nowAndThen}别理(\d+)(?:了)?$/), sub { blackList(@_, 1); }],
+[sm(qr/^<风妹>${nowAndThen}别不理(\d+)(?:了)?$/), sub { blackList(@_, 0); }],
+[sm("【被屏蔽】"), sr("【截止】")],
 [sm(qr/^<风妹>回去$/), \&stop],
 [sm(qr/^<风妹>若问(.+?)即答(.+)$/), \&teach],
 [sm(qr/^<风妹>问(.+?)答(.+)$/), sub { $_[2] = '^'.$_[2].'$'; teach(@_); }],
 [sm(qr/^<风妹>当问(.+?)则答(.+)$/), sub { $_[2] = '^<前>'.$_[2].'<后>$'; teach(@_); }],
-[sm(qr/^<风妹>(?:(?:以|今|而)后)?(?:叫|称呼|呼|唤|喊)(?:我|吾|在下|咱|人家)(?:作|为|叫)?(.+?)(?:就好|就行|就可以(?:了)?|就是(?:了)?)?$/), \&newNickname],
-[sm(qr/^<风妹>(?:(?:以|今|而)后)?(?:叫|称呼|呼|唤|喊)(\d+)(?:作|为|叫)?(.+?)(?:就好|就行|就可以(?:了)?|就是(?:了)?)?$/), \&assignNickname],
-[sm(qr/^<风妹>(?:(?:以|今|而)后)?一直(?:都)?(?:叫|称呼|呼|唤|喊)(\d+)(?:作|为|叫)?(.+?)(?:就好|就行|就可以(?:了)?|就是(?:了)?)?$/), sub { assignNickname @_, 1; }],
+[sm(qr/^<风妹>$nowAndThen(?:叫|称呼|呼|唤|喊)<我>(?:作|为|叫)?(.+?)(?:就好|就行|就可以(?:了)?|就是(?:了)?)?$/), \&newNickname],
+[sm(qr/^<风妹>$nowAndThen(?:叫|称呼|呼|唤|喊)(\d+)(?:作|为|叫)?(.+?)(?:就好|就行|就可以(?:了)?|就是(?:了)?)?$/), \&assignNickname],
+[sm(qr/^<风妹>${nowAndThen}一直(?:都)?(?:叫|称呼|呼|唤|喊)(\d+)(?:作|为|叫)?(.+?)(?:就好|就行|就可以(?:了)?|就是(?:了)?)?$/), sub { assignNickname @_, 1; }],
 );
 
 

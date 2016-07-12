@@ -4,6 +4,7 @@ no warnings 'experimental';
 use Scripts::Windy::Addons::Nickname;
 use Scripts::Windy::Addons::Sense;
 use Scripts::Windy::Addons::Sign;
+use Scripts::Windy::Addons::BlackList;
 use Scripts::Windy::SmartMatch;
 use Scripts::Windy::Quote;
 use Scripts::Windy::Util;
@@ -15,6 +16,7 @@ our @EXPORT = qw/$match sm sr $sl1 $sl2 $sl3 $subs/;
 loadNicknames;
 loadSense;
 loadSign;
+loadBlackList;
 our $match;
 my $myName = qr/(?:(?<!风)(?:小|西)?风(?:妹(?:子|儿|砸|妹)?|儿|酱|姐{1,2})|小风姬|西风待人)/;
 # wwwww, qwqwqqqqqq, 0 0 0, ououo
@@ -24,11 +26,11 @@ my $emotion = qr/(?:w+|[Qq](?:.[Qq])+[Qq]*|0(?:.0)+|[Oo](?:.[Oo])+|x+|-(?:.-)+|=
 my $emotion_s = qr/(?:\s+|？|。|\?|\.|~|～|,|，|!|！|\^|【|】|（|\(|\)|）|「|」|“|”)/;
 my $excl = qr/(?:呜|哟|哦|喵|咩|呜|吗|啊|呀|哪|呐|嘛|咪|噫|吁|嚱|嗯|恩|诶|欸|哎|唉|等|噗|铥(?:的)?|这|23{2,}(?:4*3*)*)/;
 my $excl_pre = qr/(?:喂|卧槽|woc|[Tt][Mm]|(?:神)?(?:特(?:么|喵)|(?:他|她|它)妈)(?:的)?|所以(?:说)?|说来|话说(?:回来)?|说回来|然而|(?:可|但)(?:是)?|因为|只因)/;
-my $excl_post = qr/(?:呢|哉|也|矣|你|(?:大)?误|(?:大)?雾|吧)/;
+my $excl_post = qr/(?:呢|哉|也|矣|你|(?:大)?误|(?:大)?雾|吧|了|打勾|打钩|(?:并)?不)/;
 my $emotion_post = qr/(?:$excl|$excl_post|$emotion_s|$emotion|$myName)*/;
 my $emotion_pre = qr/(?:$excl|$excl_pre|$emotion_s|$emotion|$myName)*?/;
 #my $suffix = qr/(?:哪|呐|呀|啊|喵|$emotion)/;
-my $caller = qr/\s*$myName$emotion_post/;
+my $caller = qr/$emotion_pre$myName$emotion_post/;
 my $If = qr/(?:(?:如)?若|如果)/;
 my $Then = qr/(?:则|那么)/;
 my $Else = qr/(?:不然|否则)(?:的话)?/;
@@ -125,6 +127,14 @@ $subs = {
         my ($self, $windy, $msg, $id, $nick, $sticky) = @_;
         newNick($id, $nick, $sticky);
     },
+    blackList => sub {
+        my ($self, $windy, $msg, $id, $status) = @_;
+        if ($status) {
+            addBlackList($id);
+        } else {
+            removeBlackList($id);
+        }
+    },
 };
 my $aliases = [
     # Remove spaces
@@ -193,6 +203,10 @@ my $aliases = [
     [qr/^群(?:中|里|内)有(\d+)$/, sub {
         my ($self, $windy, $msg, $id) = @_;
         msgGroupHas($windy, $msg, $id);
+     }],
+    [qr/^被(?:屏蔽|拉黑)$/, sub {
+        my ($self, $windy, $msg) = @_;
+        onBlackList(uid(msgSender($windy, $msg)));
      }],
     ];
 my $replacements = {
