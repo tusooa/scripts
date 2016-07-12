@@ -52,6 +52,7 @@ sub newNick
     if ($sticky or not isSticky $nick{$id}) {
         unshift @{$nick{$id}}, $nick;
         if (open my $f, '>>', $configDir.'windy-conf/nickname') {
+            binmode $f, ':unix';
             say $f $id.($sticky ? 'S' : '')."\t".$nick;
         }
         $nick; # return the nickname

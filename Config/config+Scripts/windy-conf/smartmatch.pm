@@ -17,10 +17,18 @@ loadSense;
 loadSign;
 our $match;
 my $myName = qr/(?:(?<!风)(?:小|西)?风(?:妹(?:子|儿|砸|妹)?|儿|酱|姐{1,2})|小风姬|西风待人)/;
-my $emotion = qr/(?:w+|[Qq](?:[AWwa][Qq])+[Qq]*)/;
-my $emotion_a = qr/(?:$emotion)?/;
-my $suffix = qr/(?:哪|呐|呀|啊|$emotion)/;
-my $caller = qr/\s*$myName(?:$suffix)?(?:\s+|，|。|,|\.{2,})?/;
+# wwwww, qwqwqqqqqq, 0 0 0, ououo
+# 这只是几个例子，绝对不是兔嫂在卖萌，嗯。
+my $emotion = qr/(?:w+|[Qq](?:.[Qq])+[Qq]*|0(?:.0)+|[Oo](?:.[Oo])+|x+|-(?:.-)+|=(?:.=)+|😂)/;
+# 最后一个是笑抽的表情，嗯。
+my $emotion_s = qr/(?:\s+|？|。|\?|\.|~|～|,|，|!|！|\^|【|】|（|\(|\)|）|「|」|“|”)/;
+my $excl = qr/(?:呜|哟|哦|喵|咩|呜|吗|啊|呀|哪|呐|嘛|咪|噫|吁|嚱|嗯|恩|诶|欸|哎|唉|等|噗|铥(?:的)?|这)/;
+my $excl_pre = qr/(?:喂|卧槽|woc|[Tt][Mm]|(?:神)?(?:特(?:么|喵)|(?:他|她|它)妈)(?:的)?|所以(?:说)?|说来|话说(?:回来)?|说回来|然而|(?:可|但)(?:是)?|因为|只因)/;
+my $excl_post = qr/(?:呢|哉|也|矣|你|(?:大)?误|(?:大)?雾|吧)/;
+my $emotion_post = qr/(?:$excl|$excl_post|$emotion_s|$emotion|$myName)*/;
+my $emotion_pre = qr/(?:$excl|$excl_pre|$emotion_s|$emotion|$myName)*?/;
+#my $suffix = qr/(?:哪|呐|呀|啊|喵|$emotion)/;
+my $caller = qr/\s*$myName$emotion_post/;
 my $If = qr/(?:(?:如)?若|如果)/;
 my $Then = qr/(?:则|那么)/;
 my $Else = qr/(?:不然|否则)(?:的话)?/;
@@ -87,11 +95,11 @@ $subs = {
         } else {
             my $nick = senderNickname($self, $windy, $msg);
             if ($sense > $sl1) {
-                '  最喜欢'.$nick.'了www';
+                '（最喜欢'.$nick.'了www';
             } elsif ($sense > $sl2) {
-                '  咱好像越来越喜欢'.$nick.'了呢w';
+                '（咱好像越来越喜欢'.$nick.'了呢w';
             } elsif ($sense > $sl3) {
-                '  咱好像有点喜欢'.$nick.'了呢w';
+                '（咱好像有点喜欢'.$nick.'了呢w';
             } else {
                 ''; # 对于好感是负的人来说...你上辈子做了什么孽呀QAQ
             }
@@ -143,8 +151,12 @@ my $aliases = [
         } })],
     # Functions
     [qr/^群讯$/, sub { my ($self, $windy, $msg) = @_; isGroupMsg($windy, $msg) and msgGroupId($windy, $msg) ~~ @{$windy->{startGroup}}; }],
-    [qr/^截止$/, sub { print "i am stopping parse this message"; msgStopping($_[1], $_[2]) = 1; '' } ],
+    [qr/^截止$/, sub { msgStopping($_[1], $_[2]) = 1; '' } ],
     [qr/^(?:来讯者(?:名|的名字))$/, \&senderNickname],
+    [qr/^来讯者(?:的|之)?(?:[Ii][Dd]|[Qq][Qq])$/, sub {
+        my ($self, $windy, $msg) = @_;
+        uid(msgSender($windy, $msg));
+     }],
     [qr/^(?:增|加|增加)(-?\d+)好感$/, $subs->{addSense}],
     [qr/^好感(?:度)?$/, $subs->{sense}],
     [qr/^捕获(\d+)$/, sub {
@@ -176,10 +188,22 @@ my $aliases = [
      }],
     [qr/^签到$/, $subs->{sign}],
     [qr/^(?:对|艾特)(?:我|你)$/, sub { my $self = shift;my $windy = shift; my $msg = shift; isAt($windy, $msg) or msgText($windy, $msg) =~ /^$caller/ }],
+    [qr/^左$/, sub { shift->{d1} }],
+    [qr/^右$/, sub { shift->{d2} }],
+    [qr/^群中有(\d+)$/, sub {
+        my ($self, $windy, $msg, $id) = @_;
+        msgGroupHas($windy, $msg, $id);
+     }],
     ];
 my $replacements = {
     '风妹' => $caller,
-    '心态' => $emotion_a,
+    '前' => $emotion_pre,
+    '后' => $emotion_post,
+    '我' => qr/(?:我|咱(?:家)?|在下|人家|吾(?:辈)?)/,
+    'd1' => qr/【/,
+    'd2' => qr/】/,
+    'd5' => qr/</,
+    'd6' => qr/>/,
     };
 $match = Scripts::Windy::SmartMatch->new(
     d1 => '【',

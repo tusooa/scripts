@@ -53,6 +53,7 @@ sub addSense
     $sense{$id}->[0] += $add;
     debug "\e[33m".$sense{$id}->[0].",".$sense{$id}->[1]."\e[0m";
     if (open my $f, '>>', $filename) {
+        binmode $f, ':unix';
         say $f join "\t", $id, @{$sense{$id}};
     }
     wantarray ? ($sense{$id}->[0], $add) : $sense{$id}->[0];

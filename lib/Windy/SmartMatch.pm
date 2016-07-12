@@ -130,12 +130,13 @@ sub smartmatch
         debug 'match pattern:'.$textMatch;
         # References could be changed,
         # Be aware when using them.
-        if (@pattern ? all { $self->runExpr($windy, $msg, $_, @_); } @pattern : 1) {
-            debug 'i am returning a value:';
-            return $t =~ $textMatch;
+        my @ret = $t =~ $textMatch;
+        # 先执行regex，然后判定是否符合条件。
+        if (@ret and (@pattern ? all { $self->runExpr($windy, $msg, $_, @_); } @pattern : 1)) {
+            @ret;
+        } else {
+            ();
         }
-        debug 'i am NOT returning a value';
-        ();
     }
 }
 

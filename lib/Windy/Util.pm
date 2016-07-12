@@ -5,7 +5,7 @@ use Exporter;
 use Scripts::scriptFunctions;
 #use Data::Dumper;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/isGroupMsg msgText msgGroupId msgStopping msgSender uid uName isAt/;
+our @EXPORT = qw/isGroupMsg msgText msgGroupId msgGroupHas msgStopping msgSender uid uName isAt/;
 our @EXPORT_OK = qw//;
 
 # check whether a msg is a group msg
@@ -30,6 +30,11 @@ sub msgGroupId
     $msg->group->gnumber;
 }
 
+sub msgGroupHas
+{
+    my ($windy, $msg, $id) = @_;
+    $msg->group->search_group_member(qq => $id); # 这条可能会。很。慢。嗯。
+}
 sub msgStopping : lvalue
 {
     my ($windy, $msg) = @_;

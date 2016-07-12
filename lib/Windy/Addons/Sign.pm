@@ -29,6 +29,7 @@ sub sign
     if ($sign{$id} ne $thisTime) {
         $sign{$id} = $thisTime;
         if (open my $f, '>>', $signFile) {
+            binmode $f, ':unix';
             say $f $id."\t".$sign{$id};
         }
         (int rand $maxSense) + 1;

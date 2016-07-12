@@ -58,6 +58,7 @@ sub start
         debug "starting on ".msgGroupId($windy, $msg);
         if (open my $f, '>', $channelFile) {
             debug "opening file,";
+            binmode $f, ':unix';
             say $f $_ for @{$windy->{startGroup}};
             close $f;
         } else {
@@ -80,6 +81,7 @@ sub stop
         ) {
         @{$windy->{startGroup}} = grep $_ ne msgGroupId($windy, $msg), @{$windy->{startGroup}};
         if (open my $f, '>', $channelFile) {
+            binmode $f, ':unix';
             say $f $_ for @{$windy->{startGroup}};
             close $f;
         }
@@ -107,6 +109,7 @@ sub teach
         debug "adding";
         $database->add([sm($ask), sr($ans)]);
         if (open my $f, '>>', $configDir.'windy-conf/userdb.db') {
+            binmode $f, ':unix';
             say $f "\tAsk$ask\n\tAns$ans";
         } else {
             debug 'cannot open db for write'."$!";
@@ -159,7 +162,7 @@ $database = Scripts::Windy::Userdb->new(
 [sm(qr/^<风妹>回去$/), \&stop],
 [sm(qr/^<风妹>若问(.+?)即答(.+)$/), \&teach],
 [sm(qr/^<风妹>问(.+?)答(.+)$/), sub { $_[2] = '^'.$_[2].'$'; teach(@_); }],
-[sm(qr/^<风妹>当问(.+?)则答(.+)$/), sub { $_[2] = '^<心态>'.$_[2].'<心态>$'; teach(@_); }],
+[sm(qr/^<风妹>当问(.+?)则答(.+)$/), sub { $_[2] = '^<前>'.$_[2].'<后>$'; teach(@_); }],
 [sm(qr/^<风妹>(?:(?:以|今|而)后)?(?:叫|称呼|呼|唤|喊)(?:我|吾|在下|咱|人家)(?:作|为|叫)?(.+?)(?:就好|就行|就可以(?:了)?|就是(?:了)?)?$/), \&newNickname],
 [sm(qr/^<风妹>(?:(?:以|今|而)后)?(?:叫|称呼|呼|唤|喊)(\d+)(?:作|为|叫)?(.+?)(?:就好|就行|就可以(?:了)?|就是(?:了)?)?$/), \&assignNickname],
 [sm(qr/^<风妹>(?:(?:以|今|而)后)?一直(?:都)?(?:叫|称呼|呼|唤|喊)(\d+)(?:作|为|叫)?(.+?)(?:就好|就行|就可以(?:了)?|就是(?:了)?)?$/), sub { assignNickname @_, 1; }],
