@@ -3,8 +3,9 @@
 use 5.012;
 use Scripts::scriptFunctions;
 use Mojo::Webqq;
-use Mojo::Util qw(md5_sum);
+use Mojo::Util qw/md5_sum/;
 use Scripts::Windy;
+use Time::HiRes qw/time/;
 
 my $file = $accountDir.'windy';
 my $uid;
@@ -13,6 +14,18 @@ if (open my $w, '<', $file) {
     close $w;
 } else {
     die term "打不开文件 $file: $!\n";
+}
+my $mailAccount = {};
+if (open my $f, '<', $accountDir.'windy-mail') {
+    while (<$f>) {
+        chomp;
+        if (/^(.+?)=(.+)$/) {
+            $mailAccount->{$1} = $2;
+        }
+    }
+    close $f;
+} else {
+    warn term "打不开mail文件: $!\n";
 }
 
 my $windy = Scripts::Windy->new;
@@ -34,11 +47,13 @@ sub onReceive
     my ($c, $m) = @_;
     my $text = $m->content;
     say term "Receiving `".$text."`";
+    my $time = time;
     my $resp = $windy->parse($m);
     if ($resp) {
-        say term "Replying `".$resp."`";
+        say term "Replying `".$resp."`, in ".( time - $time )."secs.";
         $m->reply($resp);
     }
 }
+#$t->load("PostQRcode",data => $mailAccount ) if %$mailAccount;
 $t->on(receive_message => \&onReceive);
 $t->run;

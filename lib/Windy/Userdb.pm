@@ -4,6 +4,7 @@ no warnings 'experimental';
 use Scripts::scriptFunctions;
 use Scripts::Windy::Util;
 use Data::Dumper;
+use utf8;
 #$Scripts::scriptFunctions::debug = 1;
 
 sub new

@@ -5,18 +5,21 @@ use Scripts::Windy::Addons::Nickname;
 use Scripts::Windy::Addons::Sense;
 use Scripts::Windy::Addons::Sign;
 use Scripts::Windy::Addons::BlackList;
+use Scripts::Windy::Addons::Mood;
 use Scripts::Windy::SmartMatch;
 use Scripts::Windy::Quote;
 use Scripts::Windy::Util;
 use Scripts::scriptFunctions;
 #$Scripts::scriptFunctions::debug = 0;
 use Exporter;
+use utf8;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/$match sm sr $sl1 $sl2 $sl3 $subs/;
 loadNicknames;
 loadSense;
 loadSign;
 loadBlackList;
+loadMood;
 our $match;
 my $myName = qr/(?:(?<!风)(?:小|西)?风(?:儿)?(?:妹(?:子|儿|砸|妹)?|儿|酱|姐{1,2})|小风姬|西风待人)/;
 # wwwww, qwqwqqqqqq, 0 0 0, ououo
@@ -37,6 +40,7 @@ my $Then = qr/(?:则|那么)/;
 my $Else = qr/(?:不然|否则)(?:的话)?/;
 
 our ($sl1, $sl2, $sl3) = (100, 50, 0);
+our @ml = (90, 75, 30, 0, -50, -80);
 
 our $subs;
 $subs = {
@@ -86,9 +90,52 @@ $subs = {
             #$r1 ~~ $r2 when '是';
         }
     },
+    mood => sub {
+        my ($self, $windy, $msg) = @_;
+        curMood;
+    },
+    addMood => sub {
+        my ($self, $windy, $msg, $m1) = @_;
+        my $mood = addMood($m1, uid(msgSender($windy, $msg)));
+        if ((rand) <= .233) {
+            '';
+        } elsif ($m1 > 0) {
+            if ($mood > $ml[0]) {
+                '（好开心呢ww';
+            } elsif ($mood > $ml[1]) {
+                '（开心w';
+            } elsif ($mood > $ml[2]) {
+                '（有点开心';
+            } elsif ($mood > $ml[4]) {
+                '（内心好像。。有一种。。要平静下来的感觉呢qwq';
+            } elsif ($mood > $ml[5]) {
+                '（感觉。。没有。。。那么难过了qaq';
+            } else {
+                '';
+            }
+        } else {
+            if ($mood > $ml[2]) {
+                '';
+            } elsif ($mood > $ml[3]) {
+                '（咱有点不开心了哦qwq？';
+            } elsif ($mood > $ml[4]) {
+                '（再这样的话咱可要生气了呢QAQ';
+            } elsif ($mood > $ml[5]) {
+                '（我可是。。会。黑。化。的。哦？';
+            } else {
+                '';
+            }
+        }
+    },
     sense => sub {
         my ($self, $windy, $msg) = @_;
         sense(uid(msgSender($windy, $msg)));
+    },
+    senseWithMood => sub {
+        my ($self, $windy, $msg) = @_;
+        my $sense = $subs->{sense}(@_);
+        my $mood = $subs->{mood}(@_);
+        int(abs($sense) > 20 ? $sense + abs($sense)*$mood/200 : $sense + 20*$mood/200);
     },
     addSense => sub {
         my ($self, $windy, $msg, $m1) = @_;
@@ -138,10 +185,6 @@ $subs = {
     },
 };
 my $aliases = [
-    # Remove spaces
-    #[qr/^\s+(.+)$/, $subs->{AsIs}],
-    #[qr/^(.+?)\s+$/, $subs->{AsIs}],
-    #[qr/^(?:回)?答(.+)$/, $subs->{AsIs}],
     # Plain
     #[qr/^$d3(.+)?$d4$/, sub { my ($windy, $msg, $m1) = @_; $m1 }],
     # Control structures
@@ -168,8 +211,17 @@ my $aliases = [
         my ($self, $windy, $msg) = @_;
         uid(msgSender($windy, $msg));
      }],
+    [qr/^(?:增|加|增加)(-?\d+)心情$/, $subs->{addMood}],
+    [qr/^心情$/, $subs->{mood}],
+    [qr/^(?:开心极了|十分开心)$/, sub { curMood > $ml[0] }],
+    [qr/^很开心$/, sub { curMood > $ml[1] }],
+    [qr/^开心$/, sub { curMood > $ml[2] }],
+    [qr/^一般$/, sub { (curMood) <= $ml[2] and curMood > $ml[3] }],
+    [qr/^难过$/, sub { (curMood) <= $ml[3] }],
+    [qr/^难过极了$/, sub { (curMood) <= $ml[4] }],
+    [qr/^黑化$/, sub { (curMood) <= $ml[5] }],
     [qr/^(?:增|加|增加)(-?\d+)好感$/, $subs->{addSense}],
-    [qr/^好感(?:度)?$/, $subs->{sense}],
+    [qr/^好感(?:度)?$/, $subs->{senseWithMood}],
     [qr/^捕获(\d+)$/, sub {
         my $self = shift;
         my $windy = shift;
@@ -177,24 +229,24 @@ my $aliases = [
         my $num = shift;
         $_[$num - 1];
      }],
-    [qr/^一等$/, sub {
+    [qr/^很喜欢$/, sub {
         my ($self, $windy, $msg) = @_;
-        my $s = $subs->{sense}($self, $windy, $msg);
+        my $s = $subs->{senseWithMood}($self, $windy, $msg);
         $s > $sl1;
      }],
-    [qr/^二等$/, sub {
+    [qr/^喜欢$/, sub {
         my ($self, $windy, $msg) = @_;
-        my $s = $subs->{sense}($self, $windy, $msg);
-        $s <= $sl1 and $s > $sl2;
+        my $s = $subs->{senseWithMood}($self, $windy, $msg);
+        $s > $sl2;
      }],
-    [qr/^三等$/, sub {
+    [qr/^无感$/, sub {
         my ($self, $windy, $msg) = @_;
-        my $s = $subs->{sense}($self, $windy, $msg);
+        my $s = $subs->{senseWithMood}($self, $windy, $msg);
         $s <= $sl2 and $s > $sl3;
      }],
-    [qr/^四等$/, sub {
+    [qr/^讨厌$/, sub {
         my ($self, $windy, $msg, $m1) = @_;
-        my $s = $subs->{sense}($self, $windy, $msg);
+        my $s = $subs->{senseWithMood}($self, $windy, $msg);
         $s <= $sl3;
      }],
     [qr/^签到$/, $subs->{sign}],

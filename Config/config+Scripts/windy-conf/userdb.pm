@@ -9,6 +9,7 @@ use Scripts::Windy::Userdb;
 use Scripts::Windy::Conf::smartmatch;
 use Exporter;
 use Data::Dumper;
+use utf8;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/$database loadGroups/;
 our $database;

@@ -3,6 +3,7 @@ package Scripts::Windy::Util;
 use 5.012;
 use Exporter;
 use Scripts::scriptFunctions;
+use utf8;
 #use Data::Dumper;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/isGroupMsg msgText msgGroupId msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender uid uName isAt/;

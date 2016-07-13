@@ -9,6 +9,8 @@ use Scripts::Windy::Expr;
 use List::Util qw/all/;
 no warnings 'experimental';
 use Data::Dumper;
+use utf8;
+use Encode qw/_utf8_on _utf8_off/;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/sm sr/;
 our @EXPORT_OK = qw//;
@@ -46,6 +48,7 @@ sub parse
 {
     my $self = shift;
     my $text = shift;
+    _utf8_on($text);
     my @s = (); #/$d1(.*?)$d2(.*?)(?=$d2)/g;
     my $d1 = $self->{d1};
     my $d2 = $self->{d2};
@@ -126,6 +129,7 @@ sub smartmatch
         my $windy = shift;
         my $msg = shift;
         my $t = msgText ($windy, $msg);
+        _utf8_on($t);
         debug 'cond:'. Dumper @pattern;
         debug 'match pattern:'.$textMatch;
         # References could be changed,
@@ -148,11 +152,13 @@ sub smartret
     sub {
         my $windy = shift;
         my $msg = shift;
-        my $t = msgText ($windy, $msg);
+        #my $t = msgText ($windy, $msg);
         debug Dumper @pattern;
         # Evaluate if code
         # Plain text leave it as-is
-        join '', map { $self->runExpr($windy, $msg, $_, @_) } @pattern;
+        my $ret = join '', map { $self->runExpr($windy, $msg, $_, @_) } @pattern;
+        _utf8_off($ret);
+        $ret;
     }
 }
 

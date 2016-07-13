@@ -4,6 +4,8 @@ use Scripts::scriptFunctions;
 #$Scripts::scriptFunctions::debug = 1;
 use Exporter;
 use 5.012;
+use utf8;
+use Encode qw/_utf8_on _utf8_off/;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/senderNickname newNick loadNicknames/;
 our @EXPORT_OK = qw//;
@@ -35,6 +37,7 @@ sub loadNicknames
     if (open my $f, '<', $configDir.'windy-conf/nickname') {
         while (<$f>) {
             chomp;
+            _utf8_on($_);
             my ($id, $sticky, $nickname) = /^(.+)(S?)\t(.+)$/;
             $nick{$id} = [] if not $nick{$id};
             if ($sticky or not isSticky $nick{$id}) {
@@ -52,8 +55,9 @@ sub newNick
     if ($sticky or not isSticky $nick{$id}) {
         unshift @{$nick{$id}}, $nick;
         if (open my $f, '>>', $configDir.'windy-conf/nickname') {
+            my $n = $nick;_utf8_off($n);
             binmode $f, ':unix';
-            say $f $id.($sticky ? 'S' : '')."\t".$nick;
+            say $f $id.($sticky ? 'S' : '')."\t".$n;
         }
         $nick; # return the nickname
     } else {
