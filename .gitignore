@@ -12,6 +12,7 @@ Config/config+Scripts/windy-conf/admin
 Config/config+Scripts/windy-conf/channels
 Config/config+Scripts/windy-conf/sign
 Config/config+Scripts/windy-conf/mood.db
+Config/config+Scripts/windy-conf/blacklist
 lib/Windy/Conf/userdb.db
 lib/Windy/Conf/nickname
 lib/Windy/Conf/sense
@@ -19,6 +20,7 @@ lib/Windy/Conf/admin
 lib/Windy/Conf/channels
 lib/Windy/Conf/sign
 lib/Windy/Conf/mood.db
+lib/Windy/Conf/blacklist
 src/*/build/*
 *.pir
 *.moarvm

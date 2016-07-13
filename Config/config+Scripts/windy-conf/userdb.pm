@@ -180,8 +180,8 @@ my $nowAndThen = qr/(?:(?:以|今|而)后)?/;
 $database = Scripts::Windy::Userdb->new(
 [sm(qr/^<风妹>出来$/), \&start],
 [sm("【不是群讯】"), sr("【截止】")],
-[sm(qr/^<风妹>${nowAndThen}别理(\d+)(?:了)?$/), sub { blackList(@_, 1); }],
-[sm(qr/^<风妹>${nowAndThen}别不理(\d+)(?:了)?$/), sub { blackList(@_, 0); }],
+[sm(qr/^<风妹>${nowAndThen}(?:别|不要|莫(?:要)?)理(?:睬)?(\d+)(?:了)?$/), sub { blackList(@_, 1); }],
+[sm(qr/^<风妹>${nowAndThen}(?:别|不要|莫(?:要)?)不理(?:睬)?(\d+)(?:了)?$/), sub { blackList(@_, 0); }],
 [sm("【被屏蔽】"), sr("【截止】")],
 [sm(qr/^<风妹>回去$/), \&stop],
 [sm(qr/^<风妹>若问(.+?)即答(.+)$/), \&teach],
