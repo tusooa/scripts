@@ -8,8 +8,8 @@ sub new
 {
     my $class = shift;
     my $c = conf 'windy';
-    my $self = { startGroup => [loadGroups] };
-    say term "last groups: ". join ',', $self->{startGroup};
+    my $self = {};
+    #say term "last groups: ". join ',', $self->{startGroup};
 =comment
     $self->{Addons} = [];
     if (ref $c->{Addons} ne 'HASH') {

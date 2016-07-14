@@ -11,7 +11,7 @@ use Exporter;
 use Data::Dumper;
 use utf8;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/$database loadGroups/;
+our @EXPORT = qw/$database/;
 our $database;
 #sub debug { print @_; }
 my @adminList;
@@ -31,49 +31,29 @@ sub msgSenderIsAdmin
     $id ~~ @adminList;
 }
 
-my $channelFile = $configDir.'windy-conf/channels';
-sub loadGroups
-{
-    my @lastGroups;
-    if (open my $f, '<', $channelFile) {
-        while (<$f>) {
-            chomp;
-            push @lastGroups, $_ if $_;
-        }
-        close $f;
-    }
-    @lastGroups;
-}
 my $startRes1 = sr("【截止】咱在这里呢w");
+my $startRes1F = sr("【截止】喵呼？");
 #use Data::Dumper;
 #use Mojo::Webqq::Message::Recv::GroupMessage;
 #die Dumper (($startRes1)->({}, bless { content => '1234',}, 'Mojo::Webqq::Message::Recv::GroupMessage'));
-my $startRes2 = sr("【截止】嗯哼0 0?");
+my $startRes2 = sr("【截止】");
 sub start
 {
     my $windy = shift;
     my $msg = shift;
     #$windy->{startGroup} = [@lastGroups] if ref $windy->{startGroup} ne 'ARRAY';# 初始化.
-    if ((msgSenderIsGroupAdmin($windy, $msg)
-         or msgSenderIsAdmin($windy, $msg))
-        and ! grep $_ eq msgGroupId($windy, $msg), @{$windy->{startGroup}}) {
-        push @{$windy->{startGroup}}, msgGroupId($windy, $msg);
-        debug "starting on ".msgGroupId($windy, $msg);
-        if (open my $f, '>', $channelFile) {
-            debug "opening file,";
-            binmode $f, ':unix';
-            say $f $_ for @{$windy->{startGroup}};
-            close $f;
-        } else {
-            debug "cannot open file:$!";
-        }
-        $startRes1->($windy, $msg, @_);
+    if (msgSenderIsGroupAdmin($windy, $msg)
+         or msgSenderIsAdmin($windy, $msg)) {
+        $subs->{start}(undef, $windy, $msg, @_)
+            and $startRes1->($windy, $msg, @_)
+            or $startRes1F->($windy, $msg, @_);
     } else {
         $startRes2->($windy, $msg, @_);
     }
 }
 
 my $stopRes1 = sr("【截止】那...咱走惹QAQ");
+my $stopRes1F = sr("【截止】然而这并没有什么用QAQ");
 my $stopRes2 = sr("【截止】诶..?qwq");
 sub stop
 {
@@ -81,15 +61,10 @@ sub stop
     my $msg = shift;
 #    $windy->{startGroup} = [@{$windy->{startGroup}}] if ref $windy->{startGroup} ne 'ARRAY';
     if (msgSenderIsGroupAdmin($windy, $msg)
-        or msgSenderIsAdmin($windy, $msg)# and grep $_ eq msgGroupId($windy, $msg), @{$windy->{startGroup}}
-        ) {
-        @{$windy->{startGroup}} = grep $_ ne msgGroupId($windy, $msg), @{$windy->{startGroup}};
-        if (open my $f, '>', $channelFile) {
-            binmode $f, ':unix';
-            say $f $_ for @{$windy->{startGroup}};
-            close $f;
-        }
-        $stopRes1->($windy, $msg, @_);
+        or msgSenderIsAdmin($windy, $msg)) {
+        $subs->{stop}(undef, $windy, $msg, @_)
+            and $stopRes1->($windy, $msg, @_)
+            or $stopRes1F->($windy, $msg, @_);
     } else {
         $stopRes2->($windy, $msg, @_);
     }

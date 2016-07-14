@@ -6,9 +6,12 @@ use Scripts::Windy::Addons::Sense;
 use Scripts::Windy::Addons::Sign;
 use Scripts::Windy::Addons::BlackList;
 use Scripts::Windy::Addons::Mood;
+use Scripts::Windy::Addons::StartStop;
+
 use Scripts::Windy::SmartMatch;
 use Scripts::Windy::Quote;
 use Scripts::Windy::Util;
+
 use Scripts::scriptFunctions;
 #$Scripts::scriptFunctions::debug = 0;
 use Exporter;
@@ -20,6 +23,7 @@ loadSense;
 loadSign;
 loadBlackList;
 loadMood;
+loadGroups;
 our $match;
 my $myName = qr/(?:(?<!风)(?:小|西)?(?:风|風)(?:儿)?(?:妹(?:子|儿|砸|妹)?|儿|酱|姐{1,2})|小风姬|西风待人)/;
 # wwwww, qwqwqqqqqq, 0 0 0, ououo
@@ -28,8 +32,8 @@ my $myName = qr/(?:(?<!风)(?:小|西)?(?:风|風)(?:儿)?(?:妹(?:子|儿|砸|�
 my $emotion = qr/(?:w+|[Qq](?:.[Qq])+[Qq]*|0(?:.0)+|[Oo](?:.[Oo])+|x+|-(?:.-)+|=(?:.=)+|😂|h+)/;
 # 最后一个是笑抽的表情，嗯。
 my $emotion_s = qr/(?:\s+|？|。|\?|\.|~|～|,|，|!|！|\^|【|】|（|\(|\)|）|「|」|“|”)/;
-my $excl = qr/(?:呜|哟|哦|喵|咩|呜|吗|啊|呀|哪|呐|嘛|咪|口意|噫|吁|嚱|嗯|恩|诶|欸|哎|唉|等|噗|铥(?:的)?|这|23{2,}(?:4*3*)*|6+|哈|呵|咳|科科)/;
-my $excl_pre = qr/(?:喂|卧槽|woc|[Tt][Mm]|(?:神)?(?:特(?:么|喵)|(?:他|她|它)妈)(?:的)?|所以(?:说)?|说来|话说(?:回来)?|说回来|然而|(?:可|但)(?:是)?|只是|因为|只因|十分)/;
+my $excl = qr/(?:呜|哟|哦|喵|咩|呜|吗|啊|呀|哪|呐|嘛|咪|口意|噫|吁|嚱|嗯|恩|诶|欸|哎|唉|等|噗|铥(?:的)?|这|并|23{2,}(?:4*3*)*|6+|哈|蛤|呵|咳|科科)/;
+my $excl_pre = qr/(?:喂|卧槽|woc|[Tt][Mm]|(?:神)?(?:特(?:么|喵)|(?:他|她|它)妈)(?:的)?|所以(?:说)?|说来|话说(?:回来)?|说回来|然而|(?:可|但)(?:是)?|只是|因为|只因|十分|简直)/;
 my $excl_post = qr/(?:呢|哉|也|矣|你|(?:大)?误|(?:大)?雾|吧|了|打勾|打钩|(?:并)?不|再见|(?:一脸)?生无可恋|的(?:样子|说)?|desu|极了)/;
 my $emotion_post = qr/(?:$excl|$excl_post|$emotion_s|$emotion|$myName)*/;
 my $emotion_pre = qr/(?:$excl|$excl_pre|$emotion_s|$emotion|$myName)*?/;
@@ -183,6 +187,16 @@ $subs = {
             removeBlackList($id);
         }
     },
+    start => sub {
+        my ($self, $windy, $msg, $group) = @_;
+        $group = msgGroupId($windy, $msg) if not $group;
+        startOn($group);
+    },
+    stop => sub {
+        my ($self, $windy, $msg, $group) = @_;
+        $group = msgGroupId($windy, $msg) if not $group;
+        stopOn($group);
+    },
 };
 my $aliases = [
     # Plain
@@ -204,7 +218,7 @@ my $aliases = [
             $self->runExpr($windy, $msg, $m2, @_[5..$#_]);
         } })],
     # Functions
-    [qr/^群讯$/, sub { my ($self, $windy, $msg) = @_; isGroupMsg($windy, $msg) and msgGroupId($windy, $msg) ~~ @{$windy->{startGroup}}; }],
+    [qr/^群讯$/, sub { my ($self, $windy, $msg) = @_; isGroupMsg($windy, $msg) and isStartOn(msgGroupId($windy, $msg)); }],
     [qr/^截止$/, sub { msgStopping($_[1], $_[2]) = 1; '' } ],
     [qr/^(?:来讯者(?:名|的名字))$/, \&senderNickname],
     [qr/^来讯者(?:的|之)?(?:[Ii][Dd]|[Qq][Qq])$/, sub {
@@ -266,7 +280,7 @@ my $replacements = {
     '风妹' => $caller,
     '前' => $emotion_pre,
     '后' => $emotion_post,
-    '我' => qr/(?:我|咱(?:家)?|在下|人家|吾(?:辈)?|朕|寡人|孤(?:王)?|本王|本人|本薇)/,
+    '我' => qr/(?:我|咱(?:家)?|在下|人家|吾(?:辈)?|朕|寡人|孤(?:王)?|本王|本人|本薇|本少爷|本小姐)/,
     'd1' => qr/【/,
     'd2' => qr/】/,
     'd5' => qr/</,
