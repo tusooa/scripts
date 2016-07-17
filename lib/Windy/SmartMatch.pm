@@ -63,7 +63,7 @@ sub parse
         } elsif ($text =~ s/^(?<!$d1)(.+?)(?=$d1|$)//) {
             my $ret = $1;
             debug "match `$ret`";
-            $ret =~ s/$d5(.+?)$d6/$replacements->{$1}/eg;
+            $ret =~ s<$d5(.+?)$d6>[$replacements->{$1} // $1]eg;
             debug "the pattern is now: $ret";
             push @s, $ret;
         } else {
@@ -83,9 +83,9 @@ sub parseExpr
     my $found = 0;
     my $expr;
     debug "text is ".$t;
-    my $d3 = $self->{d3};
-    my $d4 = $self->{d4};
-    return $1 if $t =~ /^$d3(.+)$d4$/; # Plain Text
+    my $d3 = quotemeta $self->{d3};
+    my $d4 = quotemeta $self->{d4};
+    return $1 if $t =~ /^$d3([^$d4]+)$d4$/; # Plain Text
     for my $a (@{$self->{aliases}}) {
         debug "sm #45:" .Dumper $a;
         if (my @matches = $t =~ $a->[0]) {

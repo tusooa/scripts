@@ -44,7 +44,7 @@ sub start
     #$windy->{startGroup} = [@lastGroups] if ref $windy->{startGroup} ne 'ARRAY';# 初始化.
     if (msgSenderIsGroupAdmin($windy, $msg)
          or msgSenderIsAdmin($windy, $msg)) {
-        $subs->{start}(undef, $windy, $msg, @_)
+        $subs->{start}(undef, $windy, $msg, undef, @_)
             and $startRes1->($windy, $msg, @_)
             or $startRes1F->($windy, $msg, @_);
     } else {
@@ -62,7 +62,7 @@ sub stop
 #    $windy->{startGroup} = [@{$windy->{startGroup}}] if ref $windy->{startGroup} ne 'ARRAY';
     if (msgSenderIsGroupAdmin($windy, $msg)
         or msgSenderIsAdmin($windy, $msg)) {
-        $subs->{stop}(undef, $windy, $msg, @_)
+        $subs->{stop}(undef, $windy, $msg, undef, @_)
             and $stopRes1->($windy, $msg, @_)
             or $stopRes1F->($windy, $msg, @_);
     } else {

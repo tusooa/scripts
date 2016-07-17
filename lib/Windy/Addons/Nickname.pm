@@ -18,7 +18,7 @@ sub senderNickname
 #    debug Dumper($msg);
     my $sender = msgSender($windy, $msg);
     my $id = uid($sender);
-    $nick{$id}->[0] // uName($sender);
+    $nick{$id}->[0] // do { my $name = uName($sender); _utf8_on($name); $name; };
 }
 my $s = 'Scripts::Windy::Addons::Nickname::Sticky';
 
