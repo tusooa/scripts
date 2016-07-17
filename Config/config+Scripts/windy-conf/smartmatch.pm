@@ -317,6 +317,7 @@ my $aliases = [
         my ($self, $windy, $msg) = @_;
         onBlackList(uid(msgSender($windy, $msg)));
      }],
+    [qr/^群[Ii][Dd]$/, sub { my ($self, $windy, $msg) = @_; msgGroupId($windy, $msg); }],
     ];
 my $replacements = {
     '风妹' => $caller,
