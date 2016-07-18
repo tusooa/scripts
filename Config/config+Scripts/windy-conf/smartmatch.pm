@@ -47,7 +47,7 @@ my $Then = qr/(?:则|那么)/;
 my $Else = qr/(?:不然|否则)(?:的话)?/;
 
 our ($sl1, $sl2, $sl3) = (100, 50, 0);
-our @ml = (90, 75, 30, 0, -50, -80);
+our @ml = (93, 85, 60, 40, -10, -40);
 
 our $subs;
 $subs = {
@@ -215,24 +215,47 @@ my $aliases = [
         my $windy = shift;
         my $msg = shift;
         my $mood = curMood;
-        say $mood;
-        say term join ',', @_;
-        $mood > $ml[2] and shift
-            or ($mood > $ml[3] and shift
-                or ($mood > $ml[5] and shift
-                    or shift));
+        #say $mood;
+        #say term join ',', @_;
+        given ($mood) {
+            when ($_ > $ml[1]) { $_[0] or continue; }
+            when ($_ > $ml[3]) { $_[1] or continue; }
+            when ($_ > $ml[5]) { $_[2] or continue; }
+            default { $_[3]; }
+        }
+     }],
+    [qr/^心情判[:：]([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*)$/, sub {
+        my $self = shift;
+        my $windy = shift;
+        my $msg = shift;
+        my $mood = curMood;
+        #say $mood;
+        #say term join ',', @_;
+        #say term join ',', @ml;
+        given ($mood) {
+            say $_;
+            when ($_ > $ml[0]) { $_[0] or continue; }
+            when ($_ > $ml[1]) { $_[1] or continue; }
+            when ($_ > $ml[2]) { $_[2] or continue; }
+            when ($_ > $ml[3]) { $_[3] or continue; }
+            when ($_ > $ml[4]) { $_[4] or continue; }
+            when ($_ > $ml[5]) { $_[5] or continue; }
+            default { $_[6]; }
+        }
      }],
     [qr/^好感判[:：]([^,]*),([^,]*),([^,]*),([^,]*)$/, sub {
         my $self = shift;
         my $windy = shift;
         my $msg = shift;
         my $sense = $subs->{senseWithMood}($self, $windy, $msg);
-        say $sense;
-        say term join ',', @_;
-        $sense > $sl1 and shift
-            or ($sense > $sl2 and shift
-                or ($sense > $sl3 and shift
-                    or shift));
+        #say $sense;
+        #say term join ',', @_;
+        given ($sense) {
+            when ($_ > $sl1) { $_[0] or continue; }
+            when ($_ > $sl2) { $_[1] or continue; }
+            when ($_ > $sl3) { $_[2] or continue; }
+            default { $_[3]; }
+        }
      }],
     # Logical expressions
     [qr/^(.+?)(?:并且|而且|且)(.+)$/, $subs->{And}],
@@ -266,7 +289,7 @@ my $aliases = [
     [qr/^黑化$/, sub { (curMood) <= $ml[5] }],
     [qr/^心情判$/, sub {
         my $mood = curMood;
-        if ($mood > $ml[2]) {
+        if ($mood > $ml[1]) {
             'w';
         } elsif ($mood > $ml[3]) {
             'qwq';
