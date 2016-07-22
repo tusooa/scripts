@@ -70,7 +70,7 @@ sub stop
     }
 }
 
-my $teachRes1 = sr("【截止】咱好像明白惹w");
+my $teachRes1 = sr("【截止】嗯。");
 my $teachRes2 = sr("诶...?QAQ");
 my $teachRes3 = sr("...");
 sub teach

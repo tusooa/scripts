@@ -50,6 +50,7 @@ sub stopOn
     my $groupId = shift;
     if (grep $_ eq $groupId, @startGroup) {
         @startGroup = grep $_ ne $groupId, @startGroup;
+        saveGroups;
         $groupId;
     } else {
         undef;

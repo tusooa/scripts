@@ -6,7 +6,7 @@ use Mojo::Webqq;
 use Mojo::Util qw/md5_sum/;
 use Scripts::Windy;
 use Time::HiRes qw/time/;
-
+use Data::Dumper;
 my $file = $accountDir.'windy';
 my $uid;
 if (open my $w, '<', $file) {
@@ -32,6 +32,7 @@ my $windy = Scripts::Windy->new;
 my $t = Mojo::Webqq->new(
     qq => $uid,
     login_type => 'qrlogin',
+    tmpdir => $configDir.'windy-cache/',
 #    is_init_friend => 0,
 #    is_init_group => 0,
 #    is_init_discuss => 0,
@@ -56,4 +57,16 @@ sub onReceive
 }
 #$t->load("PostQRcode",data => $mailAccount ) if %$mailAccount;
 $t->on(receive_message => \&onReceive);
+$t->on(receive_pic => sub {
+    ### 反正这个没成功过。。。
+    my ($client,$filepath,$sender)=@_;
+    say "receive image: ", $filepath;
+    say "sender is: ", $sender->displayname;
+       });
+#$t->on(receive_raw_message=>sub{
+#    my ($client,$bytes,$hash) = @_;
+#    print term Dumper($hash);
+    #$bytes 是接收到的原始消息 json 格式数据，未做任何处理
+    #$hash 是将 $bytes 进行 Mojo::JSON::decode_json 之后得到的 perl hash 结构
+#});
 $t->run;
