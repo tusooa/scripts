@@ -70,6 +70,15 @@ sub stop
     }
 }
 
+my $cRes = sr("【截止】听从【捕获1】的召唤而来【心情判】");
+sub callerName
+{
+    my $windy = shift;
+    my $msg = shift;
+    my $name = $subs->{fromGroup}(undef, $windy, $msg, @_);
+    $cRes->($windy, $msg, $name);
+}
+
 my $teachRes1 = sr("【截止】嗯。");
 my $teachRes2 = sr("诶...?QAQ");
 my $teachRes3 = sr("...");
@@ -86,6 +95,7 @@ sub teach
     if (#$sense > $sl1,
         msgSenderIsAdmin($windy, $msg)) { # 正常运作
         debug "adding";
+        $windy->logger("添加「${ask}」 => 「${ans}」");
         $database->add([sm($ask), sr($ans)]);
         if (open my $f, '>>', $configDir.'windy-conf/userdb.db') {
             binmode $f, ':unix';
@@ -143,28 +153,38 @@ sub blackList
     my $sense = $subs->{sense}(undef, $windy, $msg);
     if (msgSenderIsAdmin($windy, $msg)) {
         $subs->{blackList}(undef, $windy, $msg, $id, $status);
-        $blackListRes1->($windy, $msg, @_);
+        $blackListRes1->(@_);
     } elsif ($sense > $sl2) {
-        $blackListRes2->($windy, $msg, @_);
+        $blackListRes2->(@_);
     } else {
-        $blackListRes3->($windy, $msg, @_);
+        $blackListRes3->(@_);
     }
 }
 
-my $nowAndThen = qr/(?:(?:以|今|而)后)?/;
+my $sizeRes = sr("【截止】也就【捕获1】条吧【心情判】");
+sub sizeOfDB
+{
+    my ($windy, $msg) = @_;
+    $sizeRes->($windy, $msg, $database->length);
+}
+
 $database = Scripts::Windy::Userdb->new(
 [sm(qr/^<风妹>出来$/), \&start],
+#[sm(''), sr('【截止】')],
+#[sm('【群讯】'), sr("【截止】")],
 [sm("【不是群讯】"), sr("【截止】")],
-[sm(qr/^<风妹>${nowAndThen}(?:别|不要|莫(?:要)?)理(?:睬)?(\d+)(?:了)?$/), sub { blackList(@_, 1); }],
-[sm(qr/^<风妹>${nowAndThen}(?:别|不要|莫(?:要)?)不理(?:睬)?(\d+)(?:了)?$/), sub { blackList(@_, 0); }],
+[sm(qr/^<风妹>(?:<以后>)?<不要>理睬?(\d+)<后>$/), sub { blackList(@_, 1); }],
+[sm(qr/^<风妹>(?:<以后>)?<不要>不理睬?(\d+)<后>$/), sub { blackList(@_, 0); }],
 [sm("【被屏蔽】"), sr("【截止】")],
 [sm(qr/^<风妹>回去$/), \&stop],
+[sm(qr/^<风妹>当问(.+?)则答(.+)$/), sub { $_[2] = '^<前>'.$_[2].'<后>$'; teach(@_); }],
+[sm(qr/^<前>(?:<你>)?怎么出来<后>$/), \&callerName],
+[sm(qr/^<风妹>知道<多少><后>/), \&sizeOfDB],
 [sm(qr/^<风妹>若问(.+?)即答(.+)$/), \&teach],
 [sm(qr/^<风妹>问(.+?)答(.+)$/), sub { $_[2] = '^'.$_[2].'$'; teach(@_); }],
-[sm(qr/^<风妹>当问(.+?)则答(.+)$/), sub { $_[2] = '^<前>'.$_[2].'<后>$'; teach(@_); }],
-[sm(qr/^<风妹>$nowAndThen(?:叫|称呼|呼|唤|喊)<我>(?:作|为|叫)?(.+?)(?:就好|就行|就可以(?:了)?|就是(?:了)?)?$/), \&newNickname],
-[sm(qr/^<风妹>$nowAndThen(?:叫|称呼|呼|唤|喊)(\d+)(?:作|为|叫)?(.+?)(?:就好|就行|就可以(?:了)?|就是(?:了)?)?$/), \&assignNickname],
-[sm(qr/^<风妹>${nowAndThen}一直(?:都)?(?:叫|称呼|呼|唤|喊)(\d+)(?:作|为|叫)?(.+?)(?:就好|就行|就可以(?:了)?|就是(?:了)?)?$/), sub { assignNickname @_, 1; }],
+[sm(qr/^<风妹>(?:<以后>)?<称呼><我>(?:作|为|叫)?(.+?)(?:<就好>)?$/), \&newNickname],
+[sm(qr/^<风妹>(?:<以后>)?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$/), \&assignNickname],
+[sm(qr/^<风妹>(?:<以后>)?一直都?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$/), sub { assignNickname @_, 1; }],
 );
 
 

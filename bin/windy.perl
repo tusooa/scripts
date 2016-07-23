@@ -6,7 +6,7 @@ use Mojo::Webqq;
 use Mojo::Util qw/md5_sum/;
 use Scripts::Windy;
 use Time::HiRes qw/time/;
-use Data::Dumper;
+use Scripts::Windy::Util;
 my $file = $accountDir.'windy';
 my $uid;
 if (open my $w, '<', $file) {
@@ -47,12 +47,13 @@ sub onReceive
 {
     my ($c, $m) = @_;
     my $text = $m->content;
-    say term "Receiving `".$text."`";
+    my $context = ($m->type =~ /^(group|discuss)_message$/ ? " 在 ".($1 eq 'group' ? $m->group->gname.'('.$m->group->gnumber.')' : $m->discuss->dname) : '');
+    $windy->logger("收到 `".$text."` 从 ".$m->sender->displayname.$context);
     my $time = time;
     my $resp = $windy->parse($m);
     if ($resp) {
-        say term "Replying `".$resp."`, in ".( time - $time )."secs.";
-        $m->reply($resp);
+        $windy->logger("送出 `".$resp."`, 在 ".( time - $time )." 秒内");
+        $m->reply($_) for split "\n\n", $resp;
     }
 }
 #$t->load("PostQRcode",data => $mailAccount ) if %$mailAccount;
@@ -69,4 +70,6 @@ $t->on(receive_pic => sub {
     #$bytes 是接收到的原始消息 json 格式数据，未做任何处理
     #$hash 是将 $bytes 进行 Mojo::JSON::decode_json 之后得到的 perl hash 结构
 #});
+#open STDOUT, '>>', $configDir.'windy-cache/logs.txt';
+#binmode STDOUT, ':unix';
 $t->run;

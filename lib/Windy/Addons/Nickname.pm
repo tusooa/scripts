@@ -7,18 +7,25 @@ use 5.012;
 use utf8;
 use Encode qw/_utf8_on _utf8_off/;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/senderNickname newNick loadNicknames/;
+our @EXPORT = qw/userNickname senderNickname newNick loadNicknames/;
 our @EXPORT_OK = qw//;
 
 my %nick;
+
+sub userNickname
+{
+    my ($self, $user) = @_;
+    $user or return;
+    my $id = uid($user);
+    $nick{$id}->[0] // do { my $name = uName($user); _utf8_on($name); $name; };
+}
 
 sub senderNickname
 {
     my ($self, $windy, $msg) = @_;
 #    debug Dumper($msg);
     my $sender = msgSender($windy, $msg);
-    my $id = uid($sender);
-    $nick{$id}->[0] // do { my $name = uName($sender); _utf8_on($name); $name; };
+    userNickname($self, $sender);
 }
 my $s = 'Scripts::Windy::Addons::Nickname::Sticky';
 

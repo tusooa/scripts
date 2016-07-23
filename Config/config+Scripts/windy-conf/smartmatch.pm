@@ -7,6 +7,7 @@ use Scripts::Windy::Addons::Sign;
 use Scripts::Windy::Addons::BlackList;
 use Scripts::Windy::Addons::Mood;
 use Scripts::Windy::Addons::StartStop;
+use Scripts::Windy::Conf::smartmatch::replacements;
 
 use Scripts::Windy::SmartMatch;
 use Scripts::Windy::Quote;
@@ -27,22 +28,6 @@ loadMood;
 loadGroups;
 our $match;
 
-my $myName = qr/(?:(?<!风)(?:小|西)?(?:风|風)(?:儿)?(?:妹(?:子|儿|砸|妹)?|儿|酱|姐{1,2})|小风姬|西风待人)/;
-# wwwww, qwqwqqqqqq, 0 0 0, ououo
-# 这只是几个例子，绝对不是兔嫂在卖萌，嗯。
-# 丢失了一些。。。。QAQ
-my $you = qr/(?:你|乃(?:酱)?|子|汝|君|侬|尔|而|汝|阁下|陛下|殿下)/;
-my $emotion = qr/(?:w+|[PpQq](?:.[PpQq])+[PpQq]*|0(?:.0)+|[Oo](?:.[Oo])+|x+|-(?:.-)+|=(?:.=)+|😂|h+|☆|\(\?ω\?=\)|\|ω\?`\)|Σ)/;
-# 最后一个是笑抽的表情，嗯。
-my $emotion_s = qr/(?:\s+|？|。|\?|\.|~|～|,|，|!|！|\^|【|】|\[|\]|（|\(|\)|）|「|」|“|”)/;
-my $excl = qr/(?:呜|哟|哦|喵|咩|呜|吗|[啊阿][咧勒]?|呀|哪|呐|嘛|咪|口意|噫|吁|嚱|嗯|恩|诶多?|欸|哎|唉|等|噗|铥(?:的)?|这|并|23{2,}(?:4*3*)*|6+|哈|蛤|呵|咳|科科|哼|唧|摊手|捂脸|蹭(?:一下)?|(?:一脸)?[懵蒙]逼|啥|yuki)/;
-my $excl_pre = qr/(?:喂|卧槽|woc|[Tt][Mm]|(?:神)?(?:特(?:么|喵)|(?:他|她|它)妈)(?:的)?|所以(?:说)?|说来|话说(?:回来)?|说回来|然而|(?:可|但)(?:是)?|只是|因为|只因|十分|简直)/;
-my $excl_post = qr/(?:呢|哉|也|矣|$you|(?:大)?误|(?:大)?雾|吧|了|打勾|打钩|(?:并)?不|[bp]u|再见|(?:一脸)?生无可恋|的(?:样子|说)?|desu|极了|划掉|划去|惹)/;
-my $emotion_post = qr/(?:$excl|$excl_post|$emotion_s|$emotion|$myName)*/;
-my $emotion_pre = qr/(?:$excl|$excl_pre|$emotion_s|$emotion|$myName)*?/;
-#my $suffix = qr/(?:哪|呐|呀|啊|喵|$emotion)/;
-
-my $caller = qr/$emotion_pre$myName$emotion_post/;
 my $If = qr/(?:(?:如)?若|如果)/;
 my $Then = qr/(?:则|那么)/;
 my $Else = qr/(?:不然|否则)(?:的话)?/;
@@ -194,12 +179,29 @@ $subs = {
     start => sub {
         my ($self, $windy, $msg, $group) = @_;
         $group = msgGroupId($windy, $msg) if not $group;
-        startOn($group);
+        startOn($group, $windy, $msg);
     },
     stop => sub {
         my ($self, $windy, $msg, $group) = @_;
         $group = msgGroupId($windy, $msg) if not $group;
         stopOn($group);
+    },
+    fromGroup => sub {
+        #say STDERR "FROM GROUP RUNNING";
+        my ($self, $windy, $msg) = @_;
+        if (isGroupMsg($windy, $msg)
+            and my $uid = isStartOn(msgGroupId($windy, $msg))) {
+            #say STDERR "fromGroup. uid = $uid";
+            if ($uid != -1) {
+                userNickname($self,
+                             findUserInGroup($windy, $uid, msgGroup($windy, $msg)));
+            } else {
+                "神";
+            }
+        } else {
+            #say STDERR "not group msg";
+            undef;
+        }
     },
 };
 my $aliases = [
@@ -272,7 +274,7 @@ my $aliases = [
             $self->runExpr($windy, $msg, $m2, @_[5..$#_]);
         } })],
     # Functions
-    [qr/^群讯$/, sub { my ($self, $windy, $msg) = @_; isGroupMsg($windy, $msg) and isStartOn(msgGroupId($windy, $msg)); }],
+    [qr/^群讯$/, $subs->{fromGroup}],
     [qr/^截止$/, sub { msgStopping($_[1], $_[2]) = 1; '' } ],
     [qr/^(?:来讯者(?:名|的名字))$/, \&senderNickname],
     [qr/^来讯者(?:的|之)?(?:[Ii][Dd]|[Qq][Qq])$/, sub {
@@ -343,19 +345,7 @@ my $aliases = [
      }],
     [qr/^群[Ii][Dd]$/, sub { my ($self, $windy, $msg) = @_; msgGroupId($windy, $msg); }],
     ];
-my $replacements = {
-    '风妹' => $caller,
-    '前' => $emotion_pre,
-    '后' => $emotion_post,
-    '我' => qr/(?:我|咱(?:家)?|在下|人家|吾(?:辈)?|余(?:一人)?|朕|寡人|孤(?:王)?|本.|本少爷|本小姐)/,
-    '为什么' => qr/(?:为(?:什么|毛|喵|咩|何)|怎(?:么)?(?:能(?:够)?|可以)?)/,
-    '你' => $you,
-    '什么' => qr/(?:什么|神马|[什神][喵摸])/,
-    'd1' => qr/【/,
-    'd2' => qr/】/,
-    'd5' => qr/</,
-    'd6' => qr/>/,
-    };
+
 $match = Scripts::Windy::SmartMatch->new(
     d1 => '【',
     d2 => '】',

@@ -48,6 +48,7 @@ sub parse
 {
     my $self = shift;
     my $text = shift;
+    #logger "词库添加 ".$text;
     _utf8_on($text);
     my @s = (); #/$d1(.*?)$d2(.*?)(?=$d2)/g;
     my $d1 = $self->{d1};
@@ -123,18 +124,20 @@ sub smartmatch
     my $self = shift;
     my $text = shift;
     my @pattern = $self->parse($text);
+    #say "pattern:",Dumper(@pattern);
     my $textMatch = join '', grep { not ref $_ } @pattern;
     my @pattern = grep { ref $_ } @pattern;
     sub { # $m->smartmatch("")->($windy, $msg);
         my $windy = shift;
         my $msg = shift;
         my $t = msgText ($windy, $msg);
+        #say term  "text: `", $t,"`";
+        #say term "textmatch: `", $textMatch,"`";
         _utf8_on($t);
-        debug 'cond:'. Dumper @pattern;
+        #say 'cond:'. Dumper @pattern;
         debug 'match pattern:'.$textMatch;
-        # References could be changed,
-        # Be aware when using them.
-        my @ret = $t =~ $textMatch;
+        my @ret = $t =~ qr/$textMatch/; ###这实在是太奇怪了。
+        #@ret and say term "Matched this: ". $textMatch or say term "Didnt match.";
         # 先执行regex，然后判定是否符合条件。
         if (@ret and (@pattern ? all { $self->runExpr($windy, $msg, $_, @_); } @pattern : 1)) {
             @ret;

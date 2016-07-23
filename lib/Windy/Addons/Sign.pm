@@ -26,6 +26,7 @@ sub sign
     my ($self, $windy, $msg) = @_;
     my $thisTime = time2date;
     my $id = uid(msgSender($windy, $msg));
+    $windy->logger("${id}签到了。");
     if ($sign{$id} ne $thisTime) {
         $sign{$id} = $thisTime;
         if (open my $f, '>>', $signFile) {

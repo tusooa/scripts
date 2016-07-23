@@ -4,9 +4,10 @@ use 5.012;
 use Exporter;
 use Scripts::scriptFunctions;
 use utf8;
+
 #use Data::Dumper;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/isGroupMsg msgText msgGroupId msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender uid uName isAt/;
+our @EXPORT = qw/isGroupMsg msgText msgGroup msgGroupId msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender uid uName isAt findUserInGroup/;
 our @EXPORT_OK = qw//;
 
 # check whether a msg is a group msg
@@ -23,6 +24,12 @@ sub msgText
     my $windy = shift;
     my $msg = shift;
     $msg->content;
+}
+
+sub msgGroup
+{
+    my ($windy, $msg) = @_;
+    $msg->group;
 }
 
 sub msgGroupId
@@ -71,5 +78,11 @@ sub isAt
     $msg->is_at(@_);
 }
 
-
+sub findUserInGroup
+{
+    my $windy = shift;
+    my $uid = shift;
+    my $group = shift;
+    $group->search_group_member(qq => $uid);
+}
 1;
