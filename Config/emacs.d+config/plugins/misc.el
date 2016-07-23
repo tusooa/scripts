@@ -60,9 +60,9 @@
          (")" "]" "}")))))
 (defun rainbow-delimiters-escaped-char-predicate-perl (loc)
   (and (or (eq (char-after loc) ?\[)
-               (eq (char-after loc) ?\])
-        (eq (char-after loc) ?\()
-        (eq (char-after loc) ?\)))
+           (eq (char-after loc) ?\])
+           (eq (char-after loc) ?\()
+           (eq (char-after loc) ?\)))
        (eq (char-before loc) ?$))) ; 忽略$[ $] $( $) 之类
                                    ; 的确有${[}，但是有人用吗？
 

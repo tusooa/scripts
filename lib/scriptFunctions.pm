@@ -103,7 +103,7 @@ sub term #蛋痛的euc-cn <=> utf-8 转换。只有闻道死才需要。和谐�
 
 sub final
 {
-    say term "-开始我们的战争\e[4D\e[1A\e[1;7;31mDate\e[0m\e[1B吧-";
+    say term "\n开始我们的战争\e[4D\e[1A\e[1;7;32mDate\e[0m\e[1B吧w";
 }
 
 sub debug

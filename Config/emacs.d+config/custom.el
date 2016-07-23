@@ -4,10 +4,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ansi-color-names-vector ["black" "firebrick1" "lime green" "gold1" "RoyalBlue3" "HotPink1" "dark turquoise" "white"])
  '(canlock-password "64af8575f06472636c3a0709394ee6a2eae4520d")
  '(cperl-highlight-variables-indiscriminately t)
  '(cperl-indent-level 4)
- ;'(current-language-environment "UTF-8")
  '(custom-file "~/.emacs.d/config/custom.el")
  '(gnus-no-groups-message "-- No Groups --")
  '(gnus-permanently-visible-groups ".+")

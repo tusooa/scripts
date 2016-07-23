@@ -19,7 +19,9 @@
          (,(kbd "C-x C-e") eval-buffer)
          (,(kbd "C-c p") replace-string)
          (,(kbd "C-c g") replace-regexp)
-         (,(kbd "C-x C-b") ibuffer)))
+         (,(kbd "C-x C-b") ibuffer)
+         ; colorize ansi sequences
+         (,(kbd "C-c C-c") (lambda () (interactive) (ansi-color-apply-on-region (point-min) (point-max))))))
 ;         (,(kbd "C-c o") (lambda () (interactive) (find-file "~/个人/todo.org")))
 ;         (,(kbd "<S-mouse-2>") 'mouse-yank-at-click)
 ;         (,(kbd "<mode-line> <S-mouse-2>") 'describe-mode)
