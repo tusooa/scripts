@@ -126,6 +126,7 @@ sub smartmatch
     my @pattern = $self->parse($text);
     #say "pattern:",Dumper(@pattern);
     my $textMatch = join '', grep { not ref $_ } @pattern;
+    $textMatch = qr/$textMatch/; ### 加上这句之后反应速率提高数百倍
     my @pattern = grep { ref $_ } @pattern;
     sub { # $m->smartmatch("")->($windy, $msg);
         my $windy = shift;
@@ -136,7 +137,7 @@ sub smartmatch
         _utf8_on($t);
         #say 'cond:'. Dumper @pattern;
         debug 'match pattern:'.$textMatch;
-        my @ret = $t =~ qr/$textMatch/; ###这实在是太奇怪了。
+        my @ret = $t =~ $textMatch; ###这实在是太奇怪了。
         #@ret and say term "Matched this: ". $textMatch or say term "Didnt match.";
         # 先执行regex，然后判定是否符合条件。
         if (@ret and (@pattern ? all { $self->runExpr($windy, $msg, $_, @_); } @pattern : 1)) {
