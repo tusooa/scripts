@@ -11,6 +11,7 @@ no warnings 'experimental';
 use Data::Dumper;
 use utf8;
 use Encode qw/_utf8_on _utf8_off/;
+use Regexp::Common qw/balanced/;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/sm sr/;
 our @EXPORT_OK = qw//;
@@ -39,9 +40,48 @@ sub new
     $self->{d4} //= '}';
     $self->{d5} //= '<';
     $self->{d6} //= '>';
+    $self->{d7} //= '〔';
+    $self->{d8} //= '〕';
     $self->{aliases} //= [];
     $self->{replacements} //= {};
+    $self->{re_rep} = $RE{balanced}{-begin => $self->{d5}}{-end => $self->{d6}};
+    $self->{re_arg} = $RE{balanced}{-begin => $self->{d7}}{-end => $self->{d8}};
     bless $self, $class;
+}
+
+sub replace
+{
+    my ($self, $symbol, @rest) = @_;
+    my $this = $self->{replacements}{$symbol};
+    if (ref $this eq 'CODE') { # 生成器
+        $this->(@rest);
+    } elsif (ref $this eq 'ARRAY') { # array, 用或者连接。
+        my $regex = '(?:'.(join '|', @$this).')';
+        qr/$regex/;
+    } elsif ($this) { # scalar，带入。
+        $this;
+    } else {
+        $symbol; # 为空返回其名
+    }
+}
+
+#### aaa<bbbbbb〔cccccc<ffff>ddd,eeeggg,llllll<hhhhhh〔- - -〕>〕>
+sub parseReplacements
+{
+    my ($self, $text) = @_;
+    my $text = substr $text, 1, (length $text) - 2; # 去除头尾<>
+    my @args;
+    if ($text =~ s/$self->{re_arg}//) {
+        @args = map { $self->parseText($_) } split ',', substr $1, 1, (length $1) - 2;
+    }
+    $self->parseText($self->replace($text, @args));
+}
+
+sub parseText
+{
+    my ($self, $text) = @_;
+    ### 只能嵌两层。不知道为什么。不知道会有什么问题。
+    $text =~ s/$self->{re_rep}/$self->parseReplacements($1)/ger;
 }
 
 sub parse
@@ -51,10 +91,12 @@ sub parse
     #logger "词库添加 ".$text;
     _utf8_on($text);
     my @s = (); #/$d1(.*?)$d2(.*?)(?=$d2)/g;
-    my $d1 = $self->{d1};
-    my $d2 = $self->{d2};
-    my $d5 = $self->{d5};
-    my $d6 = $self->{d6};
+    my $d1 = quotemeta $self->{d1};
+    my $d2 = quotemeta $self->{d2};
+    my $d5 = quotemeta $self->{d5};
+    my $d6 = quotemeta $self->{d6};
+    my $d7 = quotemeta $self->{d7};
+    my $d8 = quotemeta $self->{d8};
     my $replacements = $self->{replacements};
     while ($text) {
         debug "text = `$text`";
@@ -62,9 +104,11 @@ sub parse
             debug "command `$1`";
             push @s, $self->parseExpr($1);
         } elsif ($text =~ s/^(?<!$d1)(.+?)(?=$d1|$)//) {
+            #($text =~ s///) {
             my $ret = $1;
+            $ret =~ s/$self->{re_rep}/$self->parseReplacements($1)/ge;
             debug "match `$ret`";
-            $ret =~ s<$d5(.+?)$d6>[$replacements->{$1} // $1]eg;
+            #$ret =~ s<$d5([^$d6$d7]+)(?:$d7([^$d8]+)$d8)?$d6>[$self->replace($1, $2)]eg;
             debug "the pattern is now: $ret";
             push @s, $ret;
         } else {

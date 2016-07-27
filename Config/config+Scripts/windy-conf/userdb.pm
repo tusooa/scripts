@@ -10,6 +10,9 @@ use Scripts::Windy::Conf::smartmatch;
 use Exporter;
 use Data::Dumper;
 use utf8;
+
+sub reloadDB;
+
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/$database/;
 our $database;
@@ -168,46 +171,75 @@ sub sizeOfDB
     $sizeRes->($windy, $msg, $database->length);
 }
 
-$database = Scripts::Windy::Userdb->new(
-[sm(qr/^<风妹>出来$/), \&start],
-#[sm(''), sr('【截止】')],
-#[sm('【群讯】'), sr("【截止】")],
-[sm("【不是群讯】"), sr("【截止】")],
-[sm(qr/^<风妹>(?:<以后>)?<不要>理睬?(\d+)<后>$/), sub { blackList(@_, 1); }],
-[sm(qr/^<风妹>(?:<以后>)?<不要>不理睬?(\d+)<后>$/), sub { blackList(@_, 0); }],
-[sm("【被屏蔽】"), sr("【截止】")],
-[sm(qr/^<风妹>回去$/), \&stop],
-[sm(qr/^<风妹>当问(.+?)则答(.+)$/), sub { $_[2] = '^<前>'.$_[2].'<后>$'; teach(@_); }],
-[sm(qr/^<前>(?:<你>)?怎么出来<后>$/), \&callerName],
-[sm(qr/^<风妹>知道<多少><后>/), \&sizeOfDB],
-[sm(qr/^<风妹>若问(.+?)即答(.+)$/), \&teach],
-[sm(qr/^<风妹>问(.+?)答(.+)$/), sub { $_[2] = '^'.$_[2].'$'; teach(@_); }],
-[sm(qr/^<风妹>(?:<以后>)?<称呼><我>(?:作|为|叫)?(.+?)(?:<就好>)?$/), \&newNickname],
-[sm(qr/^<风妹>(?:<以后>)?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$/), \&assignNickname],
-[sm(qr/^<风妹>(?:<以后>)?一直都?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$/), sub { assignNickname @_, 1; }],
-);
-
-
-if (open my $f, '<', $configDir.'windy-conf/userdb.db') {
-    my ($ask, $ans);
-    my $ref;
-    while (<$f>) {
-        if (s/^\tAsk//) {
-            chomp ($ask, $ans);
-            $database->add([sm($ask), sr($ans)]) if $ask and $ans;
-            $ask = '';
-            $ans = '';
-            $ref = \$ask;
-        } elsif (s/^\tAns//) {
-            $ref = \$ans;
-        }
-        $$ref .= $_;
+my $addRRes1 = sr("【截止】嗯。");
+my $addRRes2 = sr("。。。。");
+sub addR
+{
+    my ($windy, $msg, $rep, $name) = @_;
+    if (msgSenderIsAdmin($windy, $msg)) {
+        $subs->{addR}($name, $rep);
+        $addRRes1->(@_);
+    } else {
+        $addRRes2->(@_);
     }
-    chomp ($ask, $ans);
-    $database->add([sm($ask), sr($ans)]) if $ask and $ans;
-    close $f;
-} else {
-    debug 'cannot open';
 }
 
+my $reloadRes1 = sr("【截止】好的【心情判：w,0 0,,。】");
+my $reloadRes2 = sr("【截止】我不会考虑的【心情判：x,- -,,。】");
+sub reloadAll
+{
+    if (msgSenderIsAdmin(@_)) {
+        $subs->{reloadR}();
+        reloadDB;
+        $reloadRes1->(@_);
+    } else {
+        $reloadRes2->(@_);
+    }
+}
+
+reloadDB;
+
+sub reloadDB
+{
+    my @baseDB = (
+        [sm(qr/^<风妹>出来$/), \&start],
+        [sm("【不是群讯】"), sr("【截止】")],
+        [sm(qr/^<风妹>(?:<以后>)?<不要>理睬?(\d+)<后>$/), sub { blackList(@_, 1); }],
+        [sm(qr/^<风妹>(?:<以后>)?<不要>不理睬?(\d+)<后>$/), sub { blackList(@_, 0); }],
+        [sm("【被屏蔽】"), sr("【截止】")],
+        [sm(qr/^<风妹>回去$/), \&stop],
+        [sm(qr/^<风妹>当问(.+?)则答(.+)$/), sub { $_[2] = '^<前>'.$_[2].'<后>$'; teach(@_); }],
+        [sm(qr/^<前>(?:<你>)?怎么出来<后>$/), \&callerName],
+        [sm(qr/^<风妹>知道<多少><后>/), \&sizeOfDB],
+        [sm(qr/^<风妹>若问(.+?)即答(.+)$/), \&teach],
+        [sm(qr/^<风妹>问(.+?)答(.+)$/), sub { $_[2] = '^'.$_[2].'$'; teach(@_); }],
+        [sm(qr/^<风妹>(?:<以后>)?<称呼><我>(?:作|为|叫)?(.+?)(?:<就好>)?$/), \&newNickname],
+        [sm(qr/^<风妹>(?:<以后>)?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$/), \&assignNickname],
+        [sm(qr/^<风妹>(?:<以后>)?一直都?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$/), sub { assignNickname @_, 1; }],
+        [sm(qr/^<风妹>(?:<以后>)?<记得>(.+?)也是(.+)$/), \&addR],
+        [sm(qr/^<风妹>重生<后>$/), \&reloadAll],
+        );
+    $database = Scripts::Windy::Userdb->new(@baseDB);
+    if (open my $f, '<', $configDir.'windy-conf/userdb.db') {
+        my ($ask, $ans);
+        my $ref;
+        while (<$f>) {
+            if (s/^\tAsk//) {
+                chomp ($ask, $ans);
+                $database->add([sm($ask), sr($ans)]) if $ask and $ans;
+                $ask = '';
+                $ans = '';
+                $ref = \$ask;
+            } elsif (s/^\tAns//) {
+                $ref = \$ans;
+            }
+            $$ref .= $_;
+        }
+        chomp ($ask, $ans);
+        $database->add([sm($ask), sr($ans)]) if $ask and $ans;
+        close $f;
+    } else {
+        debug 'cannot open';
+    }
+}
 1;

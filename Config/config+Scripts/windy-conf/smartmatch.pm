@@ -7,7 +7,7 @@ use Scripts::Windy::Addons::Sign;
 use Scripts::Windy::Addons::BlackList;
 use Scripts::Windy::Addons::Mood;
 use Scripts::Windy::Addons::StartStop;
-use Scripts::Windy::Conf::smartmatch::replacements;
+#use Scripts::Windy::Conf::smartmatch::replacements;
 
 use Scripts::Windy::SmartMatch;
 use Scripts::Windy::Quote;
@@ -17,6 +17,7 @@ use Scripts::scriptFunctions;
 #$Scripts::scriptFunctions::debug = 0;
 use Exporter;
 use utf8;
+use Encode qw/_utf8_on _utf8_off/;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/$match sm sr $sl1 $sl2 $sl3 $subs/;
 
@@ -31,6 +32,14 @@ our $match;
 my $If = qr/(?:(?:如)?若|如果)/;
 my $Then = qr/(?:则|那么)/;
 my $Else = qr/(?:不然|否则)(?:的话)?/;
+
+my $repFile = $configDir.'windy-conf/replacements.db';
+
+sub sm;
+sub sr;
+sub loadReplacements;
+sub addReplacement;
+sub reloadReplacements;
 
 our ($sl1, $sl2, $sl3) = (100, 50, 0);
 our @ml = (93, 85, 60, 40, -10, -40);
@@ -203,6 +212,8 @@ $subs = {
             undef;
         }
     },
+    reloadR => \&reloadReplacements,
+    addR => \&addReplacement,
 };
 my $aliases = [
     # Plain
@@ -332,7 +343,8 @@ my $aliases = [
         $s <= $sl3;
      }],
     [qr/^签到$/, $subs->{sign}],
-    [qr/^(?:对|艾特)(?:我|你)$/, sub { my $self = shift;my $windy = shift; my $msg = shift; isAt($windy, $msg) or msgText($windy, $msg) =~ /^$caller/ }],
+    [qr/^(?:对|艾特)(?:我|你)$/, sub { my $self = shift;my $windy = shift; my $msg = shift; isAt($windy, $msg) #or msgText($windy, $msg) =~ /^$caller/
+     }],
     [qr/^左$/, sub { shift->{d1} }],
     [qr/^右$/, sub { shift->{d2} }],
     [qr/^群(?:中|里|内)有(\d+)$/, sub {
@@ -353,8 +365,11 @@ $match = Scripts::Windy::SmartMatch->new(
     d4 => '}',
     d5 => '<',
     d6 => '>',
+    d7 => '〔',
+    d8 => '〕',
     aliases => $aliases,
-    replacements => $replacements);
+    replacements => {},);
+reloadReplacements;
 
 sub sm
 {
@@ -364,6 +379,59 @@ sub sm
 sub sr
 {
     $match->smartret(@_);
+}
+
+sub loadReplacements
+{
+    if (open my $f, '<', $repFile) {
+        while (<$f>) {
+            chomp;
+            _utf8_on($_);
+            if (/^\e([^\t]+)\t(.+)$/) {
+                my $name = $1;
+                my $rep = $2;
+                $match->{replacements}{$name} = eval $rep;
+                die "Cannot eval `$rep` because: $@" if $@;
+            } elsif (/^([^\t]+)\t(.+)$/) {
+                my $name = $1;
+                my $rep = $2;
+                if (ref $match->{replacements}{$name} eq 'ARRAY') {
+                    push @{$match->{replacements}{$name}}, $rep;
+                } else {
+                    $match->{replacements}{$name} = [$rep];
+                }
+            } else {
+                # 注释以一个Tab开头？
+                # 好主意w
+            }
+        }
+        close $f;
+    }
+}
+
+sub reloadReplacements
+{
+    $match->{replacements} = {};
+    loadReplacements;
+}
+
+### addReplacement('aaa', 'bbb')
+### => <aaa> -> 'bbb'
+sub addReplacement
+{
+    my ($name, $rep) = @_;
+    if (ref $match->{replacements}{$name} eq 'ARRAY') {
+        push @{$match->{replacements}{$name}}, $rep;
+    } else {
+        $match->{replacements}{$name} = [$rep];
+    }
+    if (open my $f, '>>', $repFile) {
+        binmode $f, ':unix';
+        say $f "$name\t$rep";
+        close $f;
+    } else {
+        die term "没法打开 $repFile 写入: $!\n";
+    }
 }
 
 1;
