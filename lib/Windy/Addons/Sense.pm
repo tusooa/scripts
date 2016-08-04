@@ -61,8 +61,9 @@ sub addSense
 
 sub clearUp
 {
-    scalar keys %sense or return; # not loading anythine
+    scalar keys %sense or return; # not loading anything
     if (open my $f, '>', $filename) {
+        binmode $f, ':unix';
         for (sort { $a <=> $b } keys %sense) {
             say $f join "\t", $_, @{$sense{$_}};
         }

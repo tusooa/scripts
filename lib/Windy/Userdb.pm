@@ -51,7 +51,11 @@ sub match
             #$windy->logger("一个可选的回复是: ".$ret);
             debug 'matching, returning '.$ret;
             push @ret, $ret if $ret; # 若有返回值，则添加到回复列表。
-            $windy->logger("这条信息到此为止了。"),last if msgStopping($windy, $msg);
+            if (msgStopping($windy, $msg)) {
+                @ret = $ret ? ($ret) : ();
+                $windy->logger("这条信息到此为止了。");
+                last;
+            }
         }
     }
     @ret ? $ret[int rand @ret] : undef; # 若有多个选择，随机。

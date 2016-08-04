@@ -15,6 +15,7 @@ if (open my $w, '<', $file) {
 } else {
     die term "打不开文件 $file: $!\n";
 }
+=comment
 my $mailAccount = {};
 if (open my $f, '<', $accountDir.'windy-mail') {
     while (<$f>) {
@@ -24,15 +25,17 @@ if (open my $f, '<', $accountDir.'windy-mail') {
         }
     }
     close $f;
+    $mailAccount->{auth} = {login => $mailAccount->{user}, password => $mailAccount->{pass}};
 } else {
     warn term "打不开mail文件: $!\n";
 }
-
+=cut
 my $windy = Scripts::Windy->new;
 my $t = Mojo::Webqq->new(
     qq => $uid,
     login_type => 'qrlogin',
     tmpdir => $configDir.'windy-cache/',
+    qrcode_path => $Scripts::scriptFunctions::home.'/OneDrive/windy.png',
 #    is_init_friend => 0,
 #    is_init_group => 0,
 #    is_init_discuss => 0,
@@ -42,7 +45,6 @@ my $t = Mojo::Webqq->new(
 #    is_update_friend => 0,
 #    is_update_discuss => 0,
     );
-$t->login;
 sub onReceive
 {
     my ($c, $m) = @_;
@@ -64,12 +66,7 @@ $t->on(receive_pic => sub {
     say "receive image: ", $filepath;
     say "sender is: ", $sender->displayname;
        });
-#$t->on(receive_raw_message=>sub{
-#    my ($client,$bytes,$hash) = @_;
-#    print term Dumper($hash);
-    #$bytes 是接收到的原始消息 json 格式数据，未做任何处理
-    #$hash 是将 $bytes 进行 Mojo::JSON::decode_json 之后得到的 perl hash 结构
-#});
 #open STDOUT, '>>', $configDir.'windy-cache/logs.txt';
 #binmode STDOUT, ':unix';
+$t->login;
 $t->run;

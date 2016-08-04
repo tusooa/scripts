@@ -41,7 +41,7 @@ sub loadReplacements;
 sub addReplacement;
 sub reloadReplacements;
 
-our ($sl1, $sl2, $sl3) = (100, 50, 0);
+our ($sl1, $sl2, $sl3) = (150, 80, 0);
 our @ml = (93, 85, 60, 40, -10, -40);
 
 our $subs;
@@ -137,25 +137,37 @@ $subs = {
         my ($self, $windy, $msg) = @_;
         my $sense = $subs->{sense}(@_);
         my $mood = $subs->{mood}(@_);
-        int(abs($sense) > 20 ? $sense + abs($sense)*$mood/200 : $sense + 20*$mood/200);
+        int($sense + (abs($sense) > 20 ? abs($sense) : 20) * ($mood-$ml[3]) / 200);
     },
     addSense => sub {
         my ($self, $windy, $msg, $m1) = @_;
-        my ($sense, $added) = addSense(uid(msgSender($windy, $msg)), $m1);
-        if ($added <= 0 or rand >= .233) { # 有一定的概率,显示好感.
+        my (undef, $added) = addSense(uid(msgSender($windy, $msg)), $m1);
+        my $sense = $subs->{senseWithMood}($self, $windy, $msg);
+        if (rand >= .233) { # 有一定的概率,显示好感.
             '';
-        } else {
+        } elsif ($added >= 0) {
             my $nick = senderNickname($self, $windy, $msg);
             if ($sense > $sl1) {
                 '（最喜欢'.$nick.'了www';
             } elsif ($sense > $sl2) {
-                '（咱好像越来越喜欢'.$nick.'了呢w';
-            } elsif ($sense > $sl3) {
                 '（咱好像有点喜欢'.$nick.'了呢w';
+            } elsif ($sense > $sl3) {
+                '';
             } else {
                 ''; # 对于好感是负的人来说...你上辈子做了什么孽呀QAQ
             }
-        } 
+        } else {
+            my $nick = senderNickname($self, $windy, $msg);
+            if ($sense > $sl1) {
+                '（'.$nick.'。。是嫌弃人家了嘛呜。。';
+            } elsif ($sense > $sl2) {
+                '（'.$nick.'。。。qwq';
+            } elsif ($sense > $sl3) {
+                '（'.$nick.'，很有趣呀。';
+            } else {
+                '（你还想作死0 0？'; # 对于好感是负的人来说...你上辈子做了什么孽呀QAQ
+            }
+        }
     },
     sign => sub {
         my ($self, $windy, $msg) = @_;
@@ -171,7 +183,11 @@ $subs = {
     newNick => sub {
         my ($self, $windy, $msg, $nick, $sticky) = @_;
         my $id = uid(msgSender($windy, $msg));
-        newNick($id, $nick, $sticky);
+        if ($subs->{senseWithMood}($self, $windy, $msg) > $sl2) {
+            newNick($id, $nick, $sticky);
+        } else {
+            undef;
+        }
     },
     assignNick => sub {
         my ($self, $windy, $msg, $id, $nick, $sticky) = @_;
@@ -187,12 +203,14 @@ $subs = {
     },
     start => sub {
         my ($self, $windy, $msg, $group) = @_;
-        $group = msgGroupId($windy, $msg) if not $group;
+        $group = msgGroupId($windy, $msg) if $windy and $msg and not $group;
+        $group or return;
         startOn($group, $windy, $msg);
     },
     stop => sub {
         my ($self, $windy, $msg, $group) = @_;
-        $group = msgGroupId($windy, $msg) if not $group;
+        $group = msgGroupId($windy, $msg) if $windy and $msg and not $group;
+        $group or return;
         stopOn($group);
     },
     fromGroup => sub {
@@ -419,7 +437,8 @@ sub reloadReplacements
 ### => <aaa> -> 'bbb'
 sub addReplacement
 {
-    my ($name, $rep) = @_;
+    my ($name, $rep, $quotemeta) = @_;
+    $rep = quotemeta $rep if $quotemeta;
     if (ref $match->{replacements}{$name} eq 'ARRAY') {
         push @{$match->{replacements}{$name}}, $rep;
     } else {

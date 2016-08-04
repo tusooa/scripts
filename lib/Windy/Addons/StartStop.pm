@@ -42,7 +42,7 @@ sub startOn
     my $msg = shift;
     if (! grep $_->[0] eq $groupId, @startGroup) {
         my $uid;
-        $uid = uid(msgSender($windy, $msg)) if $windy and $msg;
+        $uid = ($windy and $msg) ? uid(msgSender($windy, $msg)) : -1;
         push @startGroup, [$groupId, $uid];
         saveGroups;
         $groupId;

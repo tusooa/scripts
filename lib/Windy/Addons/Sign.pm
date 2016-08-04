@@ -26,8 +26,8 @@ sub sign
     my ($self, $windy, $msg) = @_;
     my $thisTime = time2date;
     my $id = uid(msgSender($windy, $msg));
-    $windy->logger("${id}签到了。");
     if ($sign{$id} ne $thisTime) {
+        $windy->logger("${id}签到了。");
         $sign{$id} = $thisTime;
         if (open my $f, '>>', $signFile) {
             binmode $f, ':unix';
@@ -35,6 +35,7 @@ sub sign
         }
         (int rand $maxSense) + 1;
     } else {
+        $windy->logger("${id}已经签到过了。");
         0;
     }
 }

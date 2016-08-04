@@ -44,7 +44,6 @@ sub start
 {
     my $windy = shift;
     my $msg = shift;
-    #$windy->{startGroup} = [@lastGroups] if ref $windy->{startGroup} ne 'ARRAY';# 初始化.
     if (msgSenderIsGroupAdmin($windy, $msg)
          or msgSenderIsAdmin($windy, $msg)) {
         $subs->{start}(undef, $windy, $msg, undef, @_)
@@ -52,6 +51,40 @@ sub start
             or $startRes1F->($windy, $msg, @_);
     } else {
         $startRes2->($windy, $msg, @_);
+    }
+}
+
+my $startGRes1 = sr("【截止】听从神之召唤【心情判：w,- -,,。】");
+my $startGRes1F = sr("【截止】召唤失败了【心情判：qwq,- -,,。】");
+my $startGRes2 = sr("【截止】。。。");
+sub startG
+{
+    my $windy = shift;
+    my $msg = shift;
+    my ($group) = @_;
+    if (msgSenderIsAdmin($windy, $msg)) {
+        $subs->{start}(undef, undef, undef, $group, @_)
+            and $startGRes1->($windy, $msg, @_)
+            or $startGRes1F->($windy, $msg, @_);
+    } else {
+        $startGRes2->($windy, $msg, @_);
+    }
+}
+
+my $stopGRes1 = sr("【截止】于是我就这么消失了【心情判：w,- -,,。】");
+my $stopGRes1F = sr("【截止】出现了什么问题【心情判：qwq,- -,,。】");
+my $stopGRes2 = sr("【截止】。。。");
+sub stopG
+{
+    my $windy = shift;
+    my $msg = shift;
+    my ($group) = @_;
+    if (msgSenderIsAdmin($windy, $msg)) {
+        $subs->{stop}(undef, undef, undef, $group, @_)
+            and $stopGRes1->($windy, $msg, @_)
+            or $stopGRes1F->($windy, $msg, @_);
+    } else {
+        $stopGRes2->($windy, $msg, @_);
     }
 }
 
@@ -82,7 +115,7 @@ sub callerName
     $cRes->($windy, $msg, $name);
 }
 
-my $teachRes1 = sr("【截止】嗯。");
+my $teachRes1 = sr("【截止】呐。");
 my $teachRes2 = sr("诶...?QAQ");
 my $teachRes3 = sr("...");
 sub teach
@@ -171,13 +204,14 @@ sub sizeOfDB
     $sizeRes->($windy, $msg, $database->length);
 }
 
-my $addRRes1 = sr("【截止】嗯。");
+my $addRRes1 = sr("【截止】呐。");
 my $addRRes2 = sr("。。。。");
 sub addR
 {
     my ($windy, $msg, $rep, $name) = @_;
+    my $quotemeta = pop;
     if (msgSenderIsAdmin($windy, $msg)) {
-        $subs->{addR}($name, $rep);
+        $subs->{addR}($name, $rep, $quotemeta);
         $addRRes1->(@_);
     } else {
         $addRRes2->(@_);
@@ -216,8 +250,11 @@ sub reloadDB
         [sm(qr/^<风妹>(?:<以后>)?<称呼><我>(?:作|为|叫)?(.+?)(?:<就好>)?$/), \&newNickname],
         [sm(qr/^<风妹>(?:<以后>)?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$/), \&assignNickname],
         [sm(qr/^<风妹>(?:<以后>)?一直都?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$/), sub { assignNickname @_, 1; }],
-        [sm(qr/^<风妹>(?:<以后>)?<记得>(.+?)也是(.+)$/), \&addR],
+        [sm(qr/^<风妹>(?:<以后>)?<记得>(.+?)也是(.+)$/), sub { addR(@_, 0); }],
+        [sm(qr/^<风妹>(?:<以后>)?<记得>(.+?)亦是(.+)$/), sub { addR(@_, 1); }],
         [sm(qr/^<风妹>重生<后>$/), \&reloadAll],
+        [sm(qr/^<风妹>天降于?(\d+)<后>$/), \&startG],
+        [sm(qr/^<风妹>消失于?(\d+)<后>$/), \&stopG],
         );
     $database = Scripts::Windy::Userdb->new(@baseDB);
     if (open my $f, '<', $configDir.'windy-conf/userdb.db') {
