@@ -205,14 +205,15 @@ sub sizeOfDB
 }
 
 my $addRRes1 = sr("【截止】呐。");
+my $addRRes1F = sr("【截止】然而机智的我早已记住了【心情判：ww,- -,,。】");
 my $addRRes2 = sr("。。。。");
 sub addR
 {
     my ($windy, $msg, $rep, $name) = @_;
     my $quotemeta = pop;
     if (msgSenderIsAdmin($windy, $msg)) {
-        $subs->{addR}($name, $rep, $quotemeta);
-        $addRRes1->(@_);
+        $subs->{addR}($name, $rep, $quotemeta) ? 
+        $addRRes1->(@_) : $addRRes1F->(@_);
     } else {
         $addRRes2->(@_);
     }

@@ -438,6 +438,12 @@ sub reloadReplacements
 sub addReplacement
 {
     my ($name, $rep, $quotemeta) = @_;
+    if ($match->{replacements}{$name}) {
+        my $regex = $match->parseReplacements($match->{d5}.$name.$match->{d6});
+        if ($rep =~ m/$regex/) { # 这条已经存在了。
+            return;
+        }
+    }
     $rep = quotemeta $rep if $quotemeta;
     if (ref $match->{replacements}{$name} eq 'ARRAY') {
         push @{$match->{replacements}{$name}}, $rep;
@@ -451,6 +457,7 @@ sub addReplacement
     } else {
         die term "没法打开 $repFile 写入: $!\n";
     }
+    $rep;
 }
 
 1;
