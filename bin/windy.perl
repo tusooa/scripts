@@ -45,6 +45,30 @@ my $t = Mojo::Webqq->new(
 #    is_update_friend => 0,
 #    is_update_discuss => 0,
     );
+my $lastChannelFile = $configDir."windy-conf/last-channel";
+my $lastChannel;
+sub loadLast
+{
+    if (open my $f, '<', $lastChannelFile) {
+        chomp (my $group = <$f>);
+        $lastChannel = $t->search_group(gnumber => $group);
+        close $f;
+    }
+    $lastChannel;
+}
+sub recordLast
+{
+    eval { $lastChannel = shift->group; };
+    $lastChannel = undef if $@;
+}
+sub saveLast
+{
+    if ($lastChannel and open my $f, '>', $lastChannelFile) {
+        binmode $f, ':unix';
+        say $f $lastChannel->gnumber;
+        close $f;
+    }
+}
 sub onReceive
 {
     my ($c, $m) = @_;
@@ -56,8 +80,10 @@ sub onReceive
     if ($resp) {
         $windy->logger("送出 `".$resp."`, 在 ".( time - $time )." 秒内");
         $m->reply($_) for split "\n\n", $resp;
+        recordLast($m);
     }
 }
+$t->timer(3000, sub { saveLast;shift->stop(['auto']); });
 #$t->load("PostQRcode",data => $mailAccount ) if %$mailAccount;
 $t->on(receive_message => \&onReceive);
 $t->on(receive_pic => sub {
@@ -65,6 +91,10 @@ $t->on(receive_pic => sub {
     my ($client,$filepath,$sender)=@_;
     say "receive image: ", $filepath;
     say "sender is: ", $sender->displayname;
+       });
+$t->on(login => sub {
+    loadLast and
+        $lastChannel->send("咱又回来惹w");
        });
 #open STDOUT, '>>', $configDir.'windy-cache/logs.txt';
 #binmode STDOUT, ':unix';

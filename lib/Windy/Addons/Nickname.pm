@@ -45,7 +45,7 @@ sub loadNicknames
         while (<$f>) {
             chomp;
             _utf8_on($_);
-            my ($id, $sticky, $nickname) = /^(.+)(S?)\t(.+)$/;
+            my ($id, $sticky, $nickname) = /^(\d+)(S?)\t(.+)$/;
             $nick{$id} = [] if not $nick{$id};
             if ($sticky or not isSticky $nick{$id}) {
                 unshift @{$nick{$id}}, $nickname;
@@ -58,6 +58,7 @@ sub loadNicknames
 sub newNick
 {
     my ($id, $nick, $sticky) = @_;
+    $nick{$id} = [] if not $nick{$id};
     makeSticky $nick{$id} if $sticky;
     if ($sticky or not isSticky $nick{$id}) {
         unshift @{$nick{$id}}, $nick;

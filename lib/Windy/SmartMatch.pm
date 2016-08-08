@@ -52,17 +52,19 @@ sub new
 sub replace
 {
     my ($self, $symbol, @rest) = @_;
+    #my ($keep, $symbol, $flags) = $symbol =~ /(=?)(.+?)([\*\?\+]*)/;
     my $this = $self->{replacements}{$symbol};
+    my $ret;
     if (ref $this eq 'CODE') { # 生成器
-        $this->(@rest);
+        $ret = $this->(@rest);
     } elsif (ref $this eq 'ARRAY') { # array, 用或者连接。
-        my $regex = '(?:'.(join '|', @$this).')';
-        qr/$regex/;
+        $ret = '(?:'. (join '|', @$this) . ')';
     } elsif ($this) { # scalar，带入。
-        $this;
+        $ret = $this;
     } else {
-        $symbol; # 为空返回其名
+        $ret = $symbol; # 为空返回其名
     }
+    $ret;
 }
 
 #### aaa<bbbbbb〔cccccc<ffff>ddd,eeeggg,llllll<hhhhhh〔- - -〕>〕>

@@ -374,6 +374,8 @@ my $aliases = [
         onBlackList(uid(msgSender($windy, $msg)));
      }],
     [qr/^群[Ii][Dd]$/, sub { my ($self, $windy, $msg) = @_; msgGroupId($windy, $msg); }],
+    [qr/^换行$/, sub { "\n" }],
+    [qr/^下讯$/, sub { "\n\n" }],
     ];
 
 $match = Scripts::Windy::SmartMatch->new(
