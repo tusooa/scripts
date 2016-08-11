@@ -232,6 +232,7 @@ $subs = {
     },
     reloadR => \&reloadReplacements,
     addR => \&addReplacement,
+    getR => \&getReplacement,
 };
 my $aliases = [
     # Plain
@@ -435,13 +436,21 @@ sub reloadReplacements
     loadReplacements;
 }
 
+sub getReplacement
+{
+    my $name = shift;
+    if ($match->{replacements}{$name}) {
+        $match->parseReplacements($match->{d5}.$name.$match->{d6});
+    } else {
+        undef;
+    }
+}
 ### addReplacement('aaa', 'bbb')
 ### => <aaa> -> 'bbb'
 sub addReplacement
 {
     my ($name, $rep, $quotemeta) = @_;
-    if ($match->{replacements}{$name}) {
-        my $regex = $match->parseReplacements($match->{d5}.$name.$match->{d6});
+    if (my $regex = getReplacement($name)) {
         if ($rep =~ m/$regex/) { # 这条已经存在了。
             return;
         }

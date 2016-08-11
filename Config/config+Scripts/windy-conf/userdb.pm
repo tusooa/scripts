@@ -34,8 +34,8 @@ sub msgSenderIsAdmin
     $id ~~ @adminList;
 }
 
-my $startRes1 = sr("【截止】咱在这里呢w");
-my $startRes1F = sr("【截止】喵呼？");
+my $startRes1 = sr("【截止】【好感判：喵喵喵www咱在这里呢w,来了来了qwq,好好好，什么事啊- -,你为什么要召唤我。】");
+my $startRes1F = sr("【截止】好像哪里不对（思考");
 #use Data::Dumper;
 #use Mojo::Webqq::Message::Recv::GroupMessage;
 #die Dumper (($startRes1)->({}, bless { content => '1234',}, 'Mojo::Webqq::Message::Recv::GroupMessage'));
@@ -88,9 +88,9 @@ sub stopG
     }
 }
 
-my $stopRes1 = sr("【截止】那...咱走惹QAQ");
+my $stopRes1 = sr("【截止】【好感判：诶喵qwq那咱家走惹。。。,令咒的力量真是强大呢- -,是是是我很烦- -,woc你就是想赶我走？】");
 my $stopRes1F = sr("【截止】然而这并没有什么用QAQ");
-my $stopRes2 = sr("【截止】诶..?qwq");
+my $stopRes2 = sr("【截止】【好感判：来讯者名+为什么要赶人家走呢qwq,- -令咒用光了吧,,不回去。】");
 sub stop
 {
     my $windy = shift;
@@ -115,7 +115,7 @@ sub callerName
     $cRes->($windy, $msg, $name);
 }
 
-my $teachRes1 = sr("【截止】呐。");
+my $teachRes1 = sr("【截止】调教完成.avi");
 my $teachRes2 = sr("诶...?QAQ");
 my $teachRes3 = sr("...");
 sub teach
@@ -204,7 +204,7 @@ sub sizeOfDB
     $sizeRes->($windy, $msg, $database->length);
 }
 
-my $addRRes1 = sr("【截止】呐。");
+my $addRRes1 = sr("【截止】调教完成.avi");
 my $addRRes1F = sr("【截止】然而机智的我早已记住了【心情判：ww,- -,,。】");
 my $addRRes2 = sr("。。。。");
 sub addR
@@ -216,6 +216,20 @@ sub addR
         $addRRes1->(@_) : $addRRes1F->(@_);
     } else {
         $addRRes2->(@_);
+    }
+}
+
+my $getRRes1 = sr("【截止】据我所知，【捕获1】大约是「【捕获2】」【心情判：w,- -,,。】");
+my $getRRes1F = sr("【截止】不知道【心情判：qwq,- -,,。】");
+my $getRRes2 = sr("。。。");
+sub getR
+{
+    my ($windy, $msg, $name) = @_;
+    my $rep = $subs->{getR}($name);
+    if (msgSenderIsAdmin($windy, $msg)) {
+        $rep ? $getRRes1->($windy, $msg, $name, $rep) : $getRRes1F->(@_);
+    } else {
+        $getRRes2->(@_);
     }
 }
 
@@ -253,6 +267,7 @@ sub reloadDB
         [sm(qr/^<风妹>(?:<以后>)?一直都?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$/), sub { assignNickname @_, 1; }],
         [sm(qr/^<风妹>(?:<以后>)?<记得>(.+?)也是(.+)$/), sub { addR(@_, 0); }],
         [sm(qr/^<风妹>(?:<以后>)?<记得>(.+?)亦是(.+)$/), sub { addR(@_, 1); }],
+        [sm(qr/^<风妹><什么><是>(.+)$/), \&getR],
         [sm(qr/^<风妹>重生<后>$/), \&reloadAll],
         [sm(qr/^<风妹>天降于?(\d+)<后>$/), \&startG],
         [sm(qr/^<风妹>消失于?(\d+)<后>$/), \&stopG],

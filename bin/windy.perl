@@ -7,6 +7,7 @@ use Mojo::Util qw/md5_sum/;
 use Scripts::Windy;
 use Time::HiRes qw/time/;
 use Scripts::Windy::Util;
+no warnings 'experimental';
 my $file = $accountDir.'windy';
 my $uid;
 if (open my $w, '<', $file) {
@@ -46,26 +47,49 @@ my $t = Mojo::Webqq->new(
 #    is_update_discuss => 0,
     );
 my $lastChannelFile = $configDir."windy-conf/last-channel";
-my $lastChannel;
+my $lastChannel = [];
 sub loadLast
 {
     if (open my $f, '<', $lastChannelFile) {
-        chomp (my $group = <$f>);
-        $lastChannel = $t->search_group(gnumber => $group);
+        chomp (my $line = <$f>);
+        my ($context, $lastid) = $line =~ /^([DP]?)(\d+)$/;
+        my $channel = undef;
+        given ($context) {
+            $channel = $t->search_discuss(did => $lastid) when 'D';
+            $channel = $t->search_friend(qq => $lastid) when 'P';
+            $channel = $t->search_group(gnumber => $lastid) when '';
+        }
         close $f;
+        $windy->logger("上一次的channel是: ".$line);
+        $lastChannel = [$channel, $context];
+        $channel;
+    } else {
+        undef;
     }
-    $lastChannel;
 }
 sub recordLast
 {
-    eval { $lastChannel = shift->group; };
-    $lastChannel = undef if $@;
+    my ($last, $context) = @_;
+    $windy->logger("类型是: `". $context."`");
+    given ($context) {
+        $lastChannel = [$last->group, ''] when 'group';
+        $lastChannel = [$last->discuss, 'D'] when 'discuss';
+        $lastChannel = [$last, 'P'] when '';
+        default { $windy->logger("不能记下现在的channel。"); }
+    };
 }
 sub saveLast
 {
     if ($lastChannel and open my $f, '>', $lastChannelFile) {
         binmode $f, ':unix';
-        say $f $lastChannel->gnumber;
+        my $id;
+        given ($lastChannel->[1]) {
+            $id = $lastChannel->[0]->did when 'D';
+            $id = $lastChannel->[0]->qq when 'P';
+            $id = $lastChannel->[0]->gnumber when '';
+        }
+        $windy->logger("记下现在的channel是 ".$id."(".$lastChannel->[1].")");
+        say $f $lastChannel->[1].$id;
         close $f;
     }
 }
@@ -73,17 +97,19 @@ sub onReceive
 {
     my ($c, $m) = @_;
     my $text = $m->content;
-    my $context = ($m->type =~ /^(group|discuss)_message$/ ? " 在 ".($1 eq 'group' ? $m->group->gname.'('.$m->group->gnumber.')' : $m->discuss->dname) : '');
-    $windy->logger("收到 `".$text."` 从 ".$m->sender->displayname.$context);
+    my ($context) = $m->type =~ /^(group|discuss)_message$/;
+    my $inGroup = ($context ? " 在 ".($context eq 'group' ? $m->group->gname.'('.$m->group->gnumber.')' : $m->discuss->dname) : '');
+    $windy->logger("收到 `".$text."` 从 ".$m->sender->displayname.$inGroup);
     my $time = time;
     my $resp = $windy->parse($m);
     if ($resp) {
         $windy->logger("送出 `".$resp."`, 在 ".( time - $time )." 秒内");
         $m->reply($_) for split "\n\n", $resp;
-        recordLast($m);
+        recordLast($m, $context);
     }
 }
-$t->timer(3000, sub { saveLast;shift->stop(['auto']); });
+$t->interval(60, \&saveLast);
+$t->timer(2400, sub { saveLast;shift->stop(['auto']); });
 #$t->load("PostQRcode",data => $mailAccount ) if %$mailAccount;
 $t->on(receive_message => \&onReceive);
 $t->on(receive_pic => sub {
@@ -92,9 +118,11 @@ $t->on(receive_pic => sub {
     say "receive image: ", $filepath;
     say "sender is: ", $sender->displayname;
        });
+my @reply = ("差点就被兔姐姐丢在门外了呢。。", "我回来了w 氿潆妹妹接住我qwq", "兔姐姐又放我回来了w", "蠢妹妹呐 咱家又回来了哦qwq");
 $t->on(login => sub {
+    my $scancode = $_[1];
     loadLast and
-        $lastChannel->send("咱又回来惹w");
+        $lastChannel->[0]->send($reply[ $scancode ? 0 : (int(rand(@reply-1)) + 1)]);
        });
 #open STDOUT, '>>', $configDir.'windy-cache/logs.txt';
 #binmode STDOUT, ':unix';

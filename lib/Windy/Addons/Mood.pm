@@ -13,6 +13,7 @@ my $max = $cfg->get('max') // 100;
 my $min = $cfg->get('min') // -100;
 my $maxc = $cfg->get('max-change-after-midnight') // 40;
 my $minc = $cfg->get('min-change-after-midnight') // -40;
+my $posi = $cfg->get('posibility-reverse') // 0.0001; # 最高和最低心情的转化
 sub fixMood
 {
     my $today = time2date;
@@ -23,8 +24,8 @@ sub fixMood
         $mood[2] = '';
         $changed = 1;
     }
-    if ($mood[0] > $max) { $mood[0] = $max; $changed = 1; }
-    if ($mood[0] < $min) { $mood[0] = $min; $changed = 1; }
+    if ($mood[0] > $max) { $mood[0] = rand > $posi ? $max : $min; $changed = 1; }
+    if ($mood[0] < $min) { $mood[0] = rand > $posi ? $min : $max; $changed = 1; }
     $changed;
 }
 
