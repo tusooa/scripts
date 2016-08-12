@@ -31,7 +31,8 @@ if (open my $f, '<', $accountDir.'windy-mail') {
     warn term "打不开mail文件: $!\n";
 }
 =cut
-my $windy = Scripts::Windy->new;
+my $windy = Scripts::Windy->new(Admin => []);
+
 my $t = Mojo::Webqq->new(
     qq => $uid,
     login_type => 'qrlogin',
@@ -46,6 +47,7 @@ my $t = Mojo::Webqq->new(
 #    is_update_friend => 0,
 #    is_update_discuss => 0,
     );
+# last channel
 my $lastChannelFile = $configDir."windy-conf/last-channel";
 my $lastChannel = [];
 sub loadLast
@@ -70,7 +72,6 @@ sub loadLast
 sub recordLast
 {
     my ($last, $context) = @_;
-    $windy->logger("类型是: `". $context."`");
     given ($context) {
         $lastChannel = [$last->group, ''] when 'group';
         $lastChannel = [$last->discuss, 'D'] when 'discuss';
@@ -124,7 +125,41 @@ $t->on(login => sub {
     loadLast and
         $lastChannel->[0]->send($reply[ $scancode ? 0 : (int(rand(@reply-1)) + 1)]);
        });
-#open STDOUT, '>>', $configDir.'windy-cache/logs.txt';
-#binmode STDOUT, ':unix';
+# 管理权限和主群联通
+my $mainGroupFile = $configDir.'windy-conf/main-group';
+my $mainGroupId = undef;
+my $mainGroup = undef;
+sub loadMainGroup
+{
+    if (open my $f, '<', $mainGroupFile) {
+        chomp($mainGroupId = <$f>);
+        $mainGroup = $t->search_group(gnumber => $mainGroupId);
+        close $f;
+    }
+    $mainGroup;
+}
+sub loadAdmins
+{
+    $windy->{Admin} = [];
+    if (loadMainGroup) {
+        $windy->{Admin} = [(map { $_->qq } $mainGroup->search_group_member(role => 'admin')),
+            (map { $_->qq } $mainGroup->search_group_member(role => 'owner'))];
+        $windy->logger("管理列表: ".(join ',', @{$windy->{Admin}}));
+    }
+}
+sub updateAdmin
+{
+    my (undef,$member,$property,$old,$new) = @_;
+    return if $member->group->gnumber ne $mainGroupId or $property ne 'role';
+    if ($new eq 'admin' or $new eq 'owner') { # 成为管理就添加
+        $windy->logger("添加管理: ". $member->qq);
+        push @{$windy->{Admin}}, $member->qq;
+    } elsif (($old eq 'admin' or $old eq 'owner') and $new eq 'member') { # 撤销管理就删去
+        $windy->logger("撤销管理: ". $member->qq);
+        @{$windy->{Admin}} = grep { $member->qq ne $_ } @{$windy->{Admin}};
+    }
+}
+$t->on(login => \&loadAdmins,
+    group_member_property_change => \&updateAdmin);
 $t->login;
 $t->run;

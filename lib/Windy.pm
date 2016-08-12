@@ -11,7 +11,7 @@ sub new
 {
     my $class = shift;
     my $c = conf 'windy';
-    my $self = {};
+    my $self = {@_};
     #checkReopenLogFile($self);
     bless $self, $class;
 }
@@ -52,7 +52,7 @@ my $nocol = "\e[0m";
 sub logger
 {
     my $self = shift;
-    my ($pack, $func) = (caller)[0,3];
+    my ($pack, $func) = (caller 0)[0,3];
     #$self->checkReopenLogFile;
     my @a = (strftime("%Y,%m,%d (%w) %H,%M,%S", localtime), "[[$colorcode$pack ${func}${nocol}]]", @_);
     say term @a;

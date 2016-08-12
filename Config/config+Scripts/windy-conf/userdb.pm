@@ -31,7 +31,9 @@ sub msgSenderIsAdmin
     my $windy = shift;
     my $msg = shift;
     my $id = uid(msgSender($windy, $msg));
-    $id ~~ @adminList;
+    my @a = (@adminList, @{$windy->{Admin}});
+    #$windy->logger("管理员有: ".(join ',', @a));
+    $id ~~ @a;
 }
 
 my $startRes1 = sr("【截止】【好感判：喵喵喵www咱在这里呢w,来了来了qwq,好好好，什么事啊- -,你为什么要召唤我。】");
