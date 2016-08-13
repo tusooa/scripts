@@ -7,12 +7,13 @@ no warnings 'experimental';
 use POSIX qw/strftime/;
 use IO::Handle;
 use Data::Dumper;
+# param: logToFile - default to false
 sub new
 {
     my $class = shift;
     my $c = conf 'windy';
-    my $self = {@_};
-    #checkReopenLogFile($self);
+    my $self = @_ % 2 ? (return undef) : {@_};
+    checkReopenLogFile($self) if $self->{logToFile};
     bless $self, $class;
 }
 
@@ -20,18 +21,8 @@ sub parse
 {
     my $self = shift;
     my $msg = shift;
-    my $ret = $database->parse($self, $msg);
+    my $ret = $database->parse($self, $msg); # From Scripts::Conf::Windy::userdb
     $ret->{Text};
-=comment
-    for my $a (@{ $self->{Addons} }) {
-        say 'addon:'. $a;
-        no strict 'refs';
-        my $prefix = "Scripts::Windy::Addons::$a";
-        $ret = $prefix->parse($self, $msg);
-        $text.=$ret->{Text};
-        return $text if ! $ret->{Next};
-    }
-=cut
 }
 
 sub checkReopenLogFile
@@ -52,12 +43,13 @@ my $nocol = "\e[0m";
 sub logger
 {
     my $self = shift;
-    my ($pack, $func) = (caller 0)[0,3];
-    #$self->checkReopenLogFile;
-    my @a = (strftime("%Y,%m,%d (%w) %H,%M,%S", localtime), "[[$colorcode$pack ${func}${nocol}]]", @_);
+    my ($pack, $func) = ((caller 0)[0],(caller 1)[3]); # 倒回 1 层。
+    # FIXME: 为什么第一个是0，而第二个是1？？？
+    $self->checkReopenLogFile if $self->{logToFile};
+    my @a = (strftime("%Y,%m,%d (%w) %H,%M,%S", localtime), "[[$colorcode${func}${nocol}]]", @_);
     say term @a;
     #say "LOG is: ".$self->{log};
-    #$self->{log}->say(@a);
+    $self->{log}->say(@a) if $self->{logToFile};
 }
 
 1;

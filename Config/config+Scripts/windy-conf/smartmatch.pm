@@ -451,7 +451,8 @@ sub addReplacement
 {
     my ($name, $rep, $quotemeta) = @_;
     if (my $regex = getReplacement($name)) {
-        if ($rep =~ m/$regex/) { # 这条已经存在了。
+        if ($rep =~ m/^$regex$/) { # 这条已经存在了。
+            # 之前没有^$。简直zz。
             return;
         }
     }
