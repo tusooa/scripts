@@ -75,7 +75,7 @@ sub recordLast
     given ($context) {
         $lastChannel = [$last->group, ''] when 'group';
         $lastChannel = [$last->discuss, 'D'] when 'discuss';
-        $lastChannel = [$last, 'P'] when '';
+        $lastChannel = [$last->sender, 'P'] when undef;
         default { $windy->logger("不能记下现在的channel。"); }
     };
 }

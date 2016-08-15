@@ -7,7 +7,7 @@ use utf8;
 
 #use Data::Dumper;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/isGroupMsg msgText msgGroup msgGroupId msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender uid uName isAt findUserInGroup/;
+our @EXPORT = qw/isGroupMsg msgText msgGroup msgGroupId msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender uid uName isAt findUserInGroup isPrivateMsg/;
 our @EXPORT_OK = qw//;
 
 # check whether a msg is a group msg
@@ -16,6 +16,12 @@ sub isGroupMsg
     my $windy = shift;
     my $msg = shift;
     ref $msg eq 'Mojo::Webqq::Message::Recv::GroupMessage';
+}
+
+sub isPrivateMsg
+{
+    my ($windy, $msg) = @_;
+    $msg->type =~ /^(?:sess_)?message$/;
 }
 
 sub msgText
@@ -29,19 +35,19 @@ sub msgText
 sub msgGroup
 {
     my ($windy, $msg) = @_;
-    $msg->group;
+    isGroupMsg(@_) and $msg->group;
 }
 
 sub msgGroupId
 {
     my ($windy, $msg) = @_;
-    $msg->group->gnumber;
+    isGroupMsg(@_) and $msg->group->gnumber;
 }
 
 sub msgGroupHas
 {
     my ($windy, $msg, $id) = @_;
-    $msg->group->search_group_member(qq => $id); # 这条可能会。很。慢。嗯。
+    isGroupMsg(@_) and $msg->group->search_group_member(qq => $id); # 这条可能会。很。慢。嗯。
 }
 sub msgStopping : lvalue
 {

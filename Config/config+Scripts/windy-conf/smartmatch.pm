@@ -214,11 +214,9 @@ $subs = {
         stopOn($group);
     },
     fromGroup => sub {
-        #say STDERR "FROM GROUP RUNNING";
         my ($self, $windy, $msg) = @_;
         if (isGroupMsg($windy, $msg)
             and my $uid = isStartOn(msgGroupId($windy, $msg))) {
-            #say STDERR "fromGroup. uid = $uid";
             if ($uid != -1) {
                 userNickname($self,
                              findUserInGroup($windy, $uid, msgGroup($windy, $msg)));
@@ -226,7 +224,6 @@ $subs = {
                 "神";
             }
         } else {
-            #say STDERR "not group msg";
             undef;
         }
     },
@@ -304,7 +301,8 @@ my $aliases = [
             $self->runExpr($windy, $msg, $m2, @_[5..$#_]);
         } })],
     # Functions
-    [qr/^群讯$/, $subs->{fromGroup}],
+    [qr/^群讯开启$/, $subs->{fromGroup}],
+    [qr/^私讯$/, sub { my ($self, $windy, $msg) = @_; isPrivateMsg($windy, $msg); }],
     [qr/^截止$/, sub { msgStopping($_[1], $_[2]) = 1; '' } ],
     [qr/^(?:来讯者(?:名|的名字))$/, \&senderNickname],
     [qr/^来讯者(?:的|之)?(?:[Ii][Dd]|[Qq][Qq])$/, sub {
