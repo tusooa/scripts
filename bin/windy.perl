@@ -31,7 +31,18 @@ if (open my $f, '<', $accountDir.'windy-mail') {
     warn term "打不开mail文件: $!\n";
 }
 =cut
-my $windy = Scripts::Windy->new(Admin => []);
+my $mainGroupFile = $configDir.'windy-conf/main-group';
+my $mainGroupId = undef;
+my $mainGroup = undef;
+sub loadMainGroupId
+{
+    if (open my $f, '<', $mainGroupFile) {
+        chomp($mainGroupId = <$f>);
+        close $f;
+    }
+}
+loadMainGroupId;
+my $windy = Scripts::Windy->new(Admin => [], MainGroup => $mainGroupId);
 
 my $t = Mojo::Webqq->new(
     qq => $uid,
@@ -105,11 +116,12 @@ sub onReceive
     my $resp = $windy->parse($m);
     if ($resp) {
         $windy->logger("送出 `".$resp."`, 在 ".( time - $time )." 秒内");
-        $m->reply($_) for split "\n\n", $resp;
+        $m->reply($_) for split $nextMessage, $resp;
         recordLast($m, $context);
     }
 }
 $t->interval(60, \&saveLast);
+#$SIG{INT} = sub { saveLast;$t->stop(['auto']); };
 $t->timer(2400, sub { saveLast;shift->stop(['auto']); });
 #$t->load("PostQRcode",data => $mailAccount ) if %$mailAccount;
 $t->on(receive_message => \&onReceive);
@@ -126,15 +138,10 @@ $t->on(login => sub {
         $lastChannel->[0]->send($reply[ $scancode ? 0 : (int(rand(@reply-1)) + 1)]);
        });
 # 管理权限和主群联通
-my $mainGroupFile = $configDir.'windy-conf/main-group';
-my $mainGroupId = undef;
-my $mainGroup = undef;
 sub loadMainGroup
 {
-    if (open my $f, '<', $mainGroupFile) {
-        chomp($mainGroupId = <$f>);
+    if ($mainGroupId) {
         $mainGroup = $t->search_group(gnumber => $mainGroupId);
-        close $f;
     }
     $mainGroup;
 }

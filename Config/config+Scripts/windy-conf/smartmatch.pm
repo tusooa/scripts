@@ -374,7 +374,7 @@ my $aliases = [
      }],
     [qr/^群[Ii][Dd]$/, sub { my ($self, $windy, $msg) = @_; msgGroupId($windy, $msg); }],
     [qr/^换行$/, sub { "\n" }],
-    [qr/^下讯$/, sub { "\n\n" }],
+    [qr/^下讯$/, sub { $nextMessage }],
     ];
 
 $match = Scripts::Windy::SmartMatch->new(

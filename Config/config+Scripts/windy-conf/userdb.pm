@@ -248,7 +248,60 @@ sub reloadAll
     }
 }
 
+my $quitRes = sr("【截止】我拒绝。");
+sub quit
+{
+    if (msgSenderIsAdmin(@_)) {
+        exit;
+    } else {
+        $quitRes->(@_);
+    }
+}
 reloadDB;
+
+my $inviteRes1 = sr("【截止】拉了【好感判：w,- -,,。】");
+#my $inviteRes1F = "【截止】woc你明明已经在了啊【好感判:x,- -,,。】";
+my $inviteRes2 = sr("【截止】鬼知道什么原因不能拉- -给你个群号吧- -【捕获1】");
+sub inviteMG
+{
+    my ($windy, $msg) = @_;
+    # 很难过。
+    # 因为这个eval从来没成功过。
+    eval { invite($windy, $msg,
+           group($windy, $msg, $windy->{MainGroup}),
+                  friend(msgSenderId($windy, $msg))) }
+        ? $inviteRes1->(@_) :
+            $inviteRes2->($windy, $msg, $windy->{MainGroup});
+}
+
+### sandbook
+use Scripts::Windy::Addons::Sandbook;
+my $sandbook = Scripts::Windy::Addons::Sandbook->new;
+
+my $getSandbookRes = sr("【截止】关于【捕获2】的一句。<换行>【捕获1】");
+my $getSandbookResF = sr("没找到- -");
+sub getSandbook
+{
+    my ($windy, $msg, $db) = @_;
+    my @a = $sandbook->read($db);
+    @a ? $getSandbookRes->($windy, $msg, @a)
+        : $getSandbookResF->($windy, $msg, $db);
+}
+
+my $addSandbookRes1 = sr("【截止】嗯。");
+my $addSandbookRes1F = sr("【截止】没这说法。");
+my $addSandbookRes2 = sr("？？？");
+sub addSandbook
+{
+    my ($windy, $msg, $db, $sentence) = @_;
+    if (msgSenderIsAdmin($windy, $msg)) {
+        $sandbook->addSave($db, $sentence) ?
+            $addSandbookRes1->(@_) :
+            $addSandbookRes1F->(@_);
+    } else {
+        $addSandbookRes2->(@_);
+    }
+}
 
 sub reloadDB
 {
@@ -273,6 +326,10 @@ sub reloadDB
         [sm(qr/^<风妹>重生<后>$/), \&reloadAll],
         [sm(qr/^<风妹>天降于?(\d+)<后>$/), \&startG],
         [sm(qr/^<风妹>消失于?(\d+)<后>$/), \&stopG],
+        [sm(qr/^<风妹>以神之名义命令<中>重生<后>$/), \&quit],
+        [sm(qr/^<风妹>主群拉<一下><后>$/), \&inviteMG],
+        [sm(qr/^沙书\s*(.*)\s*$/), \&getSandbook],
+        [sm(qr/^<风妹>加一?句(.+?)「(.+)」$/s), \&addSandbook],
         );
     $database = Scripts::Windy::Userdb->new(@baseDB);
     if (open my $f, '<', $configDir.'windy-conf/userdb.db') {

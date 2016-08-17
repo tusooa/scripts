@@ -7,9 +7,10 @@ use utf8;
 
 #use Data::Dumper;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/isGroupMsg msgText msgGroup msgGroupId msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender uid uName isAt findUserInGroup isPrivateMsg/;
+our @EXPORT = qw/isGroupMsg msgText msgGroup msgGroupId msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender uid uName isAt findUserInGroup isPrivateMsg group invite friend $nextMessage/;
 our @EXPORT_OK = qw//;
 
+our $nextMessage = "\n\n";
 # check whether a msg is a group msg
 sub isGroupMsg
 {
@@ -42,6 +43,24 @@ sub msgGroupId
 {
     my ($windy, $msg) = @_;
     isGroupMsg(@_) and $msg->group->gnumber;
+}
+
+sub friend
+{
+    my ($windy, $msg, $f) = @_;
+    $msg->{_client}->search_friend(qq => $f);
+}
+sub group
+{
+    my ($windy, $msg, $g) = @_;
+    $msg->{_client}->search_group(gnumber => $g);
+}
+
+sub invite
+{
+    my ($windy, $msg, $group, $person) = @_;
+    return unless $group and $person;
+    $group->invite_friend($person);
 }
 
 sub msgGroupHas
