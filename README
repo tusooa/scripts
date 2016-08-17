@@ -1,18 +1,1 @@
-此即ThisTusooa::Scripts.new;
-
-#● perl6 -e 'ThisTusooa::Scripts.new;'
-#Could not find symbol '&Scripts'
-#  in method <anon> at gen/parrot/CORE.setting:12610
-#  in any  at gen/parrot/Metamodel.nqp:2710
-#  in any find_method_fallback at gen/parrot/Metamodel.nqp:2698
-#  in any find_method at gen/parrot/Metamodel.nqp:949
-#  in any  at gen/parrot/BOOTSTRAP.nqp:1693
-#  in block  at -e:1
-
-时至今日，其支有二：
-其一曰Master，盖余日用之script也。
-其二曰Perl6，乃余一时(蛋痛)所为。
-# P6诚可贵
-# 时间价更高
-
-为伙伴之无聊者而作。
+用 servant 作主分支名可能是因为 Fate 看多了。
