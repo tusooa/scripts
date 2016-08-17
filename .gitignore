@@ -15,7 +15,10 @@ Config/config+Scripts/windy-conf/mood.db
 Config/config+Scripts/windy-conf/blacklist
 Config/config+Scripts/windy-conf/startstop
 Config/config+Scripts/windy-conf/main-group
+Config/config+Scripts/windy-conf/last-channel
+Config/config+Scripts/windy-conf/sandbook
 Config/config+Scripts/windy-cache
+bin/g.perl
 lib/Windy/Conf/*
 src/*/build/*
 *.pir
