@@ -215,6 +215,11 @@ $subs = {
     },
     fromGroup => sub {
         my ($self, $windy, $msg) = @_;
+        isGroupMsg($windy, $msg)
+            and isStartOn(msgGroupId($windy, $msg));
+    },
+    callerName => sub {
+        my ($self, $windy, $msg) = @_;
         if (isGroupMsg($windy, $msg)
             and my $uid = isStartOn(msgGroupId($windy, $msg))) {
             if ($uid != -1) {

@@ -122,7 +122,7 @@ sub onReceive
 }
 $t->interval(60, \&saveLast);
 #$SIG{INT} = sub { saveLast;$t->stop(['auto']); };
-$t->timer(2400, sub { saveLast;shift->stop(['auto']); });
+$t->timer(2400, sub { saveLast;exit; });
 #$t->load("PostQRcode",data => $mailAccount ) if %$mailAccount;
 $t->on(receive_message => \&onReceive);
 $t->on(receive_pic => sub {
@@ -131,7 +131,7 @@ $t->on(receive_pic => sub {
     say "receive image: ", $filepath;
     say "sender is: ", $sender->displayname;
        });
-my @reply = ("差点就被兔姐姐丢在门外了呢。。", "我回来了w 氿潆妹妹接住我qwq", "兔姐姐又放我回来了w", "蠢妹妹呐 咱家又回来了哦qwq");
+my @reply = ("差点就被兔姐姐丢在门外了呢。。", "我回来了w 氿潆妹妹接住我qwq", "兔姐姐又放我回来了w", "蠢妹妹呐 咱家又回来了哦qwq", "早。", "大家早。", "。", "0 0", "0 0 0", "有人吗。", "回来了。");
 $t->on(login => sub {
     my $scancode = $_[1];
     loadLast and

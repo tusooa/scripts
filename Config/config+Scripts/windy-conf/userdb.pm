@@ -32,15 +32,11 @@ sub msgSenderIsAdmin
     my $msg = shift;
     my $id = uid(msgSender($windy, $msg));
     my @a = (@adminList, @{$windy->{Admin}});
-    #$windy->logger("管理员有: ".(join ',', @a));
     $id ~~ @a;
 }
 
 my $startRes1 = sr("【截止】【好感判：喵喵喵www咱在这里呢w,来了来了qwq,好好好，什么事啊- -,你为什么要召唤我。】");
 my $startRes1F = sr("【截止】好像哪里不对（思考");
-#use Data::Dumper;
-#use Mojo::Webqq::Message::Recv::GroupMessage;
-#die Dumper (($startRes1)->({}, bless { content => '1234',}, 'Mojo::Webqq::Message::Recv::GroupMessage'));
 my $startRes2 = sr("【截止】");
 sub start
 {
@@ -97,7 +93,7 @@ sub stop
 {
     my $windy = shift;
     my $msg = shift;
-#    $windy->{startGroup} = [@{$windy->{startGroup}}] if ref $windy->{startGroup} ne 'ARRAY';
+
     if (msgSenderIsGroupAdmin($windy, $msg)
         or msgSenderIsAdmin($windy, $msg)) {
         $subs->{stop}(undef, $windy, $msg, undef, @_)
@@ -113,11 +109,11 @@ sub callerName
 {
     my $windy = shift;
     my $msg = shift;
-    my $name = $subs->{fromGroup}(undef, $windy, $msg, @_);
+    my $name = $subs->{callerName}(undef, $windy, $msg, @_);
     $cRes->($windy, $msg, $name);
 }
 
-my $teachRes1 = sr("【截止】调教完成.avi");
+my $teachRes1 = sr("【截止】可以这很【来讯者名】【好感判：w,0 0,- -,。】");
 my $teachRes2 = sr("诶...?QAQ");
 my $teachRes3 = sr("...");
 sub teach
@@ -206,7 +202,7 @@ sub sizeOfDB
     $sizeRes->($windy, $msg, $database->length);
 }
 
-my $addRRes1 = sr("【截止】调教完成.avi");
+my $addRRes1 = $teachRes1;
 my $addRRes1F = sr("【截止】然而机智的我早已记住了【心情判：ww,- -,,。】");
 my $addRRes2 = sr("。。。。");
 sub addR
@@ -278,7 +274,7 @@ sub inviteMG
 use Scripts::Windy::Addons::Sandbook;
 my $sandbook = Scripts::Windy::Addons::Sandbook->new;
 
-my $getSandbookRes = sr("【截止】关于【捕获2】的一句。<换行>【捕获1】");
+my $getSandbookRes = sr("【截止】【来讯者名】，关于【捕获2】的一句。<下讯>【捕获1】");
 my $getSandbookResF = sr("没找到- -");
 sub getSandbook
 {
