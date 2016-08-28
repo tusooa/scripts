@@ -442,8 +442,14 @@ sub reloadReplacements
 sub getReplacement
 {
     my $name = shift;
+    my $asIs = shift;
     if ($match->{replacements}{$name}) {
-        $match->parseReplacements($match->{d5}.$name.$match->{d6});
+        if ($asIs) {
+            my $d = $match->{replacements}{$name};
+            ref $d eq 'ARRAY' ? join '|', @$d : $d;
+        } else {
+            $match->parseReplacements($match->{d5}.$name.$match->{d6});
+        }
     } else {
         undef;
     }

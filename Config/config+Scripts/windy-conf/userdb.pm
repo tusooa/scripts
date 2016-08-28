@@ -223,7 +223,7 @@ my $getRRes2 = sr("。。。");
 sub getR
 {
     my ($windy, $msg, $name) = @_;
-    my $rep = $subs->{getR}($name);
+    my $rep = $subs->{getR}($name, 'AS_IS');
     if (msgSenderIsAdmin($windy, $msg)) {
         $rep ? $getRRes1->($windy, $msg, $name, $rep) : $getRRes1F->(@_);
     } else {
