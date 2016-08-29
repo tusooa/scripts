@@ -462,10 +462,12 @@ sub addReplacement
     if (my $regex = getReplacement($name)) {
         if ($rep =~ m/^$regex$/) { # 这条已经存在了。
             # 之前没有^$。简直zz。
-            return;
+            return undef;
         }
     }
     $rep = quotemeta $rep if $quotemeta;
+    eval { qr/$rep/ };
+    return 0 if $@;
     if (ref $match->{replacements}{$name} eq 'ARRAY') {
         push @{$match->{replacements}{$name}}, $rep;
     } else {

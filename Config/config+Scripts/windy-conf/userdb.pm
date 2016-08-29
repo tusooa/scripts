@@ -204,14 +204,21 @@ sub sizeOfDB
 
 my $addRRes1 = $teachRes1;
 my $addRRes1F = sr("【截止】然而机智的我早已记住了【心情判：ww,- -,,。】");
+my $addRRes1E = sr("【截止】不可以的。。这样做会死人的。。");
 my $addRRes2 = sr("。。。。");
 sub addR
 {
     my ($windy, $msg, $rep, $name) = @_;
     my $quotemeta = pop;
     if (msgSenderIsAdmin($windy, $msg)) {
-        $subs->{addR}($name, $rep, $quotemeta) ? 
-        $addRRes1->(@_) : $addRRes1F->(@_);
+        my $ret = $subs->{addR}($name, $rep, $quotemeta);
+        if ($ret) {
+            $addRRes1->(@_);
+        } elsif (defined $ret) { # 0 for error
+            $addRRes1E->(@_);
+        } else { # undef for already-existed
+            $addRRes1F->(@_);
+        }
     } else {
         $addRRes2->(@_);
     }

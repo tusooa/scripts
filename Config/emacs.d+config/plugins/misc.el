@@ -12,7 +12,8 @@
         rainbow-identifiers
         rainbow-delimiters
         text-alias-mode
-        git-commit-mode))
+        git-commit-mode
+        perl6-mode))
 
 ; linum
 (global-linum-mode t)
