@@ -4,3 +4,6 @@
 [submodule "Config/emacs.d+lisp-others/perl6-mode"]
 	path = Config/emacs.d+lisp-others/perl6-mode
 	url = https://github.com/hinrik/perl6-mode.git
+[submodule "Config/emacs.d+lisp-others/color-theme"]
+	path = Config/emacs.d+lisp-others/color-theme
+	url = https://github.com/haxney/color-theme.git
