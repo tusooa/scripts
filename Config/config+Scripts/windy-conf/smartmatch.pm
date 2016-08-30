@@ -292,12 +292,12 @@ my $aliases = [
             default { $_[3]; }
         }
      }],
+    [qr/^(.+?)(?:连上|\+)(.+)$/, sub { my ($self, $windy, $msg, $m1, $m2) = @_; $m1 . $m2; }],
     # Logical expressions
-    [qr/^(.+?)(?:并且|而且|且)(.+)$/, $subs->{And}],
-    [qr/^(.+?)(?:或者|或是|或)(.+)$/, $subs->{Or}],
+    [qr/^(.+?)(?:并且|而且)(.+)$/, $subs->{And}],
+    [qr/^(.+?)(?:或者|或是)(.+)$/, $subs->{Or}],
     [qr/^不是(.+)$/, $subs->{Not}],
     # Comparison expressions
-    [qr/^(.+?)(?:连上|\+)(.+)$/, sub { my ($self, $windy, $msg, $m1, $m2) = @_; $m1 . $m2; }],
     [qr/^(.+?)((?:不)?(?:大|等|小)于|为)(.+)$/, $subs->{Op}],
     #[qr/^(?:随机|任选)(.+)$/s, sub { my ($self, $windy, $msg, $m1) = @_; my @arr = split /\n/, $m1; (expr $arr[int rand @arr])->($windy, $msg) } ],
     [qr/^概率(\d*\.*\d+)(.+)$/, quote(sub {
