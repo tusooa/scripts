@@ -7,3 +7,12 @@
 [submodule "Config/emacs.d+lisp-others/color-theme"]
 	path = Config/emacs.d+lisp-others/color-theme
 	url = https://github.com/haxney/color-theme.git
+[submodule "Config/emacs.d+lisp-others/highlight-tail"]
+	path = Config/emacs.d+lisp-others/highlight-tail
+	url = https://github.com/emacsmirror/highlight-tail.git
+[submodule "Config/emacs.d+lisp-others/fvwm-mode"]
+	path = Config/emacs.d+lisp-others/fvwm-mode
+	url = https://github.com/theBlackDragon/fvwm-mode.git
+[submodule "Config/emacs.d+lisp-others/rainbow-delimiters"]
+	path = Config/emacs.d+lisp-others/rainbow-delimiters
+	url = https://github.com/Fanael/rainbow-delimiters.git

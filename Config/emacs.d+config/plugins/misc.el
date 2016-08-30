@@ -67,7 +67,7 @@
        (eq (char-before loc) ?$))) ; 忽略$[ $] $( $) 之类
                                    ; 的确有${[}，但是有人用吗？
 
-(add-to-list 'rainbow-delimiters-escaped-char-predicate-list '(perl-mode . rainbow-delimiters-escaped-char-predicate-perl))
+;(add-to-list 'rainbow-delimiters-escaped-char-predicate-list '(perl-mode . rainbow-delimiters-escaped-char-predicate-perl))
 (defun thistusooa-prog-mode-hook ()
   (rainbow-delimiters-mode t)
   (rainbow-identifiers-mode t))
