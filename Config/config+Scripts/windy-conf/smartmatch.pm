@@ -13,13 +13,14 @@ use Scripts::Windy::SmartMatch;
 use Scripts::Windy::Quote;
 use Scripts::Windy::Util;
 
+use List::Util qw/sum/;
 use Scripts::scriptFunctions;
 #$Scripts::scriptFunctions::debug = 0;
 use Exporter;
 use utf8;
 use Encode qw/_utf8_on _utf8_off/;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/$match sm sr $sl1 $sl2 $sl3 $subs/;
+our @EXPORT = qw/$match sm sr $sl1 $sl2 $sl3 $subs sizeOfMatch/;
 
 loadNicknames;
 loadSense;
@@ -34,12 +35,15 @@ my $Then = qr/(?:则|那么)/;
 my $Else = qr/(?:不然|否则)(?:的话)?/;
 
 my $repFile = $configDir.'windy-conf/replacements.db';
+my $size = 0;
+my $split = qr/(?<!\\)\|/;
 
 sub sm;
 sub sr;
 sub loadReplacements;
 sub addReplacement;
 sub reloadReplacements;
+sub updateSize;
 
 our ($sl1, $sl2, $sl3) = (150, 80, 0);
 our @ml = (93, 85, 60, 40, -10, -40);
@@ -87,8 +91,8 @@ $subs = {
             $r1 <= $r2 when '不大于';
             $r1 >= $r2 when '不小于';
             $r1 != $r2 when '不等于';
-            $r1 eq $r2 when '为';
-            $r1 ne $r2 when '不为';
+            $r1 eq $r2 when '正好就是';
+            $r1 ne $r2 when '不正好就是';
             #$r1 ~~ $r2 when '是';
         }
     },
@@ -298,7 +302,7 @@ my $aliases = [
     [qr/^(.+?)(?:或者|或是)(.+)$/, $subs->{Or}],
     [qr/^不是(.+)$/, $subs->{Not}],
     # Comparison expressions
-    [qr/^(.+?)((?:不)?(?:大|等|小)于|为)(.+)$/, $subs->{Op}],
+    [qr/^(.+?)((?:不)?(?:大|等|小)于|正好就是)(.+)$/, $subs->{Op}],
     #[qr/^(?:随机|任选)(.+)$/s, sub { my ($self, $windy, $msg, $m1) = @_; my @arr = split /\n/, $m1; (expr $arr[int rand @arr])->($windy, $msg) } ],
     [qr/^概率(\d*\.*\d+)(.+)$/, quote(sub {
         my ($self, $windy, $msg, $m1, $m2) = @_;
@@ -437,6 +441,7 @@ sub reloadReplacements
 {
     $match->{replacements} = {};
     loadReplacements;
+    updateSize;
 }
 
 sub getReplacement
@@ -454,6 +459,7 @@ sub getReplacement
         undef;
     }
 }
+
 ### addReplacement('aaa', 'bbb')
 ### => <aaa> -> 'bbb'
 sub addReplacement
@@ -470,9 +476,12 @@ sub addReplacement
     return 0 if $@;
     if (ref $match->{replacements}{$name} eq 'ARRAY') {
         push @{$match->{replacements}{$name}}, $rep;
+    } elsif (defined $match->{replacements}{$name}) { # 不能这么做呐。
+        return 0;
     } else {
         $match->{replacements}{$name} = [$rep];
     }
+    $size += scalar split $split, $rep;
     if (open my $f, '>>', $repFile) {
         binmode $f, ':unix';
         say $f "$name\t$rep";
@@ -481,6 +490,25 @@ sub addReplacement
         die term "没法打开 $repFile 写入: $!\n";
     }
     $rep;
+}
+
+sub updateSize
+{
+    my %r = %{$match->{replacements}};
+    $size = 0;
+    for (keys %r) {
+        my $v = $r{$_};
+        if (ref $v eq 'ARRAY') {
+            $size += sum map { scalar split $split } @$v;
+        } else {
+            $size += 1;
+        }
+    }
+}
+
+sub sizeOfMatch
+{
+    $size;
 }
 
 1;

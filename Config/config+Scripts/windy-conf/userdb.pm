@@ -195,11 +195,12 @@ sub blackList
     }
 }
 
-my $sizeRes = sr("【截止】也就【捕获1】条吧【心情判】");
+my $sizeRes = sr("【截止】也就【捕获1】条吧【心情判】【下讯】哦对还要加上【捕获2】个词呢【心情判】所以一共是【捕获3】啦【心情判】");
 sub sizeOfDB
 {
     my ($windy, $msg) = @_;
-    $sizeRes->($windy, $msg, $database->length);
+    my ($dbSize, $matchSize) = ($database->length, sizeOfMatch);
+    $sizeRes->($windy, $msg, $dbSize, $matchSize, $dbSize + $matchSize);
 }
 
 my $addRRes1 = $teachRes1;
@@ -335,6 +336,7 @@ sub reloadDB
         [sm(qr/^<风妹>加一?句(.+?)「(.+)」$/s), \&addSandbook],
         );
     $database = Scripts::Windy::Userdb->new(@baseDB);
+    $database->{_match} = $match;
     if (open my $f, '<', $configDir.'windy-conf/userdb.db') {
         my ($ask, $ans);
         my $ref;

@@ -131,11 +131,13 @@ $t->on(receive_pic => sub {
     say "receive image: ", $filepath;
     say "sender is: ", $sender->displayname;
        });
-my @reply = ("差点就被兔姐姐丢在门外了呢。。", "我回来了w 氿潆妹妹接住我qwq", "兔姐姐又放我回来了w", "蠢妹妹呐 咱家又回来了哦qwq", "早。", "大家早。", "。", "0 0", "0 0 0", "有人吗。", "回来了。");
+my @reply = ("差点就被兔姐姐丢在门外了呢。。", "我回来了w 快来个来来来接住我qwq");
 $t->on(login => sub {
     my $scancode = $_[1];
-    loadLast and
-        $lastChannel->[0]->send($reply[ $scancode ? 0 : (int(rand(@reply-1)) + 1)]);
+    if (loadLast) {
+        $scancode and $lastChannel->[0]->send($reply[0]);
+        $lastChannel->[0]->send($reply[ int(rand(@reply-1)) + 1]);
+    }
        });
 # 管理权限和主群联通
 sub loadMainGroup

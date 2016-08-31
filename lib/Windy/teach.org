@@ -120,7 +120,7 @@
     
     【不是xxx】
     
-    【xxx为yyy】这个是判定xxx和yyy是不是一样
+    【xxx正好就是yyy】这个是判定xxx和yyy是不是一样
     
     【概率0.0yyy】
     

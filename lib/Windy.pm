@@ -13,6 +13,7 @@ sub new
     my $class = shift;
     my $c = conf 'windy';
     my $self = @_ % 2 ? (return undef) : {@_};
+    $self->{_db} = $database;
     checkReopenLogFile($self) if $self->{logToFile};
     bless $self, $class;
 }
