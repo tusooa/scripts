@@ -37,6 +37,7 @@ my $Else = qr/(?:不然|否则)(?:的话)?/;
 my $repFile = $configDir.'windy-conf/replacements.db';
 my $size = 0;
 my $split = qr/(?<!\\)\|/;
+my $caller = qr//;
 
 sub sm;
 sub sr;
@@ -45,7 +46,7 @@ sub addReplacement;
 sub reloadReplacements;
 sub updateSize;
 
-our ($sl1, $sl2, $sl3) = (150, 80, 0);
+our ($sl1, $sl2, $sl3) = (350, 180, 20);
 our @ml = (93, 85, 60, 40, -10, -40);
 
 our $subs;
@@ -141,7 +142,7 @@ $subs = {
         my ($self, $windy, $msg) = @_;
         my $sense = $subs->{sense}(@_);
         my $mood = $subs->{mood}(@_);
-        int($sense + (abs($sense) > 20 ? abs($sense) : 20) * ($mood-$ml[3]) / 200);
+        int($sense + (abs($sense) > 20 ? abs($sense) : 20) * ($mood-$ml[2]) / 120);
     },
     addSense => sub {
         my ($self, $windy, $msg, $m1) = @_;
@@ -369,7 +370,11 @@ my $aliases = [
         $s <= $sl3;
      }],
     [qr/^签到$/, $subs->{sign}],
-    [qr/^(?:对|艾特)(?:我|你)$/, sub { my $self = shift;my $windy = shift; my $msg = shift; isAt($windy, $msg) #or msgText($windy, $msg) =~ /^$caller/
+    [qr/^(?:对|艾特)(?:我|你)$/, sub {
+        my ($self, $windy, $msg) = @_;
+        my $text = msgText($windy, $msg);
+        _utf8_on($text); # 别忘。
+        $text =~ $caller;
      }],
     [qr/^左$/, sub { shift->{d1} }],
     [qr/^右$/, sub { shift->{d2} }],
@@ -441,6 +446,8 @@ sub reloadReplacements
 {
     $match->{replacements} = {};
     loadReplacements;
+    $caller = getReplacement("_风妹_");
+    $caller = qr/$caller/;
     updateSize;
 }
 
