@@ -374,7 +374,7 @@ my $aliases = [
         my ($self, $windy, $msg) = @_;
         my $text = msgText($windy, $msg);
         _utf8_on($text); # 别忘。
-        $text =~ $caller;
+        isAt($windy, $msg) or $text =~ $caller;
      }],
     [qr/^左$/, sub { shift->{d1} }],
     [qr/^右$/, sub { shift->{d2} }],

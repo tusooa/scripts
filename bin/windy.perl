@@ -108,10 +108,12 @@ sub saveLast
 sub onReceive
 {
     my ($c, $m) = @_;
-    my $text = $m->content;
+    my $text = parseRichText($windy, $m);
+    #my $text = $m->content;
     my ($context) = $m->type =~ /^(group|discuss)_message$/;
     my $inGroup = ($context ? " 在 ".($context eq 'group' ? $m->group->gname.'('.$m->group->gnumber.')' : $m->discuss->dname) : '');
     $windy->logger("收到 `".$text."` 从 ".$m->sender->displayname.$inGroup);
+    #$windy->logger($m->dump);
     my $time = time;
     my $resp = $windy->parse($m);
     if ($resp) {
