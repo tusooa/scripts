@@ -89,6 +89,7 @@ sub recordLast
         $lastChannel = [$last->sender, 'P'] when undef;
         default { $windy->logger("不能记下现在的channel。"); }
     };
+    $lastChannel->[0];
 }
 sub saveLast
 {
@@ -118,8 +119,10 @@ sub onReceive
     my $resp = $windy->parse($m);
     if ($resp) {
         $windy->logger("送出 `".$resp."`, 在 ".( time - $time )." 秒内");
-        $m->reply($_) for split $nextMessage, $resp;
-        recordLast($m, $context);
+        my $to = recordLast($m, $context);
+        for (split $nextMessage, $resp) { # 算是一个workaround吧。不知道为什么reply不能发私讯。
+            $to->send($_);
+        }
     }
 }
 $t->interval(60, \&saveLast);
@@ -137,6 +140,7 @@ my @reply = ("差点就被兔姐姐丢在门外了呢。。", "我回来了w 快
 $t->on(login => sub {
     my $scancode = $_[1];
     if (loadLast) {
+        $windy->logger("正发送初始讯息。");
         $scancode and $lastChannel->[0]->send($reply[0]);
         $lastChannel->[0]->send($reply[ int(rand(@reply-1)) + 1]);
     }

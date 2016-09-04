@@ -46,7 +46,7 @@ sub addReplacement;
 sub reloadReplacements;
 sub updateSize;
 
-our ($sl1, $sl2, $sl3) = (350, 180, 20);
+our ($sl1, $sl2, $sl3) = (350, 180, 5);
 our @ml = (93, 85, 60, 40, -10, -40);
 
 our $subs;
