@@ -382,6 +382,10 @@ my $aliases = [
         my ($self, $windy, $msg, $id) = @_;
         msgGroupHas($windy, $msg, $id);
      }],
+    [qr/^艾特到(\d+)$/, sub {
+        my ($self, $windy, $msg, $id) = @_;
+        isAtId($windy, $msg, $id);
+     }],
     [qr/^被(?:屏蔽|拉黑)$/, sub {
         my ($self, $windy, $msg) = @_;
         onBlackList(uid(msgSender($windy, $msg)));

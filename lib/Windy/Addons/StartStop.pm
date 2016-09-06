@@ -16,7 +16,10 @@ sub loadGroups
     if (open my $f, '<', $file) {
         while (<$f>) {
             chomp;
-            push @startGroup, [$1, $2] if /^(\d+)(?:\t(-?\d+))?$/;
+            if (/^(\d+)(?:\t(-?\d+))?$/) {
+                my ($group, $start) = ($1, $2);
+                push @startGroup, [$group, $start];
+            }
         }
         close $f;
     }

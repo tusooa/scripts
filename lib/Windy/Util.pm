@@ -7,7 +7,7 @@ use utf8;
 use Encode qw/_utf8_on _utf8_off/;
 #use Data::Dumper;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/isGroupMsg msgText msgGroup msgGroupId msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender uid uName isAt findUserInGroup isPrivateMsg group invite friend $nextMessage $atPrefix $atSuffix parseRichText/;
+our @EXPORT = qw/isGroupMsg msgText msgGroup msgGroupId msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender uid uName isAt isAtId findUserInGroup isPrivateMsg group invite friend $nextMessage $atPrefix $atSuffix parseRichText/;
 our @EXPORT_OK = qw//;
 
 our $nextMessage = "\n\n";
@@ -133,6 +133,14 @@ sub isAt : lvalue
 #    $windy->logger("name is ". $msg->receiver->displayname);
 #    $windy->logger("艾特了风儿。") if $ret;
 #    $ret;
+}
+
+sub isAtId
+{
+    my ($windy, $msg, $id) = @_;
+    my $user = msgGroupHas($windy, $msg, $id) or return;
+    my $name = $user->displayname;
+    msgText($windy, $msg) =~ /\Q$atPrefix\E\@\Q$name$atSuffix\E/;
 }
 
 sub findUserInGroup
