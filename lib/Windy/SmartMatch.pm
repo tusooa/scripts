@@ -102,10 +102,10 @@ sub parse
     my $replacements = $self->{replacements};
     while ($text) {
         debug "text = `$text`";
-        if ($text =~ s/^$d1(.*?)$d2//) {
+        if ($text =~ s/^$d1(.*?)$d2//s) {
             debug "command `$1`";
             push @s, $self->parseExpr($1);
-        } elsif ($text =~ s/^(?<!$d1)(.+?)(?=$d1|$)//) {
+        } elsif ($text =~ s/^(?<!$d1)(.+?)(?=$d1|$)//s) {
             #($text =~ s///) {
             my $ret = $1;
             $ret =~ s/$self->{re_rep}/$self->parseReplacements($1)/ge;
