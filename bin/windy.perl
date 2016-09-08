@@ -136,7 +136,7 @@ $t->on(receive_pic => sub {
     say "receive image: ", $filepath;
     say "sender is: ", $sender->displayname;
        });
-my @reply = ("差点就被兔姐姐丢在门外了呢。。", "我回来了w 快来个来来来接住我qwq");
+my @reply = ("差点就被兔姐姐丢在门外了呢。。", "我又回来了哦w", "早上好呐w");
 $t->on(login => sub {
     my $scancode = $_[1];
     if (loadLast) {

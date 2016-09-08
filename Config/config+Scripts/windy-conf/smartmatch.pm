@@ -46,7 +46,7 @@ sub addReplacement;
 sub reloadReplacements;
 sub updateSize;
 
-our ($sl1, $sl2, $sl3) = (350, 180, 5);
+our ($sl1, $sl2, $sl3) = (350, 180, 0);
 our @ml = (93, 85, 60, 40, -10, -40);
 
 our $subs;
@@ -269,11 +269,7 @@ my $aliases = [
         my $windy = shift;
         my $msg = shift;
         my $mood = curMood;
-        #say $mood;
-        #say term join ',', @_;
-        #say term join ',', @ml;
         given ($mood) {
-            say $_;
             when ($_ > $ml[0]) { $_[0] or continue; }
             when ($_ > $ml[1]) { $_[1] or continue; }
             when ($_ > $ml[2]) { $_[2] or continue; }
