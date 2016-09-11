@@ -256,7 +256,7 @@ my $quitRes = sr("【截止】我拒绝。");
 sub quit
 {
     if (msgSenderIsAdmin(@_)) {
-        exit;
+        exit pop;
     } else {
         $quitRes->(@_);
     }
@@ -330,10 +330,11 @@ sub reloadDB
         [sm(qr/^<前>【对我】重生<后>$/), \&reloadAll],
         [sm(qr/^<风妹>天降于?(\d+)<后>$/), \&startG],
         [sm(qr/^<风妹>消失于?(\d+)<后>$/), \&stopG],
-        [sm(qr/^<风妹>以神之名义命令<中>重生<后>$/), \&quit],
+        [sm(qr/^<风妹>以神之名义命令<中>重生<后>$/), sub { quit(@_, 1); }],
         [sm(qr/^<风妹>主群拉<一下><后>$/), \&inviteMG],
         [sm(qr/^沙书\s*(.*)\s*$/), \&getSandbook],
         [sm(qr/^<风妹>加一?句(.+?)「(.+)」$/s), \&addSandbook],
+        [sm(qr/^<前>【对我】来扫个码<后>$/), sub { quit(@_, 0); }],
         );
     $database = Scripts::Windy::Userdb->new(@baseDB);
     $database->{_match} = $match;

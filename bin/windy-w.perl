@@ -1,8 +1,9 @@
 #!/usr/bin/env perl
 
 use 5.012;
+my $ret = 1;
 while (1) {
-    system "windy.perl";
+    $ret = $ret ? (system "windy.perl") : (system "windy.perl scancode");
     say "restarting in 5s...";
     sleep 5;
 }

@@ -127,7 +127,7 @@ sub onReceive
 }
 $t->interval(60, \&saveLast);
 #$SIG{INT} = sub { saveLast;$t->stop(['auto']); };
-$t->timer(2400, sub { saveLast;exit; });
+$t->timer(2400, sub { saveLast; exit 1; });
 #$t->load("PostQRcode",data => $mailAccount ) if %$mailAccount;
 $t->on(receive_message => \&onReceive);
 $t->on(receive_pic => sub {
@@ -176,5 +176,9 @@ sub updateAdmin
 }
 $t->on(login => \&loadAdmins,
     group_member_property_change => \&updateAdmin);
-$t->login;
+if ($ARGV[0] eq 'scancode') {
+    $t->relogin;
+} else {
+    $t->login;
+}
 $t->run;

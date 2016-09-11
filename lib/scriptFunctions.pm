@@ -4,6 +4,7 @@ use Scripts::Configure qw/$defg/;
 use 5.014;
 use File::Basename qw/basename dirname/;
 no if $] >= 5.018, warnings => "experimental";
+use POSIX qw/strftime/;
 our $VERSION = 0.1;
 our @ISA = qw/Exporter/;
 our @EXPORT_OK = qw/$appsDir/;
@@ -13,6 +14,7 @@ $accountDir $scriptsDir $libDir
 $verbose verbose $debug debug
 conf $pathConf $defg $scriptName
 multiArgs time2date final ln term
+formatTime
 /;
 use Scripts::WindowsSupport;
 sub time2date;
@@ -22,6 +24,7 @@ sub ln;
 sub term;
 sub final;
 sub debug;
+sub formatTime;
 
 our $home = $^O eq 'MSWin32' ? "C:\\Users\\tusoo" : $ENV{HOME};
 our $scriptName= basename $0;
@@ -120,6 +123,13 @@ sub debug
     }
 }
 
+sub formatTime
+{
+    @_ or @_ = localtime;
+    my $ret = strftime("%Y,%m,%d (%w) %H,%M,%S", @_);
+    $ret =~ s/\(0\)/(7)/;
+    $ret;
+}
 #$pathConf = conf 'scriptpath'; #不加这，cairo-w就会出错。
 #原因是之前没有指明默认配置在哪里
 

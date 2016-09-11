@@ -8,7 +8,7 @@ use Scripts::Windy::Addons::BlackList;
 use Scripts::Windy::Addons::Mood;
 use Scripts::Windy::Addons::StartStop;
 #use Scripts::Windy::Conf::smartmatch::replacements;
-
+use POSIX qw/strftime/;
 use Scripts::Windy::SmartMatch;
 use Scripts::Windy::Quote;
 use Scripts::Windy::Util;
@@ -38,6 +38,7 @@ my $repFile = $configDir.'windy-conf/replacements.db';
 my $size = 0;
 my $split = qr/(?<!\\)\|/;
 my $caller = qr//;
+my $nickForbidden = qr//;
 
 sub sm;
 sub sr;
@@ -188,7 +189,7 @@ $subs = {
     newNick => sub {
         my ($self, $windy, $msg, $nick, $sticky) = @_;
         my $id = uid(msgSender($windy, $msg));
-        if ($subs->{senseWithMood}($self, $windy, $msg) > $sl2) {
+        if ($subs->{senseWithMood}($self, $windy, $msg) > $sl2 and $nick !~ $nickForbidden) {
             newNick($id, $nick, $sticky);
         } else {
             undef;
@@ -389,6 +390,21 @@ my $aliases = [
     [qr/^群[Ii][Dd]$/, sub { my ($self, $windy, $msg) = @_; msgGroupId($windy, $msg); }],
     [qr/^换行$/, sub { "\n" }],
     [qr/^下讯$/, sub { $nextMessage }],
+    [qr/^当下时间$/, sub { formatTime; }],
+    [qr/^时间段$/, sub {
+        my ($min, $hour) = (localtime)[1,2];
+        given ($hour + $min/60) {
+            '凌晨' when $_ <= 4;
+            '黎明' when $_ <= 6;
+            '早上' when $_ <= 8;
+            '上午' when $_ <= 11;
+            '中午' when $_ <= 13;
+            '下午' when $_ <= 17;
+            '晚上' when $_ <= 21;
+            '夜里' when $_ <= 23;
+            default { '子夜'; }
+        }
+     }],
     ];
 
 $match = Scripts::Windy::SmartMatch->new(
@@ -448,6 +464,8 @@ sub reloadReplacements
     loadReplacements;
     $caller = getReplacement("_风妹_");
     $caller = qr/$caller/;
+    $nickForbidden = getReplacement("称呼里不能用的");
+    $nickForbidden = qr/$nickForbidden/;
     updateSize;
 }
 
