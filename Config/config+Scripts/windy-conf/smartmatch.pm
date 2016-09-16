@@ -248,7 +248,7 @@ my $aliases = [
     # Control structures
     [qr/^$If(.+?)，$Then(.+?)，$Else(.+)$/, $subs->{IfThenElse}],
     [qr/^$If(.+?)，$Then(.+)$/, $subs->{IfThen}],
-    [qr/^心情判[:：]([^,]*),([^,]*),([^,]*),([^,]*)$/, sub {
+    [qr/^心情判[:：]([^,]*),([^,]*),([^,]*),([^,]*)$/, quote(sub {
         ### 多余的(1)??? 好感判亦同。
         ### 只要任何一个分支中留空，就会出现。
         ### 不知道可能会有什么问题
@@ -259,28 +259,28 @@ my $aliases = [
         #say $mood;
         #say term join ',', @_;
         given ($mood) {
-            when ($_ > $ml[1]) { $_[0] or continue; }
-            when ($_ > $ml[3]) { $_[1] or continue; }
-            when ($_ > $ml[5]) { $_[2] or continue; }
-            default { $_[3]; }
+            when ($_ > $ml[1]) { $self->runExpr($windy, $msg, $_[0], @_[4..$#_]) or continue; }
+            when ($_ > $ml[3]) { $self->runExpr($windy, $msg, $_[1], @_[4..$#_]) or continue; }
+            when ($_ > $ml[5]) { $self->runExpr($windy, $msg, $_[2], @_[4..$#_]) or continue; }
+            default { $self->runExpr($windy, $msg, $_[3], @_[4..$#_]); }
         }
-     }],
-    [qr/^心情判[:：]([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*)$/, sub {
+     })],
+    [qr/^心情判[:：]([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*)$/, quote(sub {
         my $self = shift;
         my $windy = shift;
         my $msg = shift;
         my $mood = curMood;
         given ($mood) {
-            when ($_ > $ml[0]) { $_[0] or continue; }
-            when ($_ > $ml[1]) { $_[1] or continue; }
-            when ($_ > $ml[2]) { $_[2] or continue; }
-            when ($_ > $ml[3]) { $_[3] or continue; }
-            when ($_ > $ml[4]) { $_[4] or continue; }
-            when ($_ > $ml[5]) { $_[5] or continue; }
-            default { $_[6]; }
+            when ($_ > $ml[0]) { $self->runExpr($windy, $msg, $_[0], @_[7..$#_]) or continue; }
+            when ($_ > $ml[1]) { $self->runExpr($windy, $msg, $_[1], @_[7..$#_]) or continue; }
+            when ($_ > $ml[2]) { $self->runExpr($windy, $msg, $_[2], @_[7..$#_]) or continue; }
+            when ($_ > $ml[3]) { $self->runExpr($windy, $msg, $_[3], @_[7..$#_]) or continue; }
+            when ($_ > $ml[4]) { $self->runExpr($windy, $msg, $_[4], @_[7..$#_]) or continue; }
+            when ($_ > $ml[5]) { $self->runExpr($windy, $msg, $_[5], @_[7..$#_]) or continue; }
+            default { $self->runExpr($windy, $msg, $_[6], @_[7..$#_]); }
         }
-     }],
-    [qr/^好感判[:：]([^,]*),([^,]*),([^,]*),([^,]*)$/, sub {
+     })],
+    [qr/^好感判[:：]([^,]*),([^,]*),([^,]*),([^,]*)$/, quote(sub {
         my $self = shift;
         my $windy = shift;
         my $msg = shift;
@@ -288,12 +288,13 @@ my $aliases = [
         #say $sense;
         #say term join ',', @_;
         given ($sense) {
-            when ($_ > $sl1) { $_[0] or continue; }
-            when ($_ > $sl2) { $_[1] or continue; }
-            when ($_ > $sl3) { $_[2] or continue; }
-            default { $_[3]; }
+            when ($_ > $sl1) { $self->runExpr($windy, $msg, $_[0], @_[4..$#_]) or continue; }
+            when ($_ > $sl2) { $self->runExpr($windy, $msg, $_[1], @_[4..$#_]) or continue; }
+            when ($_ > $sl3) { $self->runExpr($windy, $msg, $_[2], @_[4..$#_]) or continue; }
+            default { $self->runExpr($windy, $msg, $_[3], @_[4..$#_]); }
         }
-     }],
+                                                             })],
+    [qr/^隐掉：(.+?)。$/, sub { undef; }],
     [qr/^(.+?)(?:连上|\+)(.+)$/, sub { my ($self, $windy, $msg, $m1, $m2) = @_; $m1 . $m2; }],
     # Logical expressions
     [qr/^(.+?)(?:并且|而且)(.+)$/, $subs->{And}],
@@ -400,9 +401,8 @@ my $aliases = [
             '上午' when $_ <= 11;
             '中午' when $_ <= 13;
             '下午' when $_ <= 17;
-            '晚上' when $_ <= 21;
-            '夜里' when $_ <= 23;
-            default { '子夜'; }
+            '晚上' when $_ <= 23;
+            default { '夜里'; }
         }
      }],
     ];
