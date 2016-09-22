@@ -5,10 +5,11 @@ use Exporter;
 use Scripts::scriptFunctions;
 use Scripts::Windy::Util;
 use Scripts::Windy::Expr;
+use Scripts::Windy::SmartMatch::MatchObject;
+use Scripts::Windy::SmartMatch::RetObject;
 #$Scripts::scriptFunctions::debug = 1;
 use List::Util qw/all/;
 no warnings 'experimental';
-use Data::Dumper;
 use utf8;
 use Encode qw/_utf8_on _utf8_off/;
 use Regexp::Common qw/balanced/;
@@ -134,9 +135,7 @@ sub parseExpr
     my $d4 = quotemeta $self->{d4};
     return $1 if $t =~ /^$d3([^$d4]+)$d4$/; # Plain Text
     for my $a (@{$self->{aliases}}) {
-        debug "sm #45:" .Dumper $a;
         if (my @matches = $t =~ $a->[0]) {
-            debug "sm #47:".Dumper @matches;
             $expr = Scripts::Windy::Expr->new ($a->[1], map { $_ = $self->parseExpr($_) } @matches);
             $found = 1;
             last;
@@ -152,14 +151,11 @@ sub runExpr
     my $windy = shift;
     my $msg = shift;
     my $expr = shift;
-    debug "running expr:" . Dumper($expr);
     ref $expr eq 'Scripts::Windy::Expr' or return $expr;
     my @args = @{$expr->{args}};
     if (not $expr->quoted) {
         for (@args) {
-            debug "Arg: ". Dumper($_);
             $_ = $self->runExpr($windy, $msg, $_, @_);
-            debug "Changed into:".Dumper($_);
         }
     }
     ($expr->{run})->($self, $windy, $msg, @args, @_);
@@ -170,28 +166,7 @@ sub smartmatch
     my $self = shift;
     my $text = shift;
     my @pattern = $self->parse($text);
-    #say "pattern:",Dumper(@pattern);
-    my $textMatch = join '', grep { not ref $_ } @pattern;
-    $textMatch = qr/$textMatch/; ### 加上这句之后反应速率提高数百倍
-    my @pattern = grep { ref $_ } @pattern;
-    sub { # $m->smartmatch("")->($windy, $msg);
-        my $windy = shift;
-        my $msg = shift;
-        my $t = msgText ($windy, $msg);
-        #say term  "text: `", $t,"`";
-        #say term "textmatch: `", $textMatch,"`";
-        _utf8_on($t);
-        #say 'cond:'. Dumper @pattern;
-        debug 'match pattern:'.$textMatch;
-        my @ret = $t =~ $textMatch; ###这实在是太奇怪了。
-        #@ret and say term "Matched this: ". $textMatch or say term "Didnt match.";
-        # 先执行regex，然后判定是否符合条件。
-        if (@ret and (@pattern ? all { $self->runExpr($windy, $msg, $_, @_); } @pattern : 1)) {
-            @ret;
-        } else {
-            ();
-        }
-    }
+    Scripts::Windy::SmartMatch::MatchObject->new($self, @pattern);
 }
 
 sub smartret
@@ -199,37 +174,9 @@ sub smartret
     my $self = shift;
     my $text = shift;
     my @pattern = $self->parse($text);
-    sub {
-        my $windy = shift;
-        my $msg = shift;
-        #my $t = msgText ($windy, $msg);
-        debug Dumper @pattern;
-        # Evaluate if code
-        # Plain text leave it as-is
-        my $ret = join '', map { $self->runExpr($windy, $msg, $_, @_) } @pattern;
-        _utf8_off($ret);
-        $ret;
-    }
+    Scripts::Windy::SmartMatch::RetObject->new($self, @pattern);
 }
-
 
 1;
-=comment
-package Scripts::Windy::MatchObject;
 
-use 5.012;
-use Scripts::Windy::Expr;
 
-sub new
-{
-    my $class = shift;
-    my $self = [@_];
-    bless $self, $class;
-}
-
-sub newFromString
-{
-
-}
-=cut
-1;

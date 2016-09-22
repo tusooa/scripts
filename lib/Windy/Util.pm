@@ -7,12 +7,17 @@ use utf8;
 use Encode qw/_utf8_on _utf8_off/;
 #use Data::Dumper;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/isGroupMsg msgText msgGroup msgGroupId msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender uid uName isAt isAtId findUserInGroup isPrivateMsg group invite friend $nextMessage $atPrefix $atSuffix parseRichText/;
+our @EXPORT = qw/isGroupMsg msgText msgGroup msgGroupId
+msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender
+uid uName isAt isAtId findUserInGroup isPrivateMsg
+group invite friend $nextMessage $atPrefix $atSuffix
+parseRichText $mainConf/;
 our @EXPORT_OK = qw//;
 
 our $nextMessage = "\n\n";
 our $atPrefix = "\tat";
 our $atSuffix = "\t";
+our $mainConf = "windy-conf/main.conf";
 # check whether a msg is a group msg
 sub isGroupMsg
 {
