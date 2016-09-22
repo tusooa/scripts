@@ -45,10 +45,10 @@ sub start
     if (msgSenderIsGroupAdmin($windy, $msg)
          or msgSenderIsAdmin($windy, $msg)) {
         $subs->{start}(undef, $windy, $msg, undef, @_)
-            and $startRes1->($windy, $msg, @_)
-            or $startRes1F->($windy, $msg, @_);
+            and $startRes1->run($windy, $msg, @_)
+            or $startRes1F->run($windy, $msg, @_);
     } else {
-        $startRes2->($windy, $msg, @_);
+        $startRes2->run($windy, $msg, @_);
     }
 }
 
@@ -62,10 +62,10 @@ sub startG
     my ($group) = @_;
     if (msgSenderIsAdmin($windy, $msg)) {
         $subs->{start}(undef, undef, undef, $group, @_)
-            and $startGRes1->($windy, $msg, @_)
-            or $startGRes1F->($windy, $msg, @_);
+            and $startGRes1->run($windy, $msg, @_)
+            or $startGRes1F->run($windy, $msg, @_);
     } else {
-        $startGRes2->($windy, $msg, @_);
+        $startGRes2->run($windy, $msg, @_);
     }
 }
 
@@ -79,10 +79,10 @@ sub stopG
     my ($group) = @_;
     if (msgSenderIsAdmin($windy, $msg)) {
         $subs->{stop}(undef, undef, undef, $group, @_)
-            and $stopGRes1->($windy, $msg, @_)
-            or $stopGRes1F->($windy, $msg, @_);
+            and $stopGRes1->run($windy, $msg, @_)
+            or $stopGRes1F->run($windy, $msg, @_);
     } else {
-        $stopGRes2->($windy, $msg, @_);
+        $stopGRes2->run($windy, $msg, @_);
     }
 }
 
@@ -97,10 +97,10 @@ sub stop
     if (msgSenderIsGroupAdmin($windy, $msg)
         or msgSenderIsAdmin($windy, $msg)) {
         $subs->{stop}(undef, $windy, $msg, undef, @_)
-            and $stopRes1->($windy, $msg, @_)
-            or $stopRes1F->($windy, $msg, @_);
+            and $stopRes1->run($windy, $msg, @_)
+            or $stopRes1F->run($windy, $msg, @_);
     } else {
-        $stopRes2->($windy, $msg, @_);
+        $stopRes2->run($windy, $msg, @_);
     }
 }
 
@@ -110,7 +110,7 @@ sub callerName
     my $windy = shift;
     my $msg = shift;
     my $name = $subs->{callerName}(undef, $windy, $msg, @_);
-    $cRes->($windy, $msg, $name);
+    $cRes->run($windy, $msg, $name);
 }
 
 my $teachRes1 = sr("【截止】可以这很【来讯者名】【好感判：w,0 0,- -,。】");
@@ -137,11 +137,11 @@ sub teach
         } else {
             debug 'cannot open db for write'."$!";
         }
-        $teachRes1->($windy, $msg, @_);
+        $teachRes1->run($windy, $msg, @_);
     } elsif ($sense > $sl2) { # 
-        $teachRes2->($windy, $msg, @_);
+        $teachRes2->run($windy, $msg, @_);
     } else {
-        $teachRes3->($windy, $msg, @_);
+        $teachRes3->run($windy, $msg, @_);
     }
 }
 
@@ -153,8 +153,8 @@ sub newNickname
     my $msg = shift;
     my ($nick) = @_;
     $subs->{newNick}(undef, $windy, $msg, $nick) ?
-        $nickRes->($windy, $msg, @_) :
-        $nickResF->($windy, $msg, @_);
+        $nickRes->run($windy, $msg, @_) :
+        $nickResF->run($windy, $msg, @_);
 }
 
 my $assignRes1 = sr("【截止】好哒【来讯者名】w");
@@ -169,12 +169,12 @@ sub assignNickname
     my $sense = $subs->{sense}(undef, $windy, $msg);
     if (msgSenderIsAdmin($windy, $msg)) {
         $subs->{assignNick}(undef, $windy, $msg, $id, $nick, $sticky) ?
-            $assignRes1->($windy, $msg, @_) :
-            $assignRes1F->($windy, $msg, @_);
+            $assignRes1->run($windy, $msg, @_) :
+            $assignRes1F->run($windy, $msg, @_);
     } elsif ($sense > $sl2) {
-        $assignRes2->($windy, $msg, @_);
+        $assignRes2->run($windy, $msg, @_);
     } else {
-        $assignRes3->($windy, $msg, @_);
+        $assignRes3->run($windy, $msg, @_);
     }
 }
 
@@ -187,11 +187,11 @@ sub blackList
     my $sense = $subs->{sense}(undef, $windy, $msg);
     if (msgSenderIsAdmin($windy, $msg)) {
         $subs->{blackList}(undef, $windy, $msg, $id, $status);
-        $blackListRes1->(@_);
+        $blackListRes1->run(@_);
     } elsif ($sense > $sl2) {
-        $blackListRes2->(@_);
+        $blackListRes2->run(@_);
     } else {
-        $blackListRes3->(@_);
+        $blackListRes3->run(@_);
     }
 }
 
@@ -200,7 +200,7 @@ sub sizeOfDB
 {
     my ($windy, $msg) = @_;
     my ($dbSize, $matchSize) = ($database->length, sizeOfMatch);
-    $sizeRes->($windy, $msg, $dbSize, $matchSize, $dbSize + $matchSize);
+    $sizeRes->run($windy, $msg, $dbSize, $matchSize, $dbSize + $matchSize);
 }
 
 my $addRRes1 = $teachRes1;
@@ -214,14 +214,14 @@ sub addR
     if (msgSenderIsAdmin($windy, $msg)) {
         my $ret = $subs->{addR}($name, $rep, $quotemeta);
         if ($ret) {
-            $addRRes1->(@_);
+            $addRRes1->run(@_);
         } elsif (defined $ret) { # 0 for error
-            $addRRes1E->(@_);
+            $addRRes1E->run(@_);
         } else { # undef for already-existed
-            $addRRes1F->(@_);
+            $addRRes1F->run(@_);
         }
     } else {
-        $addRRes2->(@_);
+        $addRRes2->run(@_);
     }
 }
 
@@ -233,9 +233,9 @@ sub getR
     my ($windy, $msg, $name) = @_;
     my $rep = $subs->{getR}($name, 'AS_IS');
     if (msgSenderIsAdmin($windy, $msg)) {
-        $rep ? $getRRes1->($windy, $msg, $name, $rep) : $getRRes1F->(@_);
+        $rep ? $getRRes1->run($windy, $msg, $name, $rep) : $getRRes1F->run(@_);
     } else {
-        $getRRes2->(@_);
+        $getRRes2->run(@_);
     }
 }
 
@@ -246,9 +246,9 @@ sub reloadAll
     if (msgSenderIsAdmin(@_)) {
         $subs->{reloadR}();
         reloadDB;
-        $reloadRes1->(@_);
+        $reloadRes1->run(@_);
     } else {
-        $reloadRes2->(@_);
+        $reloadRes2->run(@_);
     }
 }
 
@@ -258,7 +258,7 @@ sub quit
     if (msgSenderIsAdmin(@_)) {
         exit pop;
     } else {
-        $quitRes->(@_);
+        $quitRes->run(@_);
     }
 }
 reloadDB;
@@ -274,8 +274,8 @@ sub inviteMG
     eval { invite($windy, $msg,
            group($windy, $msg, $windy->{MainGroup}),
                   friend(msgSenderId($windy, $msg))) }
-        ? $inviteRes1->(@_) :
-            $inviteRes2->($windy, $msg, $windy->{MainGroup});
+        ? $inviteRes1->run(@_) :
+            $inviteRes2->run($windy, $msg, $windy->{MainGroup});
 }
 
 ### sandbook
@@ -288,8 +288,8 @@ sub getSandbook
 {
     my ($windy, $msg, $db) = @_;
     my @a = $sandbook->read($db);
-    @a ? $getSandbookRes->($windy, $msg, @a)
-        : $getSandbookResF->($windy, $msg, $db);
+    @a ? $getSandbookRes->run($windy, $msg, @a)
+        : $getSandbookResF->run($windy, $msg, $db);
 }
 
 my $addSandbookRes1 = sr("【截止】嗯。");
@@ -300,10 +300,10 @@ sub addSandbook
     my ($windy, $msg, $db, $sentence) = @_;
     if (msgSenderIsAdmin($windy, $msg)) {
         $sandbook->addSave($db, $sentence) ?
-            $addSandbookRes1->(@_) :
-            $addSandbookRes1F->(@_);
+            $addSandbookRes1->run(@_) :
+            $addSandbookRes1F->run(@_);
     } else {
-        $addSandbookRes2->(@_);
+        $addSandbookRes2->run(@_);
     }
 }
 
