@@ -11,7 +11,7 @@ our @EXPORT = qw/isGroupMsg msgText msgGroup msgGroupId
 msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender
 uid uName isAt isAtId findUserInGroup isPrivateMsg
 group invite friend $nextMessage $atPrefix $atSuffix
-parseRichText $mainConf/;
+parseRichText $mainConf msgPosStart msgPosEnd/;
 our @EXPORT_OK = qw//;
 
 our $nextMessage = "\n\n";
@@ -35,6 +35,7 @@ sub isPrivateMsg
 sub parseRichText
 {
     my ($windy, $msg) = @_;
+    my $match = $windy->{_db}->{_match};
     my @raw = @{ $msg->raw_content };
     my $text;
     while (@raw) {
@@ -56,6 +57,25 @@ sub parseRichText
     my $name = $msg->receiver->displayname;
     isAt($windy, $msg) = $text =~ /\Q$atPrefix\E\@\Q$name$atSuffix\E/;
     msgText($windy, $msg) = $text;
+    _utf8_on($text);
+    my ($pre, $post) = ($match->{preMatch}, $match->{postMatch});
+    $text =~ $pre; msgPosStart($windy, $msg) = length $&;
+    $text =~ $post; msgPosEnd($windy, $msg) = length $&;
+    say "position: ", msgPosStart($windy, $msg), ',', msgPosEnd($windy, $msg);
+    _utf8_off($text);
+    msgText($windy, $msg);
+}
+
+sub msgPosStart : lvalue
+{
+    my ($windy, $msg) = @_;
+    $msg->{_pos_start};
+}
+
+sub msgPosEnd : lvalue
+{
+    my ($windy, $msg) = @_;
+    $msg->{_pos_end};
 }
 
 sub msgText : lvalue

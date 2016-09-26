@@ -163,18 +163,12 @@ sub runExpr
 
 sub smartmatch
 {
-    my $self = shift;
-    my $text = shift;
-    my @pattern = $self->parse($text);
-    Scripts::Windy::SmartMatch::MatchObject->new($self, @pattern);
+    Scripts::Windy::SmartMatch::MatchObject->fromString(@_)->selfParse;
 }
 
 sub smartret
 {
-    my $self = shift;
-    my $text = shift;
-    my @pattern = $self->parse($text);
-    Scripts::Windy::SmartMatch::RetObject->new($self, @pattern);
+    Scripts::Windy::SmartMatch::RetObject->fromString(@_);
 }
 
 1;

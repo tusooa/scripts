@@ -20,7 +20,7 @@ use Exporter;
 use utf8;
 use Encode qw/_utf8_on _utf8_off/;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/$match sm sr $sl1 $sl2 $sl3 $subs sizeOfMatch/;
+our @EXPORT = qw/$match sm smS sms sr $sl1 $sl2 $sl3 $subs sizeOfMatch/;
 
 loadNicknames;
 loadSense;
@@ -420,6 +420,16 @@ $match = Scripts::Windy::SmartMatch->new(
     replacements => {},);
 reloadReplacements;
 
+sub smS
+{
+    $match->smartmatch({ style => 'S' }, @_);
+}
+
+sub sms
+{
+    $match->smartmatch({ style => 's' }, @_);
+}
+
 sub sm
 {
     $match->smartmatch(@_);
@@ -466,6 +476,10 @@ sub reloadReplacements
     $caller = qr/$caller/;
     $nickForbidden = getReplacement("称呼里不能用的");
     $nickForbidden = qr/$nickForbidden/;
+    my $pre = getReplacement("前");
+    $match->{preMatch} = qr/^$pre/;
+    my $post = getReplacement("后");
+    $match->{postMatch} = qr/$post$/;
     updateSize;
 }
 

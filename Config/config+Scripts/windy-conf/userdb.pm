@@ -15,7 +15,7 @@ sub reloadDB;
 
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/$database/;
-our $database;
+our $database = Scripts::Windy::Userdb->new();
 #sub debug { print @_; }
 my @adminList;
 if (open my $f, '<', $configDir.'windy-conf/admin') {
@@ -120,7 +120,7 @@ sub teach
 {
     my $windy = shift;
     my $msg = shift;
-    my ($ask, $ans) = @_;
+    my ($ask, $ans, $style) = @_;
     debug 'teaching:';
     debug 'ques:'.$ask;
     debug 'answ:'.$ans;
@@ -133,7 +133,7 @@ sub teach
         $database->add([sm($ask), sr($ans)]);
         if (open my $f, '>>', $configDir.'windy-conf/userdb.db') {
             binmode $f, ':unix';
-            say $f "\tAsk$ask\n\tAns$ans";
+            say $f "$style\tAsk$ask\n\tAns$ans";
         } else {
             debug 'cannot open db for write'."$!";
         }
@@ -307,54 +307,69 @@ sub addSandbook
     }
 }
 
+my $repeatRes = sr("【捕获1】");
+sub repeat
+{
+    my ($windy, $msg, $content) = @_;
+    if (msgSenderIsAdmin($windy, $msg)) {
+        sr($content)->run(@_);
+    } else {
+        $repeatRes->run(@_);
+    }
+}
+
 sub reloadDB
 {
     my @baseDB = (
-        [sm(qr/^<前>【对我】出来<后>$/), \&start],
+        [smS(qr/【对我】出来/), \&start],
         [sm("【不是私讯而且不是群讯开启】"), sr("【截止】")],
-        [sm(qr/^<风妹>(?:<以后>)?<不要>理睬?(\d+)<后>$/), sub { blackList(@_, 1); }],
-        [sm(qr/^<风妹>(?:<以后>)?<不要>不理睬?(\d+)<后>$/), sub { blackList(@_, 0); }],
+        [smS(qr/<风妹>(?:<以后>)?<不要>理睬?(\d+)/), sub { blackList(@_, 1); }],
+        [smS(qr/<风妹>(?:<以后>)?<不要>不理睬?(\d+)/), sub { blackList(@_, 0); }],
         [sm("【被屏蔽】"), sr("【截止】")],
-        [sm(qr/^<前>【对我】回去<后>$/), \&stop],
-        [sm(qr/^<风妹>当问(.+?)则答(.+)$/s), sub { $_[2] = '^<前>'.$_[2].'<后>$'; teach(@_); }],
-        [sm(qr/^<判定〔<风妹>,<怎么>出来〕><后>$/), \&callerName],
-        [sm(qr/^<前>【对我】知道<多少><后>/), \&sizeOfDB],
+        [smS(qr/【对我】回去/), \&stop],
+        [sm(qr/^<风妹>当问(.+?)则答(.+)$/s), sub { teach(@_, 'S'); }],
+        [sm(qr/^<风妹>对问(.+?)则答(.+)$/s), sub { teach(@_, 's'); }],
+        [smS(qr/<判定〔<风妹>,<怎么>出来〕>/), \&callerName],
+        [smS(qr/【对我】知道<多少>/), \&sizeOfDB],
         [sm(qr/^<风妹>若问(.+?)即答(.+)$/s), \&teach],
         [sm(qr/^<风妹>问(.+?)答(.+)$/s), sub { $_[2] = '^'.$_[2].'$'; teach(@_); }],
         [sm(qr/^<风妹>(?:<以后>)?<称呼><我>(?:作|为|叫)?(.+?)(?:<就好>)?$/), \&newNickname],
         [sm(qr/^<风妹>(?:<以后>)?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$/), \&assignNickname],
         [sm(qr/^<风妹>(?:<以后>)?一直都?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$/), sub { assignNickname @_, 1; }],
+        [sm(qr/^喵 复述(.+)$/), \&repeat],
         [sm(qr/^<风妹>(?:<以后>)?<记得>(.+?)也是(.+)$/), sub { addR(@_, 0); }],
         [sm(qr/^<风妹>(?:<以后>)?<记得>(.+?)亦是(.+)$/), sub { addR(@_, 1); }],
         [sm(qr/^<风妹><什么><是>(.+)$/), \&getR],
-        [sm(qr/^<前>【对我】重生<后>$/), \&reloadAll],
+        [smS(qr/【对我】重生/), \&reloadAll],
         [sm(qr/^<风妹>天降于?(\d+)<后>$/), \&startG],
         [sm(qr/^<风妹>消失于?(\d+)<后>$/), \&stopG],
-        [sm(qr/^<风妹>以神之名义命令<中>重生<后>$/), sub { quit(@_, 1); }],
-        [sm(qr/^<风妹>主群拉<一下><后>$/), \&inviteMG],
+        [smS(qr/<风妹>以神之名义命令<中>重生/), sub { quit(@_, 1); }],
+        [smS(qr/【对我】主群拉<一下>/), \&inviteMG],
         [sm(qr/^沙书\s*(.*)\s*$/), \&getSandbook],
         [sm(qr/^<风妹>加一?句(.+?)「(.+)」$/s), \&addSandbook],
-        [sm(qr/^<前>【对我】来扫个码<后>$/), sub { quit(@_, 0); }],
+        [smS(qr/【对我】来扫个码/), sub { quit(@_, 0); }],
         );
-    $database = Scripts::Windy::Userdb->new(@baseDB);
+    $database->set(@baseDB);
     $database->{_match} = $match;
     if (open my $f, '<', $configDir.'windy-conf/userdb.db') {
-        my ($ask, $ans);
+        my ($ask, $ans, $style);
         my $ref;
         while (<$f>) {
-            if (s/^\tAsk//) {
+            if (s/^(.?)\tAsk//) {
+                my $newStyle = $1;
                 chomp ($ask, $ans);
-                $database->add([sm($ask), sr($ans)]) if $ask and $ans;
+                $database->add([sm({ style => $style }, $ask), sr($ans)]) if $ask and $ans;
                 $ask = '';
                 $ans = '';
                 $ref = \$ask;
+                $style = $newStyle;
             } elsif (s/^\tAns//) {
                 $ref = \$ans;
             }
             $$ref .= $_ unless /^$/;
         }
         chomp ($ask, $ans);
-        $database->add([sm($ask), sr($ans)]) if $ask and $ans;
+        $database->add([sm({ style => $style }, $ask), sr($ans)]) if $ask and $ans;
         close $f;
     } else {
         debug 'cannot open';

@@ -13,6 +13,12 @@ sub new
     bless $self, $class;
 }
 
+sub set
+{
+    my $self = shift;
+    $self->{words} = [@_];
+}
+
 sub add
 {
     my $self = shift;
