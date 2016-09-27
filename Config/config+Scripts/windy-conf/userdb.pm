@@ -130,7 +130,7 @@ sub teach
         msgSenderIsAdmin($windy, $msg)) { # 正常运作
         debug "adding";
         $windy->logger("添加「${ask}」 => 「${ans}」");
-        $database->add([sm($ask), sr($ans)]);
+        $database->add([sm({ style => $style }, $ask), sr($ans)]);
         if (open my $f, '>>', $configDir.'windy-conf/userdb.db') {
             binmode $f, ':unix';
             say $f "$style\tAsk$ask\n\tAns$ans";
@@ -323,13 +323,13 @@ sub reloadDB
     my @baseDB = (
         [smS(qr/【对我】出来/), \&start],
         [sm("【不是私讯而且不是群讯开启】"), sr("【截止】")],
-        [smS(qr/<风妹>(?:<以后>)?<不要>理睬?(\d+)/), sub { blackList(@_, 1); }],
-        [smS(qr/<风妹>(?:<以后>)?<不要>不理睬?(\d+)/), sub { blackList(@_, 0); }],
+        [smS(qr/【对我】<不要>理睬?(\d+)/), sub { blackList(@_, 1); }],
+        [smS(qr/【对我】<不要>不理睬?(\d+)/), sub { blackList(@_, 0); }],
         [sm("【被屏蔽】"), sr("【截止】")],
         [smS(qr/【对我】回去/), \&stop],
         [sm(qr/^<风妹>当问(.+?)则答(.+)$/s), sub { teach(@_, 'S'); }],
         [sm(qr/^<风妹>对问(.+?)则答(.+)$/s), sub { teach(@_, 's'); }],
-        [smS(qr/<判定〔<风妹>,<怎么>出来〕>/), \&callerName],
+        [smS(qr/【对我】<怎么>出来/), \&callerName],
         [smS(qr/【对我】知道<多少>/), \&sizeOfDB],
         [sm(qr/^<风妹>若问(.+?)即答(.+)$/s), \&teach],
         [sm(qr/^<风妹>问(.+?)答(.+)$/s), sub { $_[2] = '^'.$_[2].'$'; teach(@_); }],
@@ -341,9 +341,9 @@ sub reloadDB
         [sm(qr/^<风妹>(?:<以后>)?<记得>(.+?)亦是(.+)$/), sub { addR(@_, 1); }],
         [sm(qr/^<风妹><什么><是>(.+)$/), \&getR],
         [smS(qr/【对我】重生/), \&reloadAll],
-        [sm(qr/^<风妹>天降于?(\d+)<后>$/), \&startG],
-        [sm(qr/^<风妹>消失于?(\d+)<后>$/), \&stopG],
-        [smS(qr/<风妹>以神之名义命令<中>重生/), sub { quit(@_, 1); }],
+        [smS(qr/【对我】天降于?(\d+)/), \&startG],
+        [smS(qr/【对我】消失于?(\d+)/), \&stopG],
+        [smS(qr/【对我】以神之名义命令<中>重生/), sub { quit(@_, 1); }],
         [smS(qr/【对我】主群拉<一下>/), \&inviteMG],
         [sm(qr/^沙书\s*(.*)\s*$/), \&getSandbook],
         [sm(qr/^<风妹>加一?句(.+?)「(.+)」$/s), \&addSandbook],

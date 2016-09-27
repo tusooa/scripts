@@ -61,7 +61,6 @@ sub parseRichText
     my ($pre, $post) = ($match->{preMatch}, $match->{postMatch});
     $text =~ $pre; msgPosStart($windy, $msg) = length $&;
     $text =~ $post; msgPosEnd($windy, $msg) = length $&;
-    say "position: ", msgPosStart($windy, $msg), ',', msgPosEnd($windy, $msg);
     _utf8_off($text);
     msgText($windy, $msg);
 }
