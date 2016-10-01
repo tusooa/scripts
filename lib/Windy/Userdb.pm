@@ -16,7 +16,7 @@ sub new
 sub all
 {
     my $self = shift;
-    @{$self->{words}};
+    wantarray ? @{$self->{words}} : $self->{words};
 }
 
 sub set
@@ -32,7 +32,14 @@ sub add
         push @{$self->{words}}, $_;
     }
 }
-#my $conf = conf 'windy-conf/startstop';
+
+sub remove
+{
+    my $self = shift;
+    my $num = shift;
+    $self->{words} = [@{$self->{words}}[0 .. $num-1, $num+1 .. (@{$self->{words}} - 1)]];
+}
+
 sub parse
 {
     my $self = shift;

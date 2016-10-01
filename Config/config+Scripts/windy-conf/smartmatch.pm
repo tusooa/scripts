@@ -242,6 +242,7 @@ $subs = {
     reloadR => \&reloadReplacements,
     addR => \&addReplacement,
     getR => \&getReplacement,
+    nicknameById => \&nicknameById,
 };
 my $aliases = [
     # Plain

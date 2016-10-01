@@ -7,7 +7,7 @@ use 5.012;
 use utf8;
 use Encode qw/_utf8_on _utf8_off/;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/userNickname senderNickname newNick loadNicknames/;
+our @EXPORT = qw/userNickname nicknameById senderNickname newNick loadNicknames/;
 our @EXPORT_OK = qw//;
 
 my %nick;
@@ -18,6 +18,12 @@ sub userNickname
     $user or return;
     my $id = uid($user);
     $nick{$id}->[0] // do { my $name = uName($user); _utf8_on($name); $name; };
+}
+
+sub nicknameById
+{
+    my ($self, $id) = @_;
+    $nick{$id}->[0] // $id;
 }
 
 sub senderNickname

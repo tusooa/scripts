@@ -17,6 +17,7 @@ sub msgSenderIsAdmin;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/$database/;
 our $database = Scripts::Windy::Userdb->new();
+my $databaseFile = $configDir.'windy-conf/userdb.db';
 our $commands = {};
 my @baseDB;
 loadCommands;
@@ -349,23 +350,26 @@ sub repeat
 
 sub dbToString
 {
-    my $line = shift;
+    my $num = shift;
+    my $realNum = $num + @baseDB;
+    my $line = $database->all->[$realNum];
     return if ref $line ne 'ARRAY';
     my ($ask, $ans) = @{$line};
     return if ref $ans ne 'Scripts::Windy::SmartMatch::RetObject';
     my ($q, $a) = ($ask->{raw}, $ans->{raw});
-    #_utf8_on($q);_utf8_on($a);
+    my $ret;
     given ($ask->{style}) {
         when ('S') {
-            '风儿当问'.$q.'则答'.$a;
+            $ret = '风儿当问'.$q.'则答'.$a;
         }
         when ('s') {
-            '风儿对问'.$q.'则答'.$a;
+            $ret = '风儿对问'.$q.'则答'.$a;
         }
         default {
-            '风儿若问'.$q.'即答'.$a;
+            $ret = '风儿若问'.$q.'即答'.$a;
         }
     }
+    $subs->{nicknameById}(undef, $line->[0]->{teacher})."第".$num."，".$ret;
 }
 
 sub findDB
@@ -393,7 +397,7 @@ sub findDB
                     $_->[0]->{raw} =~ $rPattern) {
                     $count += 1;
                     if ($count > 0) {
-                        push @found, "第".$i."，".dbToString($_);
+                        push @found, dbToString($i);
                     }
                 }
                 last if $count >= $maxCount;
@@ -402,6 +406,50 @@ sub findDB
             ($count, join "\n", @found);
           },
           success => 'ret' },
+        @_);
+}
+
+sub deleteDB
+{
+    my $windy = shift;
+    my $msg = shift;
+    my ($num) = @_;
+    runCommand(
+        $windy, $msg,
+        { run => sub {
+            my $realNum = $num + @baseDB;
+            return unless ($database->all)[$realNum];
+            my $teacher = ($database->all)[$realNum]->[0]->{teacher};
+            if ($teacher and $teacher ne uid(msgSender($windy, $msg))) {
+                return 0;
+            }
+            my $removed = dbToString($num);
+            my $line = $num * 2 + 1;
+            $database->remove($realNum);
+            {
+                local ($^I = '.bak');
+                local (@ARGV = $databaseFile);
+                while (<>) {
+                    print if $. != $line and $. != $line + 1;
+                }
+            }
+            $removed;
+          },
+          success => 'ret', },
+        @_);
+}
+
+sub queryDB
+{
+    my $windy = shift;
+    my $msg = shift;
+    my ($num) = @_;
+    runCommand(
+        $windy, $msg,
+        { run => sub {
+            dbToString($num);
+          },
+          success => 'ret', },
         @_);
 }
 
@@ -436,10 +484,12 @@ sub reloadDB
         [smS(qr/<_风妹_><中>加一?句(.+?)「(.+)」$/s), \&addSandbook],
         [smS(qr/【对我】来扫个码/), sub { quit(@_, 0); }],
         [smS(qr/<_风妹_><中>(?:从(\d+))?找一下(.+)$/), \&findDB],
+        [smS(qr/【对我】<删><中>(\d+)/), \&deleteDB],
+        [smS(qr/【对我】第(\d+)条<是><什么>/), \&queryDB],
         );
     $database->set(@baseDB);
     $database->{_match} = $match;
-    if (open my $f, '<', $configDir.'windy-conf/userdb.db') {
+    if (open my $f, '<', $databaseFile) {
         my ($ask, $ans, $style, $id);
         my $ref;
         while (<$f>) {
