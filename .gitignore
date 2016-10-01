@@ -24,3 +24,4 @@ src/*/build/*
 *.pir
 *.moarvm
 GentooConfig/conf.d/._cfg*
+*-backup

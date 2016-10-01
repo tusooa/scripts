@@ -20,7 +20,7 @@ use Exporter;
 use utf8;
 use Encode qw/_utf8_on _utf8_off/;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/$match sm smS sms sr $sl1 $sl2 $sl3 $subs sizeOfMatch/;
+our @EXPORT = qw/$match sm smS sms sr $sl1 $sl2 $sl3 @sl @ml $subs sizeOfMatch/;
 
 loadNicknames;
 loadSense;
@@ -48,6 +48,7 @@ sub reloadReplacements;
 sub updateSize;
 
 our ($sl1, $sl2, $sl3) = (350, 180, 0);
+our @sl = ($sl1, $sl2, $sl3);
 our @ml = (93, 85, 60, 40, -10, -40);
 
 our $subs;

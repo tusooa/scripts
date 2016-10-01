@@ -13,6 +13,12 @@ sub new
     bless $self, $class;
 }
 
+sub all
+{
+    my $self = shift;
+    @{$self->{words}};
+}
+
 sub set
 {
     my $self = shift;
