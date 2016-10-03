@@ -20,7 +20,8 @@ sub parse
 {
     my $self = shift;
     my $textMatch = join '', grep { not ref $_ } @_;
-    $textMatch = qr/$textMatch/;
+    $textMatch = eval { qr/$textMatch/ };
+    return if $@;
     my @cond = grep { ref $_ } @_;
     $self->{cond} = [@cond];
     $self->{pattern} = $textMatch;

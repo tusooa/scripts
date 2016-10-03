@@ -110,13 +110,17 @@ sub runCommand
     $commands->{$cmd}{$status}->run($windy, $msg, @args);
 }
 
+sub isAdmin
+{
+    my $id = shift;
+    $id ~~ (@adminList, @{$windy->{Admin}});
+}
+
 sub msgSenderIsAdmin
 {
     my $windy = shift;
     my $msg = shift;
-    my $id = uid(msgSender($windy, $msg));
-    my @a = (@adminList, @{$windy->{Admin}});
-    $id ~~ @a;
+    isAdmin(uid(msgSender($windy, $msg)));
 }
 
 sub start
@@ -187,14 +191,19 @@ sub teach
             my $teacher = uid(msgSender($windy, $msg));
             debug "adding";
             $windy->logger("添加「${ask}」 => 「${ans}」");
-            $database->add([sm({ style => $style, teacher => $teacher }, $ask), sr($ans)]);
+            my $q = sm({ style => $style, teacher => $teacher }, $ask);
+            my $a = sr($ans)->selfParse;
+            return (undef, $ask, $ans) unless $q and $a;
+            $database->add([$q, $a]);
             if (open my $f, '>>', $configDir.'windy-conf/userdb.db') {
                 binmode $f, ':unix';
                 say $f "$style\tAsk$ask\n$teacher\tAns$ans";
             } else {
-                debug 'cannot open db for write'."$!";
+                return (0, $ask, $ans);
             }
-          }, },
+            (1, $ask, $ans);
+          },
+          success => 'ret', failure => 'ret', error => 'ret', },
         @_);
 }
 
@@ -420,7 +429,7 @@ sub deleteDB
             my $realNum = $num + @baseDB;
             return unless ($database->all)[$realNum];
             my $teacher = ($database->all)[$realNum]->[0]->{teacher};
-            if ($teacher and $teacher ne uid(msgSender($windy, $msg))) {
+            if (isAdmin($teacher) and $teacher ne uid(msgSender($windy, $msg))) {
                 return 0;
             }
             my $removed = dbToString($num);

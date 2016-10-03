@@ -115,7 +115,7 @@ sub parse
             debug "the pattern is now: $ret";
             push @s, $ret;
         } else {
-            die "not match";
+            return;
         }
         #debug chomp ($_ = <>);
     }

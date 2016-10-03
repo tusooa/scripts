@@ -15,6 +15,7 @@ sub new
 sub parse
 {
     my $self = shift;
+    @_ or return;
     $self->{pattern} = [@_];
     $self->{parsed} = 1;
     $self;
