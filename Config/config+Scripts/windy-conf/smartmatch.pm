@@ -7,7 +7,6 @@ use Scripts::Windy::Addons::Sign;
 use Scripts::Windy::Addons::BlackList;
 use Scripts::Windy::Addons::Mood;
 use Scripts::Windy::Addons::StartStop;
-#use Scripts::Windy::Conf::smartmatch::replacements;
 use POSIX qw/strftime/;
 use Scripts::Windy::SmartMatch;
 use Scripts::Windy::Quote;
@@ -15,7 +14,6 @@ use Scripts::Windy::Util;
 
 use List::Util qw/sum/;
 use Scripts::scriptFunctions;
-#$Scripts::scriptFunctions::debug = 0;
 use Exporter;
 use utf8;
 use Encode qw/_utf8_on _utf8_off/;
@@ -297,7 +295,7 @@ my $aliases = [
         }
                                                              })],
     [qr/^隐掉：(.+?)。$/, sub { undef; }],
-    [qr/^(.+?)(?:连上|\+)(.+)$/, sub { my ($self, $windy, $msg, $m1, $m2) = @_; $m1 . $m2; }],
+    [qr/^(.+?)\+(.+)$/, sub { my ($self, $windy, $msg, $m1, $m2) = @_; $m1 . $m2; }],
     # Logical expressions
     [qr/^(.+?)(?:并且|而且)(.+)$/, $subs->{And}],
     [qr/^(.+?)(?:或者|或是)(.+)$/, $subs->{Or}],
@@ -315,6 +313,7 @@ my $aliases = [
     [qr/^私讯$/, sub { my ($self, $windy, $msg) = @_; isPrivateMsg($windy, $msg); }],
     [qr/^截止$/, sub { msgStopping($_[1], $_[2]) = 1; '' } ],
     [qr/^(?:来讯者(?:名|的名字))$/, \&senderNickname],
+    [qr/^我名$/, sub { shift; receiverName(@_) },],
     [qr/^来讯者(?:的|之)?(?:[Ii][Dd]|[Qq][Qq])$/, sub {
         my ($self, $windy, $msg) = @_;
         uid(msgSender($windy, $msg));

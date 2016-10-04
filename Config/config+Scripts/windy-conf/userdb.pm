@@ -63,6 +63,14 @@ sub getPriv
                 last;
             }
         }
+        when (/^sense=(\d+)$/) {
+            my $value = $1;
+            my $sense = $subs->{senseWithMood}(undef, $windy, $msg);
+            if ($sense >= $value) {
+                $accepted = 1;
+                last;
+            }
+        }
         when (/^sense(\d+)$/) {
             my $level = $1 - 1;
             my $sense = $subs->{senseWithMood}(undef, $windy, $msg);
@@ -112,15 +120,18 @@ sub runCommand
 
 sub isAdmin
 {
+    my $windy = shift;
+    my $msg = shift;
     my $id = shift;
-    $id ~~ (@adminList, @{$windy->{Admin}});
+    my @a = (@adminList, @{$windy->{Admin}}); 
+    $id ~~ @a;
 }
 
 sub msgSenderIsAdmin
 {
     my $windy = shift;
     my $msg = shift;
-    isAdmin(uid(msgSender($windy, $msg)));
+    isAdmin($windy, $msg, uid(msgSender($windy, $msg)));
 }
 
 sub start
@@ -201,7 +212,7 @@ sub teach
             } else {
                 return (0, $ask, $ans);
             }
-            (1, $ask, $ans);
+            ($database->length() - @baseDB - 1, $ask, $ans);
           },
           success => 'ret', failure => 'ret', error => 'ret', },
         @_);
@@ -274,8 +285,8 @@ sub getR
     my ($name) = @_;
     runCommand(
         $windy, $msg,
-        { run => sub { my $rep = $subs->{getR}($name, 'AS_IS'); ($name, $rep) },
-          success => 'ret', },
+        { run => sub { my $rep = $subs->{getR}($name, 'AS_IS'); ($rep, $name) },
+          success => 'ret', error => 'ret', failure => 'ret' },
         @_);
 }
 
@@ -290,7 +301,6 @@ sub reloadAll
         @_);
 }
 
-my $quitRes = sr("【截止】我拒绝。");
 sub quit
 {
     my $windy = shift;
@@ -429,7 +439,8 @@ sub deleteDB
             my $realNum = $num + @baseDB;
             return unless ($database->all)[$realNum];
             my $teacher = ($database->all)[$realNum]->[0]->{teacher};
-            if (isAdmin($teacher) and $teacher ne uid(msgSender($windy, $msg))) {
+            if ((isAdmin($windy, $msg, $teacher) or not msgSenderIsAdmin($windy, $msg))
+                and $teacher ne uid(msgSender($windy, $msg))) {
                 return 0;
             }
             my $removed = dbToString($num);
@@ -467,35 +478,39 @@ sub reloadDB
     @baseDB = (
         [smS(qr/【对我】出来/), \&start],
         [sm("【不是私讯而且不是群讯开启】"), sr("【截止】")],
-        [smS(qr/【对我】<不要>理睬?(\d+)/), sub { blackList(@_, 1); }],
-        [smS(qr/【对我】<不要>不理睬?(\d+)/), sub { blackList(@_, 0); }],
+        [smS(qr/【对我或者私讯】<不要>理睬?(\d+)/), sub { blackList(@_, 1); }],
+        [smS(qr/【对我或者私讯】<不要>不理睬?(\d+)/), sub { blackList(@_, 0); }],
         [sm("【被屏蔽】"), sr("【截止】")],
         [smS(qr/【对我】回去/), \&stop],
         [smS(qr/<_风妹_><中>当问(.+?)则答(.+)$/), sub { teach(@_, 'S'); }],
         [smS(qr/<_风妹_><中>被问到(.+?)时回答(.+)$/), sub { $_[3] = $_[3].'【概率0.33好感判：w,,0 0,。】'; teach(@_, 'S'); }],
         [smS(qr/<_风妹_><中>对问(.+?)则答(.+)$/), sub { teach(@_, 's'); }],
         [smS(qr/【对我】<怎么>出来/), \&callerName],
-        [smS(qr/【对我】知道<多少>/), \&sizeOfDB],
+        [smS(qr/【对我或者私讯】知道<多少>/), \&sizeOfDB],
         [smS(qr/<_风妹_><中>若问(.+?)即答(.+)$/s), \&teach],
         [smS(qr/<_风妹_><中>问(.+?)答(.+)$/s), sub { $_[2] = '^'.$_[2].'$'; teach(@_); }],
         [smS(qr/<_风妹_><中>(?:<以后>)?<称呼><我>(?:作|为|叫)?(.+?)(?:<就好>)?$/), \&newNickname],
         [smS(qr/<_风妹_><中>(?:<以后>)?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$/), \&assignNickname],
-        [smS(qr/<_风妹_><中>(?:<以后>)?一直都?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$/), sub { assignNickname @_, 1; }],
+#        [smS(qr/<_风妹_><中>(?:<以后>)?一直都?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$/), sub { assignNickname @_, 1; }],
         [sm(qr/^喵 复述(.+)$/), \&repeat],
-        [smS(qr/<_风妹_><中>(?:<以后>)?<记得>(.+?)也是(.+)$/), sub { addR(@_, 0); }],
-        [smS(qr/<_风妹_><中>(?:<以后>)?<记得>(.+?)亦是(.+)$/), sub { addR(@_, 1); }],
+        [smS(qr/<_风妹_><中>(?:<以后>)?<记得>(.+?)(也|亦)是(.+)$/),
+         sub {
+             my ($windy, $msg, $rep, $mode, $name) = @_;
+             addR($windy, $msg, $rep, $name, $mode eq '也' ? 0 : 1);
+         }],
+#        [smS(qr/<_风妹_><中>(?:<以后>)?<记得>(.+?)亦是(.+)$/), sub { addR(@_, 1); }],
         [smS(qr/<_风妹_><中><什么><是>(.+)$/), \&getR],
-        [smS(qr/【对我】重生/), \&reloadAll],
-        [smS(qr/【对我】天降于?(?:欢迎加入.+?，群号码：)?(\d+)/), \&startG],
-        [smS(qr/【对我】消失于?(?:欢迎加入.+?，群号码：)?(\d+)/), \&stopG],
-        [smS(qr/【对我】以神之名义命令<中>重生/), sub { quit(@_, 1); }],
-        [smS(qr/【对我】主群拉<一下>/), \&inviteMG],
-        [sm(qr/^沙书\s*(.*)\s*$/), \&getSandbook],
+        [smS(qr/【对我或者私讯】重生/), \&reloadAll],
+        [smS(qr/【对我或者私讯】天降于?(?:欢迎加入.+?，群号码：)?(\d+)/), \&startG],
+        [smS(qr/【对我或者私讯】消失于?(?:欢迎加入.+?，群号码：)?(\d+)/), \&stopG],
+        [smS(qr/【对我或者私讯】以神之名义命令<中>重生/), sub { quit(@_, 1); }],
+        [smS(qr/【对我或者私讯】主群拉<一下>/), \&inviteMG],
+        [sm(qr/^沙书\s*([^\s]*)\s*$/), \&getSandbook],
         [smS(qr/<_风妹_><中>加一?句(.+?)「(.+)」$/s), \&addSandbook],
-        [smS(qr/【对我】来扫个码/), sub { quit(@_, 0); }],
+        [smS(qr/【对我或者私讯】来扫个码/), sub { quit(@_, 0); }],
         [smS(qr/<_风妹_><中>(?:从(\d+))?找一下(.+)$/), \&findDB],
-        [smS(qr/【对我】<删><中>(\d+)/), \&deleteDB],
-        [smS(qr/【对我】第(\d+)条<是><什么>/), \&queryDB],
+        [smS(qr/【对我或者私讯】<删><中>(\d+)/), \&deleteDB],
+        [smS(qr/【对我或者私讯】第(\d+)条<是><什么>/), \&queryDB],
         );
     $database->set(@baseDB);
     $database->{_match} = $match;

@@ -11,7 +11,8 @@ our @EXPORT = qw/isGroupMsg msgText msgGroup msgGroupId
 msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender
 uid uName isAt isAtId findUserInGroup isPrivateMsg
 group invite friend $nextMessage $atPrefix $atSuffix
-parseRichText $mainConf msgPosStart msgPosEnd/;
+parseRichText $mainConf msgPosStart msgPosEnd
+msgReceiver receiverName/;
 our @EXPORT_OK = qw//;
 
 our $nextMessage = "\n\n";
@@ -132,6 +133,12 @@ sub msgSender
     $msg->sender;
 }
 
+sub msgReceiver
+{
+    my ($windy, $msg) = @_;
+    $msg->receiver;
+}
+
 sub msgSenderIsGroupAdmin
 {
     my ($windy, $msg) = @_;
@@ -148,15 +155,20 @@ sub uName
     shift->displayname;
 }
 
+sub receiverName
+{
+    my $windy = shift;
+    my $msg = shift;
+    my $name = uName(msgReceiver($windy, $msg));
+    _utf8_on($name);
+    $name;
+}
+
 sub isAt : lvalue
 {
     my $windy = shift;
     my $msg = shift;
     $msg->{__is_at};
-#    my $ret = msgText($windy, $msg) =~ $msg->{__at_regex};
-#    $windy->logger("name is ". $msg->receiver->displayname);
-#    $windy->logger("艾特了风儿。") if $ret;
-#    $ret;
 }
 
 sub isAtId
