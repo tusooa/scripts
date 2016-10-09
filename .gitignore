@@ -25,3 +25,7 @@ src/*/build/*
 *.moarvm
 GentooConfig/conf.d/._cfg*
 *-backup
+*.exe
+*.dll
+*/blib
+build
