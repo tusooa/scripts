@@ -61,18 +61,23 @@ sub match
     #$windy->logger("正在处理此行: ".msgText($windy, $msg));
     my @ret = ();
     for (@{$self->{words}}) {
-#        my $m = $words->[$_];
+        #        my $m = $words->[$_];
+        #say term 'word: '. $_->[0]->{raw};
         #debug 'word:'.Dumper ($_->[0]);
-        if ((my @a = $_->[0]->run($windy, $msg))) {
+        if ((my @a = #(ref $_->[0] eq 'CODE' ?
+             #$_->[0]->($windy, $msg) :
+             $_->[0]->run($windy, $msg))) {
             #debug '@a:'. Dumper (@a);
             #debug 'scalar @a:'. scalar @a;
-            my $ret = ref $_->[1] eq 'CODE' ? $_->[1]->($windy, $msg, @a) : $_->[1]->run($windy, $msg, @a);
+            my $ret = ref $_->[1] eq 'CODE' ?
+                $_->[1]->($windy, $msg, @a) :
+                $_->[1]->run($windy, $msg, @a);
             #$windy->logger("一个可选的回复是: ".$ret);
             #debug 'matching, returning '.$ret;
             push @ret, $ret if $ret; # 若有返回值，则添加到回复列表。
             if (msgStopping($windy, $msg)) {
                 @ret = $ret ? ($ret) : ();
-                $windy->logger("这条信息到此为止了。");
+                #$windy->logger("这条信息到此为止了。");
                 last;
             }
         }

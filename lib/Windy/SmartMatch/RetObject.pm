@@ -48,7 +48,7 @@ sub run
     # Evaluate if code
     # Plain text leave it as-is
     my $ret = join '', map { $self->runExpr($windy, $msg, $_, @_) } @{$object->{pattern}};
-    _utf8_off($ret);
+    _utf8_off($ret) if BACKEND eq 'mojo';
     $ret;
 }
 

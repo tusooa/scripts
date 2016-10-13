@@ -4,6 +4,7 @@ use Scripts::Configure qw/$defg/;
 use 5.014;
 use File::Basename qw/basename dirname/;
 no if $] >= 5.018, warnings => "experimental";
+use Encode qw/encode decode _utf8_on _utf8_off/;
 use POSIX qw/strftime/;
 our $VERSION = 0.1;
 our @ISA = qw/Exporter/;
@@ -14,7 +15,7 @@ $accountDir $scriptsDir $libDir
 $verbose verbose $debug debug
 conf $pathConf $defg $scriptName
 multiArgs time2date final ln term
-formatTime
+formatTime utf8
 /;
 use Scripts::WindowsSupport;
 sub time2date;
@@ -93,6 +94,15 @@ sub ln
         my ($target, $name) = @_;
         symlink $target, $name;
     }
+}
+
+sub utf8
+{
+    my $str = join '', @_;
+    my $ret;
+    $ret = encode 'utf-8', decode 'euc-cn', $str;
+    _utf8_on($ret);
+    $ret;
 }
 
 sub term #蛋痛的euc-cn <=> utf-8 转换。只有闻道死才需要。和谐。

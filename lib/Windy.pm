@@ -7,6 +7,7 @@ no warnings 'experimental';
 use POSIX qw/strftime/;
 use IO::Handle;
 use Data::Dumper;
+use Scripts::Windy::Util;
 # param: logToFile - default to false
 sub new
 {
@@ -47,8 +48,9 @@ sub logger
     my ($pack, $func) = ((caller 0)[0],(caller 1)[3]); # 倒回 1 层。
     # FIXME: 为什么第一个是0，而第二个是1？？？
     $self->checkReopenLogFile if $self->{logToFile};
-    my @a = (formatTime(localtime), "[[$colorcode${func}${nocol}]]", @_);
+    my @a = (formatTime(localtime), (-t STDOUT ? "[[$colorcode${func}${nocol}]]" : "[[${func}]]"), @_);
     say term @a;
+    outputLog(@a);
     #say "LOG is: ".$self->{log};
     $self->{log}->say(@a) if $self->{logToFile};
 }

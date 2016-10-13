@@ -308,7 +308,7 @@ sub quit
     my $stat = pop;
     runCommand(
         $windy, $msg,
-        { run => sub { exit $stat; }, },
+        { run => sub { $stat; }, },
         @_);
 }
 reloadDB;
@@ -450,6 +450,7 @@ sub deleteDB
                 local ($^I = '.bak');
                 local (@ARGV = $databaseFile);
                 while (<>) {
+                    binmode \*STDOUT, ':unix';
                     print if $. != $line and $. != $line + 1;
                 }
             }
@@ -476,6 +477,7 @@ sub queryDB
 sub reloadDB
 {
     @baseDB = (
+        [sm('【不是讯息】'), sr('【截止】')],
         [smS(qr/【对我】出来/), \&start],
         [sm("【不是私讯而且不是群讯开启】"), sr("【截止】")],
         [smS(qr/【对我或者私讯】<不要>理睬?(\d+)/), sub { blackList(@_, 1); }],

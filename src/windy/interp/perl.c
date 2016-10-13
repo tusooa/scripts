@@ -2,6 +2,9 @@
 #include <perl.h>
 #include <windows.h>
 #include <stdio.h>
+#ifndef INIT_FILE
+#define INIT_FILE "init.perl"
+#endif
 static PerlInterpreter *my_perl = NULL;
 static void xs_init (pTHX);
 
@@ -37,7 +40,7 @@ xs_init(pTHX)
 static __attribute__((constructor)) void init()
 {
   int num = 2;
-  char *args[] = { "", "init.perl" };
+  char *args[] = { "", INIT_FILE };
   PERL_SYS_INIT3((int *)NULL,(char ***)NULL,(char ***)NULL);
   my_perl = perl_alloc();
   perl_construct(my_perl);
@@ -51,9 +54,9 @@ static __attribute__((destructor)) void quit()
   if (my_perl) {
     PERL_SET_CONTEXT(my_perl);
     PL_perl_destruct_level = 1;
-    perl_destruct(my_perl);printf("1st\n");
-    perl_free(my_perl);printf("2nd\n");
-    PERL_SYS_TERM();printf("3rd\n");
+    perl_destruct(my_perl);
+    perl_free(my_perl);
+    PERL_SYS_TERM();
   }
 }
 
@@ -125,6 +128,9 @@ extern __declspec(dllexport) int end()
 }
 extern __declspec(dllexport) int EventFun(char *tencent, int type, int subtype, char *source, char *act, char *bep, char *msg, char *rawmsg, int backptr)
 {
+  if (type == -1) { //undefined
+    return 0;
+  }
   PERL_SET_CONTEXT(my_perl);
   //fprintf(debugf, "EventFun %s\n", msg);
   dSP;
@@ -158,7 +164,8 @@ extern __declspec(dllexport) int EventFun(char *tencent, int type, int subtype, 
   LEAVE;
   return retval;
 }
-extern __declspec(dllexport) int Message(char *tencent, int type, char *rawmsg, char *cookie, char *sessionkey, char *clientkey)
+
+/*extern __declspec(dllexport) int Message(char *tencent, int type, char *rawmsg, char *cookie, char *sessionkey, char *clientkey)
 {
   PERL_SET_CONTEXT(my_perl);
   dSP;
@@ -188,7 +195,7 @@ extern __declspec(dllexport) int Message(char *tencent, int type, char *rawmsg, 
   FREETMPS;
   LEAVE;
   return retval;  
-}
+  }*/
 extern __declspec(dllexport) char * info()
 {
   PERL_SET_CONTEXT(my_perl);

@@ -309,6 +309,7 @@ my $aliases = [
             $self->runExpr($windy, $msg, $m2, @_[5..$#_]);
         } })],
     # Functions
+    [qr/^讯息$/, sub { my ($self, $windy, $msg) = @_; isMsg($windy, $msg); }],
     [qr/^群讯开启$/, $subs->{fromGroup}],
     [qr/^私讯$/, sub { my ($self, $windy, $msg) = @_; isPrivateMsg($windy, $msg); }],
     [qr/^截止$/, sub { msgStopping($_[1], $_[2]) = 1; '' } ],
