@@ -153,13 +153,17 @@ sub msgStopping : lvalue
 sub getAdminList
 {
     my ($windy, $msg, $group) = @_;
-    split "\n", MPQ::GetAdminList(msgReceiver($windy, $msg), $group);
+    my $list = MPQ::GetAdminList(msgReceiver($windy, $msg), $group);
+    my @ret = grep $_, map s/\r//gr, split /\n+/, $list;
+    $windy->logger($_) for @ret;
+    @ret;
 }
 sub msgSenderIsGroupAdmin
 {
     my ($windy, $msg) = @_;
     isGroupMsg($windy, $msg) or return;
     my @adminList = getAdminList($windy, $msg, $msg->{source});
+    $windy->logger("sender is `". msgSender($windy, $msg)."`, adminList:".join ',', @adminList);
     msgSender($windy, $msg) ~~ @adminList;
 }
 
