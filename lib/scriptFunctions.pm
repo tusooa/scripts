@@ -100,7 +100,7 @@ sub utf8
 {
     my $str = join '', @_;
     my $ret;
-    $ret = encode 'utf-8', decode 'euc-cn', $str;
+    $ret = encode 'utf-8', decode 'GBK', $str;
     _utf8_on($ret);
     $ret;
 }

@@ -1,20 +1,29 @@
 #include <EXTERN.h>
 #include <perl.h>
+#include <XSUB.h>
 #include <windows.h>
 #include <stdio.h>
 #ifndef INIT_FILE
 #define INIT_FILE "init.perl"
 #endif
 static PerlInterpreter *my_perl = NULL;
-static void xs_init (pTHX);
+#define EXTERN_C extern
 
-extern void boot_DynaLoader (pTHX_ CV* cv);
+EXTERN_C void xs_init (pTHX);
 
-extern void
+EXTERN_C void boot_DynaLoader (pTHX_ CV* cv);
+EXTERN_C void boot_Win32CORE (pTHX_ CV* cv);
+
+EXTERN_C void
 xs_init(pTHX)
 {
-  char *file = __FILE__;
-  newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);
+    static const char file[] = __FILE__;
+    dXSUB_SYS;
+    PERL_UNUSED_CONTEXT;
+
+    /* DynaLoader is a special case */
+    newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);
+    newXS("Win32CORE::bootstrap", boot_Win32CORE, file);
 }
 /*BOOL APIENTRY DllMain( HINSTANCE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
 {
@@ -64,15 +73,13 @@ extern __declspec(dllexport) void set()
 {
   PERL_SET_CONTEXT(my_perl);
   dSP;
-  SV *err_tmp;
   ENTER;
   SAVETMPS;
   PUSHMARK(SP);
   PUTBACK;
-  call_pv("set", G_VOID|G_DISCARD|G_EVAL|G_NOARGS);
+  call_pv("set", G_VOID|G_EVAL|G_NOARGS);
   SPAGAIN;
-  err_tmp = ERRSV;
-  if (SvTRUE(err_tmp)) {
+  if (SvTRUE(ERRSV)) {
     //fprintf (debugf, "[error set]%s\n", SvPV_nolen(err_tmp));
     POPs;
   }
@@ -85,16 +92,13 @@ extern __declspec(dllexport) void about()
 {
   PERL_SET_CONTEXT(my_perl);
   dSP;
-  SV *err_tmp;
   ENTER;
   SAVETMPS;
   PUSHMARK(SP);
   PUTBACK;
-  call_pv("about", G_VOID|G_DISCARD|G_EVAL|G_NOARGS);
+  call_pv("about", G_VOID|G_EVAL|G_NOARGS);
   SPAGAIN;
-  err_tmp = ERRSV;
-  if (SvTRUE(err_tmp)) {
-    printf ("[error about]%s\n", SvPV_nolen(err_tmp));
+  if (SvTRUE(ERRSV)) {
     POPs;
   }
   PUTBACK;
@@ -105,7 +109,6 @@ extern __declspec(dllexport) int end()
 {
   PERL_SET_CONTEXT(my_perl);
   dSP;
-  SV *err_tmp;
   int retval;
   ENTER;
   SAVETMPS;
@@ -113,8 +116,7 @@ extern __declspec(dllexport) int end()
   PUTBACK;
   call_pv("end", G_SCALAR|G_EVAL|G_NOARGS);
   SPAGAIN;
-  err_tmp = ERRSV;
-  if (SvTRUE(err_tmp)) {
+  if (SvTRUE(ERRSV)) {
     //fprintf (debugf, "[error end]%s\n", SvPV_nolen(err_tmp));
     POPs;
     retval = 1;
@@ -134,7 +136,7 @@ extern __declspec(dllexport) int EventFun(char *tencent, int type, int subtype, 
   PERL_SET_CONTEXT(my_perl);
   //fprintf(debugf, "EventFun %s\n", msg);
   dSP;
-  SV *err_tmp;
+  int count;
   int retval;
   ENTER;
   SAVETMPS;
@@ -149,10 +151,11 @@ extern __declspec(dllexport) int EventFun(char *tencent, int type, int subtype, 
   XPUSHs(sv_2mortal(newSVpv(rawmsg, 0)));
   //XPUSHs(sv_2mortal(newSVpv(backptr, 0)));
   PUTBACK;
-  call_pv("EventFun", G_SCALAR|G_EVAL);
+  count = call_pv("EventFun", G_SCALAR|G_EVAL);
   SPAGAIN;
-  err_tmp = ERRSV;
-  if (SvTRUE(err_tmp)) {
+  if (count != 1) {
+    retval = 0; // big trouble
+  } else if (SvTRUE(ERRSV)) {
     //fprintf (debugf, "[error EventFun]%s\n", SvPV_nolen(err_tmp));
     POPs;
     retval = 0;
@@ -200,16 +203,17 @@ extern __declspec(dllexport) char * info()
 {
   PERL_SET_CONTEXT(my_perl);
   dSP;
-  SV *err_tmp;
   char *retval;
+  int count;
   ENTER;
   SAVETMPS;
   PUSHMARK(SP);
   PUTBACK;
-  call_pv("info", G_NOARGS|G_SCALAR|G_EVAL);
+  count = call_pv("info", G_NOARGS|G_SCALAR|G_EVAL);
   SPAGAIN;
-  err_tmp = ERRSV;
-  if (SvTRUE(err_tmp)) {
+  if (count != 1) {
+    retval = "big trouble";
+  } else if (SvTRUE(ERRSV)) {
     //fprintf (debugf, "[error info]%s\n", SvPV_nolen(err_tmp));
     POPs;
     retval = "[ERROR]";

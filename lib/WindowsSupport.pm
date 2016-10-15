@@ -20,8 +20,8 @@ our %winFunc = (
             term => sub {
                 my $str = join '', @_;
                 my $ret;
-                eval { $ret = encode 'euc-cn', decode 'utf-8', $str };
-                eval { $ret = encode 'euc-cn', $str } if $@;
+                eval { $ret = encode 'GBK', decode 'utf-8', $str };
+                eval { $ret = encode 'GBK', $str } if $@;
                 die "error: $@, @_" if $@;
                 $ret;
             }

@@ -1,5 +1,6 @@
 
 package Scripts::Windy::MyPCQQ;
+#use threads;
 use 5.012;
 use Scripts::scriptFunctions;
 use utf8;
@@ -35,16 +36,11 @@ sub loadAdmins
 sub info { term "何事西风不待人w"; }
 sub set {}
 sub about {}
-
-my @initMsg = map $Events{$_}, 'login', 'plugin-load', 'plugin-enable';
-sub EventFun
+sub parseEvent
 {
-    my $ret = $EventRet{pass};
-    my $event = Scripts::Windy::Event->new(@_);
-    if ($event->{type} ~~ @initMsg) {
-        loadAdmins($event);
-    }
+    my ($event) = @_;
     my $time = time;
+    my $ret;
     parseRichText($windy, $event);
     $windy->logger("收到".msgText($windy, $event));
     my $resp = $windy->parse($event);
@@ -54,6 +50,18 @@ sub EventFun
     } else {
         #$windy->logger("没送出什么。");
     }
+    $ret;
+}
+
+my @initMsg = map $Events{$_}, 'login', 'plugin-load', 'plugin-enable';
+sub EventFun
+{
+    my $ret = $EventRet{pass};
+    my $event = Scripts::Windy::Event->new(@_);
+    if ($event->{type} ~~ @initMsg) {
+        loadAdmins($event);
+    }
+    $ret = parseEvent($event);
     $ret;
 }
 1;

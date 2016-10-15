@@ -433,87 +433,87 @@ if (! (Api_RemoveLogHandler = (Api_RemoveLogHandler_ptr)GetProcAddress(dll, "Api
   croak("cannot load Api_RemoveLogHandler");
 }
 
-SV *
+char *
 GetGtk_Bkn(__arg_0)
   char *  __arg_0
 CODE: 
-  RETVAL = newSVpv(Api_GetGtk_Bkn(__arg_0), 0);
+  RETVAL = Api_GetGtk_Bkn(__arg_0);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetBkn32(__arg_0)
   char *  __arg_0
 CODE: 
-  RETVAL = newSVpv(Api_GetBkn32(__arg_0), 0);
+  RETVAL = Api_GetBkn32(__arg_0);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetLdw(__arg_0)
   char *  __arg_0
 CODE: 
-  RETVAL = newSVpv(Api_GetLdw(__arg_0), 0);
+  RETVAL = Api_GetLdw(__arg_0);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetRunPath()
 CODE: 
-  RETVAL = newSVpv(Api_GetRunPath(), 0);
+  RETVAL = Api_GetRunPath();
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetOnlineQQlist()
 CODE: 
-  RETVAL = newSVpv(Api_GetOnlineQQlist(), 0);
+  RETVAL = Api_GetOnlineQQlist();
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetQQlist()
 CODE: 
-  RETVAL = newSVpv(Api_GetQQlist(), 0);
+  RETVAL = Api_GetQQlist();
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetSessionkey(__arg_0)
   char *  __arg_0
 CODE: 
-  RETVAL = newSVpv(Api_GetSessionkey(__arg_0), 0);
+  RETVAL = Api_GetSessionkey(__arg_0);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetClientkey(__arg_0)
   char *  __arg_0
 CODE: 
-  RETVAL = newSVpv(Api_GetClientkey(__arg_0), 0);
+  RETVAL = Api_GetClientkey(__arg_0);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetLongClientkey(__arg_0)
   char *  __arg_0
 CODE: 
-  RETVAL = newSVpv(Api_GetLongClientkey(__arg_0), 0);
+  RETVAL = Api_GetLongClientkey(__arg_0);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetCookies(__arg_0)
   char *  __arg_0
 CODE: 
-  RETVAL = newSVpv(Api_GetCookies(__arg_0), 0);
+  RETVAL = Api_GetCookies(__arg_0);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetPrefix()
 CODE: 
-  RETVAL = newSVpv(Api_GetPrefix(), 0);
+  RETVAL = Api_GetPrefix();
 OUTPUT:
   RETVAL
 
@@ -569,22 +569,22 @@ SetNotice(__arg_0, __arg_1, __arg_2, __arg_3)
 CODE: 
   Api_SetNotice(__arg_0, __arg_1, __arg_2, __arg_3);
 
-SV *
+char *
 GetNotice(__arg_0, __arg_1)
   char * __arg_0
   char *  __arg_1
 CODE: 
-  RETVAL = newSVpv(Api_GetNotice(__arg_0, __arg_1), 0);
+  RETVAL = Api_GetNotice(__arg_0, __arg_1);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetNameCard(__arg_0, __arg_1, __arg_2)
   char * __arg_0
   char * __arg_1
   char *  __arg_2
 CODE: 
-  RETVAL = newSVpv(Api_GetNameCard(__arg_0, __arg_1, __arg_2), 0);
+  RETVAL = Api_GetNameCard(__arg_0, __arg_1, __arg_2);
 OUTPUT:
   RETVAL
 
@@ -638,22 +638,22 @@ QuitGroup(__arg_0, __arg_1)
 CODE: 
   Api_QuitGroup(__arg_0, __arg_1);
 
-SV *
+char *
 UploadPic(__arg_0, __arg_1, __arg_2, __arg_3)
   char * __arg_0
   int __arg_1
   char * __arg_2
   unsigned char *  __arg_3
 CODE: 
-  RETVAL = newSVpv(Api_UploadPic(__arg_0, __arg_1, __arg_2, __arg_3), 0);
+  RETVAL = Api_UploadPic(__arg_0, __arg_1, __arg_2, __arg_3);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GuidGetPicLink(__arg_0)
   char *  __arg_0
 CODE: 
-  RETVAL = newSVpv(Api_GuidGetPicLink(__arg_0), 0);
+  RETVAL = Api_GuidGetPicLink(__arg_0);
 OUTPUT:
   RETVAL
 
@@ -681,11 +681,11 @@ CODE:
 OUTPUT:
   RETVAL
 
-SV *
+char *
 Send(__arg_0)
   char *  __arg_0
 CODE: 
-  RETVAL = newSVpv(Api_Send(__arg_0), 0);
+  RETVAL = Api_Send(__arg_0);
 OUTPUT:
   RETVAL
 
@@ -718,53 +718,53 @@ Logout(__arg_0)
 CODE: 
   Api_Logout(__arg_0);
 
-SV *
+char *
 TeaEncrypt(__arg_0, __arg_1)
   char * __arg_0
   char *  __arg_1
 CODE: 
-  RETVAL = newSVpv(Api_TeaEncrypt(__arg_0, __arg_1), 0);
+  RETVAL = Api_TeaEncrypt(__arg_0, __arg_1);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 TeaDecrypt(__arg_0, __arg_1)
   char * __arg_0
   char *  __arg_1
 CODE: 
-  RETVAL = newSVpv(Api_TeaDecrypt(__arg_0, __arg_1), 0);
+  RETVAL = Api_TeaDecrypt(__arg_0, __arg_1);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetNick(__arg_0)
   char *  __arg_0
 CODE: 
-  RETVAL = newSVpv(Api_GetNick(__arg_0), 0);
+  RETVAL = Api_GetNick(__arg_0);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetQQLevel(__arg_0)
   char *  __arg_0
 CODE: 
-  RETVAL = newSVpv(Api_GetQQLevel(__arg_0), 0);
+  RETVAL = Api_GetQQLevel(__arg_0);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GNGetGid(__arg_0)
   char *  __arg_0
 CODE: 
-  RETVAL = newSVpv(Api_GNGetGid(__arg_0), 0);
+  RETVAL = Api_GNGetGid(__arg_0);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GidGetGN(__arg_0)
   char *  __arg_0
 CODE: 
-  RETVAL = newSVpv(Api_GidGetGN(__arg_0), 0);
+  RETVAL = Api_GidGetGN(__arg_0);
 OUTPUT:
   RETVAL
 
@@ -775,10 +775,10 @@ CODE:
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetVersionName()
 CODE: 
-  RETVAL = newSVpv(Api_GetVersionName(), 0);
+  RETVAL = Api_GetVersionName();
 OUTPUT:
   RETVAL
 
@@ -789,10 +789,10 @@ CODE:
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetLog()
 CODE: 
-  RETVAL = newSVpv(Api_GetLog(), 0);
+  RETVAL = Api_GetLog();
 OUTPUT:
   RETVAL
 
@@ -804,81 +804,81 @@ CODE:
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetAdminList(__arg_0, __arg_1)
   char * __arg_0
   char *  __arg_1
 CODE: 
-  RETVAL = newSVpv(Api_GetAdminList(__arg_0, __arg_1), 0);
+  RETVAL = Api_GetAdminList(__arg_0, __arg_1);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 AddTaotao(__arg_0, __arg_1)
   char * __arg_0
   char *  __arg_1
 CODE: 
-  RETVAL = newSVpv(Api_AddTaotao(__arg_0, __arg_1), 0);
+  RETVAL = Api_AddTaotao(__arg_0, __arg_1);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetSign(__arg_0, __arg_1)
   char * __arg_0
   char *  __arg_1
 CODE: 
-  RETVAL = newSVpv(Api_GetSign(__arg_0, __arg_1), 0);
+  RETVAL = Api_GetSign(__arg_0, __arg_1);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 SetSign(__arg_0, __arg_1)
   char * __arg_0
   char *  __arg_1
 CODE: 
-  RETVAL = newSVpv(Api_SetSign(__arg_0, __arg_1), 0);
+  RETVAL = Api_SetSign(__arg_0, __arg_1);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetGroupListA(__arg_0)
   char *  __arg_0
 CODE: 
-  RETVAL = newSVpv(Api_GetGroupListA(__arg_0), 0);
+  RETVAL = Api_GetGroupListA(__arg_0);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetGroupListB(__arg_0)
   char *  __arg_0
 CODE: 
-  RETVAL = newSVpv(Api_GetGroupListB(__arg_0), 0);
+  RETVAL = Api_GetGroupListB(__arg_0);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetGroupMemberA(__arg_0, __arg_1)
   char * __arg_0
   char *  __arg_1
 CODE: 
-  RETVAL = newSVpv(Api_GetGroupMemberA(__arg_0, __arg_1), 0);
+  RETVAL = Api_GetGroupMemberA(__arg_0, __arg_1);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetGroupMemberB(__arg_0, __arg_1)
   char * __arg_0
   char *  __arg_1
 CODE: 
-  RETVAL = newSVpv(Api_GetGroupMemberB(__arg_0, __arg_1), 0);
+  RETVAL = Api_GetGroupMemberB(__arg_0, __arg_1);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetFriendList(__arg_0)
   char *  __arg_0
 CODE: 
-  RETVAL = newSVpv(Api_GetFriendList(__arg_0), 0);
+  RETVAL = Api_GetFriendList(__arg_0);
 OUTPUT:
   RETVAL
 
@@ -900,21 +900,21 @@ CODE:
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetPersonalProfile(__arg_0, __arg_1)
   char * __arg_0
   char *  __arg_1
 CODE: 
-  RETVAL = newSVpv(Api_GetPersonalProfile(__arg_0, __arg_1), 0);
+  RETVAL = Api_GetPersonalProfile(__arg_0, __arg_1);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetEmail(__arg_0, __arg_1)
   char * __arg_0
   char *  __arg_1
 CODE: 
-  RETVAL = newSVpv(Api_GetEmail(__arg_0, __arg_1), 0);
+  RETVAL = Api_GetEmail(__arg_0, __arg_1);
 OUTPUT:
   RETVAL
 
@@ -945,10 +945,10 @@ CODE:
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetRadomOnlineQQ()
 CODE: 
-  RETVAL = newSVpv(Api_GetRadomOnlineQQ(), 0);
+  RETVAL = Api_GetRadomOnlineQQ();
 OUTPUT:
   RETVAL
 
@@ -972,56 +972,56 @@ CODE:
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetMC()
 CODE: 
-  RETVAL = newSVpv(Api_GetMC(), 0);
+  RETVAL = Api_GetMC();
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GroupInvitation(__arg_0, __arg_1, __arg_2)
   char * __arg_0
   char * __arg_1
   char *  __arg_2
 CODE: 
-  RETVAL = newSVpv(Api_GroupInvitation(__arg_0, __arg_1, __arg_2), 0);
+  RETVAL = Api_GroupInvitation(__arg_0, __arg_1, __arg_2);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 CreateDG(__arg_0)
   char *  __arg_0
 CODE: 
-  RETVAL = newSVpv(Api_CreateDG(__arg_0), 0);
+  RETVAL = Api_CreateDG(__arg_0);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 KickDG(__arg_0, __arg_1, __arg_2)
   char * __arg_0
   char * __arg_1
   char *  __arg_2
 CODE: 
-  RETVAL = newSVpv(Api_KickDG(__arg_0, __arg_1, __arg_2), 0);
+  RETVAL = Api_KickDG(__arg_0, __arg_1, __arg_2);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 DGInvitation(__arg_0, __arg_1, __arg_2)
   char * __arg_0
   char * __arg_1
   char *  __arg_2
 CODE: 
-  RETVAL = newSVpv(Api_DGInvitation(__arg_0, __arg_1, __arg_2), 0);
+  RETVAL = Api_DGInvitation(__arg_0, __arg_1, __arg_2);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GetDGList(__arg_0)
   char *  __arg_0
 CODE: 
-  RETVAL = newSVpv(Api_GetDGList(__arg_0), 0);
+  RETVAL = Api_GetDGList(__arg_0);
 OUTPUT:
   RETVAL
 
@@ -1116,36 +1116,36 @@ CODE:
 OUTPUT:
   RETVAL
 
-SV *
+char *
 UploadVoice(__arg_0, __arg_1)
   char * __arg_0
   int __arg_1
 CODE: 
-  RETVAL = newSVpv(Api_UploadVoice(__arg_0, __arg_1), 0);
+  RETVAL = Api_UploadVoice(__arg_0, __arg_1);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 GuidGetVoiceLink(__arg_0, __arg_1)
   char * __arg_0
   char * __arg_1
 CODE: 
-  RETVAL = newSVpv(Api_GuidGetVoiceLink(__arg_0, __arg_1), 0);
+  RETVAL = Api_GuidGetVoiceLink(__arg_0, __arg_1);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 AddLogHandler(__arg_0)
   int __arg_0
 CODE: 
-  RETVAL = newSVpv(Api_AddLogHandler(__arg_0), 0);
+  RETVAL = Api_AddLogHandler(__arg_0);
 OUTPUT:
   RETVAL
 
-SV *
+char *
 RemoveLogHandler()
 CODE: 
-  RETVAL = newSVpv(Api_RemoveLogHandler(), 0);
+  RETVAL = Api_RemoveLogHandler();
 OUTPUT:
   RETVAL
 
