@@ -9,4 +9,5 @@ our @EXPORT = qw();
 our @EXPORT_OK = qw//;
 
 bootstrap MPQ;
+sub dl_load_flags { 0x01 }
 1;

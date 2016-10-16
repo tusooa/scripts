@@ -16,3 +16,6 @@
 [submodule "Config/emacs.d+lisp-others/rainbow-delimiters"]
 	path = Config/emacs.d+lisp-others/rainbow-delimiters
 	url = https://github.com/Fanael/rainbow-delimiters.git
+[submodule "src/windy/Simple-Web-Server"]
+	path = src/windy/Simple-Web-Server
+	url = https://github.com/eidheim/Simple-Web-Server.git
