@@ -428,6 +428,20 @@ sub findDB
         @_);
 }
 
+sub writeDB
+{
+    my $base = shift;
+    my @db = $database->all;
+    open my $f, '>', $databaseFile;
+    binmode $f, ':unix';
+    for ($base..$#db) {
+        my ($ask, $ans) = ($db[$_]->[0], $db[$_]->[1]);
+        say $f ($ask->{style}."\tAsk".$ask->{raw});
+        say $f ($ask->{teacher}."\tAns".$ans->{raw});
+    }
+    close $f;
+}
+
 sub deleteDB
 {
     my $windy = shift;
@@ -446,14 +460,14 @@ sub deleteDB
             my $removed = dbToString($num);
             my $line = $num * 2 + 1;
             $database->remove($realNum);
-            {
-                local ($^I = '.bak');
-                local (@ARGV = $databaseFile);
-                while (<>) {
-                    binmode \*STDOUT, ':unix';
-                    print if $. != $line and $. != $line + 1;
-                }
-            }
+            writeDB(scalar @baseDB);
+            #{
+            #    local $^I = '.bak';
+            #    local @ARGV = $databaseFile;
+            #    while (<<>>) {
+            #        print if $. != $line and $. != $line + 1;
+            #    }
+            #}
             $removed;
           },
           success => 'ret', },
@@ -511,7 +525,7 @@ sub reloadDB
         [smS(qr/<_风妹_><中>加一?句(.+?)「(.+)」$/s), \&addSandbook],
         [smS(qr/【对我或者私讯】来扫个码/), sub { quit(@_, 0); }],
         [smS(qr/<_风妹_><中>(?:从(\d+))?找一下(.+)$/), \&findDB],
-        [smS(qr/【对我或者私讯】<删><中>(\d+)/), \&deleteDB],
+        [smS(qr/【对我或者私讯】<删><中>第(\d+)/), \&deleteDB],
         [smS(qr/【对我或者私讯】第(\d+)条<是><什么>/), \&queryDB],
         );
     $database->set(@baseDB);

@@ -1,8 +1,20 @@
+# Emacs Files
 .#*
-# 终于解决了emacs临时文件不能忽略的问题
 \#*
+# Backup Files
 *~
+*.bak
+*-backup
+# Compiled
 *.elc
+*.exe
+*.dll
+*/blib
+build
+src/*/build/*
+*.pir
+*.moarvm
+# cache and data
 Config/config+Scripts/countup.cache
 Config/config+Scripts/show-png.perl
 Config/config+Scripts/windy-conf/userdb.db
@@ -18,14 +30,9 @@ Config/config+Scripts/windy-conf/main-group
 Config/config+Scripts/windy-conf/last-channel
 Config/config+Scripts/windy-conf/sandbook
 Config/config+Scripts/windy-cache
+# only used in w32, symlink
 bin/g.perl
+# quick launch
 lib/Windy/Conf-/*
-src/*/build/*
-*.pir
-*.moarvm
+# Gentoo etc-update
 GentooConfig/conf.d/._cfg*
-*-backup
-*.exe
-*.dll
-*/blib
-build

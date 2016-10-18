@@ -12,7 +12,7 @@ msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender
 uid uName isAt isAtId findUserInGroup isPrivateMsg
 group invite friend $nextMessage $atPrefix $atSuffix
 parseRichText $mainConf msgPosStart msgPosEnd
-msgReceiver receiverName/;
+msgReceiver receiverName outputLog isMsg/;
 our @EXPORT_OK = qw//;
 
 our $nextMessage = "\n\n";
@@ -185,5 +185,13 @@ sub findUserInGroup
     my $uid = shift;
     my $group = shift;
     $group->search_group_member(qq => $uid);
+}
+sub outputLog
+{
+    1;
+}
+sub isMsg
+{
+    1;
 }
 1;
