@@ -77,7 +77,7 @@ sub match
             push @ret, $ret if $ret; # 若有返回值，则添加到回复列表。
             if (msgStopping($windy, $msg)) {
                 @ret = $ret ? ($ret) : ();
-                #$windy->logger("这条信息到此为止了。");
+                $windy->logger("这条信息到此为止了。");
                 last;
             }
         }

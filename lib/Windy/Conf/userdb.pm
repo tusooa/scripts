@@ -20,6 +20,7 @@ our $database = Scripts::Windy::Userdb->new();
 my $databaseFile = $configDir.'windy-conf/userdb.db';
 our $commands = {};
 my @baseDB;
+my $cfg = conf($mainConf);
 loadCommands;
 #sub debug { print @_; }
 my @adminList;
@@ -33,7 +34,7 @@ if (open my $f, '<', $configDir.'windy-conf/admin') {
 
 sub loadCommands
 {
-    my $c = conf($mainConf);
+    my $c = $cfg;
     $commands = {};
     for my $cmd ($c->getGroups('command')) {
         $commands->{$cmd}{priv} = [split ',', $c->get('command', $cmd, 'priv')];
@@ -296,7 +297,8 @@ sub reloadAll
     my $msg = shift;
     runCommand(
         $windy, $msg,
-        { run => sub { $subs->{reloadR}();
+        { run => sub { loadCommands;
+                       $subs->{reloadR}();
                        reloadDB; }, },
         @_);
 }
@@ -308,7 +310,7 @@ sub quit
     my $stat = pop;
     runCommand(
         $windy, $msg,
-        { run => sub { $stat; }, },
+        { run => sub { if (BACKEND eq 'mojo') { exit $stat; } else { $stat; } }, },
         @_);
 }
 reloadDB;
@@ -488,6 +490,53 @@ sub queryDB
         @_);
 }
 
+sub queryConf
+{
+    my $windy = shift;
+    my $msg = shift;
+    my ($text) = @_;
+    my @entry = split /\s+/, $text;
+    runCommand(
+        $windy, $msg,
+        { run => sub {
+            my $orig = $cfg->getOrigValue(@entry);_utf8_on($orig);
+            my $parsed = $cfg->get(@entry);_utf8_on($parsed);
+            ($parsed, $orig, join '::', @entry);
+          },
+          success => 'ret', error => 'ret', failure => 'ret', },
+        @_);
+}
+sub changeConf
+{
+    my $windy = shift;
+    my $msg = shift;
+    my ($text) = @_;
+    my ($key, $val) = split /=/, $text, 2;
+    my @entry = split /\s+/, $key;
+    runCommand(
+        $windy, $msg,
+        { run => sub {
+            my $orig = $cfg->getOrigValue(@entry);_utf8_on($orig);
+            _utf8_off($val);
+            my $success = $cfg->modify(@entry, $val);_utf8_on($val);
+            if ($success) {
+                if (open my $f, '>', $configDir.$mainConf) {
+                    binmode $f, ':unix';
+                    print $f $cfg->outputFile;
+                    close $f;
+                } else {
+                    $val = undef;
+                }
+                loadCommands;
+            } else {
+                $val = undef;
+            }
+            ($val, $orig, join '::', @entry);
+          },
+          success => 'ret', error => 'ret', failure => 'ret', },
+        @_);
+}
+
 sub reloadDB
 {
     @baseDB = (
@@ -503,30 +552,32 @@ sub reloadDB
         [smS(qr/<_风妹_><中>对问(.+?)则答(.+)$/), sub { teach(@_, 's'); }],
         [smS(qr/【对我】<怎么>出来/), \&callerName],
         [smS(qr/【对我或者私讯】知道<多少>/), \&sizeOfDB],
-        [smS(qr/<_风妹_><中>若问(.+?)即答(.+)$/s), \&teach],
-        [smS(qr/<_风妹_><中>问(.+?)答(.+)$/s), sub { $_[2] = '^'.$_[2].'$'; teach(@_); }],
-        [smS(qr/<_风妹_><中>(?:<以后>)?<称呼><我>(?:作|为|叫)?(.+?)(?:<就好>)?$/), \&newNickname],
-        [smS(qr/<_风妹_><中>(?:<以后>)?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$/), \&assignNickname],
+        [smS(qr/<_我名_><中>若问(.+?)即答(.+)$/s), \&teach],
+        [smS(qr/<_我名_><中>问(.+?)答(.+)$/s), sub { $_[2] = '^'.$_[2].'$'; teach(@_); }],
+        [smS(qr/<_我名_><中>(?:<以后>)?<称呼><我>(?:作|为|叫)?(.+?)(?:<就好>)?$/), \&newNickname],
+        [smS(qr/<_我名_><中>(?:<以后>)?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$/), \&assignNickname],
 #        [smS(qr/<_风妹_><中>(?:<以后>)?一直都?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$/), sub { assignNickname @_, 1; }],
         [sm(qr/^喵 复述(.+)$/), \&repeat],
-        [smS(qr/<_风妹_><中>(?:<以后>)?<记得>(.+?)(也|亦)是(.+)$/),
+        [smS(qr/<_我名_><中>(?:<以后>)?<记得>(.+?)(也|亦)是(.+)$/),
          sub {
              my ($windy, $msg, $rep, $mode, $name) = @_;
              addR($windy, $msg, $rep, $name, $mode eq '也' ? 0 : 1);
          }],
 #        [smS(qr/<_风妹_><中>(?:<以后>)?<记得>(.+?)亦是(.+)$/), sub { addR(@_, 1); }],
-        [smS(qr/<_风妹_><中><什么><是>(.+)$/), \&getR],
+        [smS(qr/<_我名_><中><什么><是>(.+)$/), \&getR],
         [smS(qr/【对我或者私讯】重生/), \&reloadAll],
         [smS(qr/【对我或者私讯】天降于?(?:欢迎加入.+?，群号码：)?(\d+)/), \&startG],
         [smS(qr/【对我或者私讯】消失于?(?:欢迎加入.+?，群号码：)?(\d+)/), \&stopG],
         [smS(qr/【对我或者私讯】以神之名义命令<中>重生/), sub { quit(@_, 1); }],
         [smS(qr/【对我或者私讯】主群拉<一下>/), \&inviteMG],
         [sm(qr/^沙书\s*([^\s]*)\s*$/), \&getSandbook],
-        [smS(qr/<_风妹_><中>加一?句(.+?)「(.+)」$/s), \&addSandbook],
+        [smS(qr/<_我名_><中>加一?句(.+?)「(.+)」$/s), \&addSandbook],
         [smS(qr/【对我或者私讯】来扫个码/), sub { quit(@_, 0); }],
-        [smS(qr/<_风妹_><中>(?:从(\d+))?找一下(.+)$/), \&findDB],
+        [smS(qr/<_我名_><中>(?:从(\d+))?找一下(.+)$/), \&findDB],
         [smS(qr/【对我或者私讯】<删><中>第(\d+)/), \&deleteDB],
         [smS(qr/【对我或者私讯】第(\d+)条<是><什么>/), \&queryDB],
+        [sm(qr/^wconf\s+g\s+(.+)$/), \&queryConf],
+        [sm(qr/^wconf\s+s\s+([^=]+=.+)$/), \&changeConf],
         );
     $database->set(@baseDB);
     $database->{_match} = $match;

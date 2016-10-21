@@ -33,6 +33,7 @@ my $Then = qr/(?:则|那么)/;
 my $Else = qr/(?:不然|否则)(?:的话)?/;
 
 my $repFile = $configDir.'windy-conf/replacements.db';
+my $aliasFile = $configDir.'windy-conf/alias.conf';
 my $size = 0;
 my $split = qr/(?<!\\)\|/;
 my $caller = qr//;
@@ -43,6 +44,9 @@ sub sr;
 sub loadReplacements;
 sub addReplacement;
 sub reloadReplacements;
+sub loadAlias;
+sub addAlias;
+sub reloadAlias;
 sub updateSize;
 
 our ($sl1, $sl2, $sl3) = (350, 180, 0);
@@ -242,7 +246,7 @@ $subs = {
     getR => \&getReplacement,
     nicknameById => \&nicknameById,
 };
-my $aliases = [
+my @aliases = (
     # Plain
     #[qr/^$d3(.+)?$d4$/, sub { my ($windy, $msg, $m1) = @_; $m1 }],
     # Control structures
@@ -407,7 +411,7 @@ my $aliases = [
             default { '夜里'; }
         }
      }],
-    ];
+    );
 
 $match = Scripts::Windy::SmartMatch->new(
     d1 => '【',
@@ -418,9 +422,10 @@ $match = Scripts::Windy::SmartMatch->new(
     d6 => '>',
     d7 => '〔',
     d8 => '〕',
-    aliases => $aliases,
+    aliases => [@aliases],
     replacements => {},);
 reloadReplacements;
+loadAlias;
 
 sub smS
 {
@@ -474,7 +479,7 @@ sub reloadReplacements
 {
     $match->{replacements} = {};
     loadReplacements;
-    $caller = getReplacement("_风妹_");
+    $caller = getReplacement("_我名_");
     $caller = qr/$caller/;
     $nickForbidden = getReplacement("称呼里不能用的");
     $nickForbidden = qr/$nickForbidden/;
@@ -550,6 +555,36 @@ sub updateSize
 sub sizeOfMatch
 {
     $size;
+}
+
+sub loadAlias
+{
+    if (open my $f, '<', $aliasFile) {
+        while (<$f>) {
+            chomp;
+            my ($from, $to) = split /\t/, $_;
+            push @{$match->{aliases}}, [$from, $to];
+        }
+        close $f;
+    }
+}
+
+sub reloadAlias
+{
+    $match->{aliases} = [@aliases];
+    loadAlias;
+}
+
+sub addAlias
+{
+    my ($from, $to) = @_;
+    push @{$match->{aliases}}, [$from, $to];
+    if (open my $f, '>', $aliasFile) {
+        binmode $f, ':unix';
+        say $f $from."\t".$to;
+        close $f;
+    }
+    $to;
 }
 
 1;

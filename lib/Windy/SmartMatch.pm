@@ -122,6 +122,12 @@ sub parse
     wantarray ? @s : [@s];
 }
 
+sub isCode
+{
+    my $c = shift;
+    ref $c eq 'CODE' or ref $c eq 'Scripts::Windy::Quote';
+}
+
 sub parseExpr
 {
     my $self = shift;
@@ -136,7 +142,7 @@ sub parseExpr
     return $1 if $t =~ /^$d3([^$d4]+)$d4$/; # Plain Text
     for my $a (@{$self->{aliases}}) {
         if (my @matches = $t =~ $a->[0]) {
-            $expr = Scripts::Windy::Expr->new ($a->[1], map { $_ = $self->parseExpr($_) } @matches);
+            $expr = Scripts::Windy::Expr->new (isCode($a->[1]) ? $a->[1] : $self->parseExpr($a->[1]), map { $_ = $self->parseExpr($_) } @matches);
             $found = 1;
             last;
         }

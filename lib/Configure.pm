@@ -9,12 +9,7 @@ our $defg = 'main'; # default group
 
 =comment new
 my $config = Scripts::Configure->new ($file, $default);
-returns:
-    A Scripts::Configure object.
-    check errors with $config->checkErrors.
-example:
     my $config = Scripts::Configure->new ("${configDir}weather", "${defConfDir}weather");
-
     use Scripts::scriptFunctions;
     my $config = conf 'weather'; # 简略写法.和上边作用一样.
 =cut
@@ -135,23 +130,49 @@ sub hashref
     $self;
 }
 
-sub getOrigValue : lvalue
+sub origValue : lvalue
 {
     my $self = shift;
     my $confhash = $self->hashref;
     if (@_ == 1) {
         $confhash->{$defg}{$_[0]};
     } elsif (@_ == 2) {
+        if (not exists $confhash->{$_[0]}) {
+            $confhash->{$_[0]} = {};
+        } elsif (ref $confhash->{$_[0]} ne 'HASH') {
+            die;
+        }
         $confhash->{$_[0]}{$_[1]};
     } elsif (@_ == 3) {
+        if (not exists $confhash->{$_[0]}) {
+            $confhash->{$_[0]}{$_[1]} = {};
+        } elsif (ref $confhash->{$_[0]} ne 'HASH') {
+            die;
+        } elsif (not exists $confhash->{$_[0]}{$_[1]}) {
+            $confhash->{$_[0]}{$_[1]} = {};
+        } elsif (ref $confhash->{$_[0]}{$_[1]} ne 'HASH') {
+            die;
+        }
         $confhash->{$_[0]}{$_[1]}{$_[2]};
+    } else {
+        die;
     }
 }
+
+sub getOrigValue
+{
+    my $ret = eval { shift->origValue(@_) };
+    $@ ? undef : $ret;
+}
+
 sub modify # 似乎并没有用
 {
     my $self = shift;
     my $value = pop;
-    $self->getOrigValue(@_) = $value;
+    my $orig = eval { $self->origValue(@_) };
+    return if ref $orig or $@; # cannot modify a group
+    $self->origValue(@_) = $value;
+    $self;
 }
 =comment get
 $config->get ($var); # equal to $config->get ($defg, $var);
@@ -213,6 +234,34 @@ sub runHooks
         say "$hookName hook => $_";
         system $confhash->{Hooks}->{$hookName}->{$_};
     }
+}
+
+sub outputFile
+{
+    my ($self) = @_;
+    my $h = $self->hashref;
+    my $order = sub { $a cmp $b };
+    my $ret;
+    for my $group (sort {$order->()} keys %$h) {
+        my @all = sort {$order->()} keys %{$h->{$group}};
+        my @subgroups = grep { ref $h->{$group}{$_} eq 'HASH' } @all;
+        my @entries = grep { not ref $h->{$group}{$_} } @all;
+        if (@entries) {
+            $ret .= "[${group}]\n";
+            for (@entries) {
+                $ret .= $_.' = '.$h->{$group}{$_}."\n";
+            }
+            $ret .= "\n";
+        }
+        for my $subg (@subgroups) {
+            $ret .= "[${group}]:$subg\n";
+            for my $entry (sort {$order->()} keys %{$h->{$group}{$subg}}) {
+                $ret .= $entry . ' = ' . $h->{$group}{$subg}{$entry}."\n";
+            }
+            $ret .= "\n";
+        }
+    }
+    $ret;
 }
 
 1;
