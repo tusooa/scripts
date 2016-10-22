@@ -265,7 +265,8 @@ sub childList
     eval { ($g, $sg) = ([$self->getGroups(@_)], $self->sortGroup(@_)); };
     return () if $@;
     my $func = $self->getSortFunc(@_);
-    sort { $func->($self, $a, $b, @_) } @$g;
+    my @path = @_;
+    sort { $func->($self, $a, $b, @path) } @$g;
 }
 
 sub defaultOrder
@@ -323,9 +324,12 @@ sub getSortFunc
     while (@path) {
         eval { $func = $self->sortFunc(@path) };
         $func = undef if $@;
-        last if $func;
+        if ($func) {
+            last;
+        }
         pop @path;
     }
+    
     $func or $func = sub { $_[1] cmp $_[2] };
     $func;
 }
@@ -352,18 +356,20 @@ sub reversedSort { -shift; }
 sub groupFirst
 {
     my ($self, $first, $second, @path) = @_;
-    $self->getGroup(@path, $second) cmp $self->getGroup(@path, $first); # '' cmp 'HASH'
+    ref $self->getGroup(@path, $second) cmp ref $self->getGroup(@path, $first); # '' cmp 'HASH'
 }
 sub groupLast
 {
-    -groupFirst(@_);
+    my ($self, $first, $second, @path) = @_;
+    ref $self->getGroup(@path, $first) cmp ref $self->getGroup(@path, $second); # '' cmp 'HASH'
 }
 # DEF_FIRST:DEF_LAST:NUM:CHAR:G_FIRST:G_LAST:G_NORMAL:REVERSE:a,b,c,d,e
 # sortFunc ($a, $b, @path);
 sub parseSort
 {
     my $self = shift;
-
+    eval { $self->sortWords(@_) = {}; };
+    return if $@;
     eval { $self->sortFlags(@_) = {}; };
     return if $@;
     eval { $self->sortFunc(@_) };
@@ -395,17 +401,19 @@ sub parseSort
     
     my $this = $defOrder eq 'DEF_FIRST' ? -1 : 1;
     my $add = $defOrder eq 'DEF_FIRST' ? -1 : 1;
-    my $w = {};
+    my $w = $self->sortWords(@_);
     for ($defOrder eq 'DEF_FIRST' ? reverse @words : @words) {
         $w->{$_} = $this;
         $this += $add;
     }
     $self->sortFunc(@_) = sub {
         my ($self, $first, $second, @path) = @_;
+        #ay ($first, $second);
         #my $s = $self->sortWords(@path);
         my $ret = $gFunc->($self, $first, $second, @path) ||
             $w->{$first} <=> $w->{$second} ||
             $comp->($first, $second);
+        #ay $ret;
         $reverse ? -$ret : $ret;
     };
 }

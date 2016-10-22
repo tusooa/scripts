@@ -298,7 +298,7 @@ sub reloadAll
     my $msg = shift;
     runCommand(
         $windy, $msg,
-        { run => sub { loadCommands;
+        { run => sub { reloadConfig('ALL');
                        reloadReplacements;
                        reloadDB; }, },
         @_);
@@ -522,19 +522,26 @@ sub changeConf
         $windy, $msg,
         { run => sub {
             my $orig = $cfg->getOrigValue(@entry);_utf8_on($orig);
-            _utf8_off($val);
-            my $success = $cfg->modify(@entry, $val);_utf8_on($val);
-            if ($success) {
-                if (open my $f, '>', $configDir.$mainConf) {
-                    binmode $f, ':unix';
-                    print $f $cfg->outputFile;
-                    close $f;
+            my $ro = $cfg->get('_readonly');
+            if ($ro) {
+                my $path = join '::', @entry;
+                $val = undef if $path =~ /$ro/;
+            }
+            if (defined $val) {
+                _utf8_off($val);
+                my $success = $cfg->modify(@entry, $val);_utf8_on($val);
+                if ($success) {
+                    if (open my $f, '>', $configDir.$mainConf) {
+                        binmode $f, ':unix';
+                        print $f $cfg->outputFile;
+                        close $f;
+                    } else {
+                        $val = undef;
+                    }
+                    reloadConfig($entry[0]); # main type
                 } else {
                     $val = undef;
                 }
-                reloadConfig($entry[0]); # main type
-            } else {
-                $val = undef;
             }
             ($val, $orig, join '::', @entry);
           },
