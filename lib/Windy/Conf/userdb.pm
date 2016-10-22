@@ -505,6 +505,7 @@ sub queryConf
         { run => sub {
             my $orig = $cfg->getOrigValue(@entry);_utf8_on($orig);
             my $parsed = $cfg->get(@entry);_utf8_on($parsed);
+            $windy->logger("orig: $orig, parsed: $parsed");
             ($parsed, $orig, join '::', @entry);
           },
           success => 'ret', error => 'ret', failure => 'ret', },
@@ -540,7 +541,22 @@ sub changeConf
           success => 'ret', error => 'ret', failure => 'ret', },
         @_);
 }
-
+sub queryConfGroup
+{
+    my $windy = shift;
+    my $msg = shift;
+    my ($text) = @_;
+    my @entry = split /\s+/, $text;
+    runCommand(
+        $windy, $msg,
+        { run => sub {
+            my $tree = join ', ',
+            map { $_ . ($cfg->getGroup(@entry, $_) ? '[G]' : '') } $cfg->childList(@entry);
+            ($tree, join '::', @entry);
+          },
+          success => 'ret', error => 'ret', failure => 'ret', },
+        @_);
+}
 sub reloadConfig
 {
     my $type = shift;
@@ -594,6 +610,7 @@ sub reloadDB
         [smS(qr/【对我或者私讯】第(-?\d+)条<是><什么>/), \&queryDB],
         [sm(qr/^wconf\s+g\s+(.+)$/), \&queryConf],
         [sm(qr/^wconf\s+s\s+([^=]+=.+)$/), \&changeConf],
+        [sm(qr/^wconf\s+l\s+(.*)$/), \&queryConfGroup],
         );
     $database->set(@baseDB);
     $database->{_match} = $match;

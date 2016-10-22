@@ -26,7 +26,7 @@ sub printTree
         for (ref $item) {
             printTree ($topLevel, @_, $name) when 'HASH';
             default {
-                say $groupColor . join ("$noColor => $groupColor", @_) . "$noColor => $entryColor$name$noColor => $confColor".$topLevel->get (@_, $name).$noColor;
+                say term $groupColor . join ("$noColor => $groupColor", @_) . "$noColor => $entryColor$name$noColor => $confColor".$topLevel->get (@_, $name).$noColor;
             }
         }
     }
@@ -48,6 +48,5 @@ my $conf = conf $file;
 if (@ARGV) {
     say $conf->get (@ARGV);
 } else {
-    my $confhash = $conf->hashref;
-    printTree $confhash;
+    printTree $conf;
 }

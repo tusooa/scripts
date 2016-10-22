@@ -93,6 +93,7 @@ $subs = {
     },
     Op => sub {
         my ($self, $windy, $msg, $r1, $e, $r2) = @_;
+        $windy->logger("$r1 $e $r2");
         given ($e) {
             $r1 > $r2 when '大于';
             $r1 == $r2 when '等于';
@@ -252,7 +253,7 @@ my @aliases = (
     [qr/^(.+?)(?:或者|或是)(.+)$/, $subs->{Or}],
     [qr/^不是(.+)$/, $subs->{Not}],
     # Comparison expressions
-    [qr/^(.+?)((?:不)?(?:大|等|小)于|正好就是)(.+)$/, $subs->{Op}],
+    [qr/^(.+?)(不?(?:(?:大|等|小)于|正好就是))(.+)$/, $subs->{Op}],
     #[qr/^(?:随机|任选)(.+)$/s, sub { my ($self, $windy, $msg, $m1) = @_; my @arr = split /\n/, $m1; (expr $arr[int rand @arr])->($windy, $msg) } ],
     [qr/^概率(\d*\.*\d+)(.+)$/, quote(sub {
         my ($self, $windy, $msg, $m1, $m2) = @_;

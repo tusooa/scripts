@@ -1,12 +1,13 @@
 package Scripts::Configure;
 use 5.012;
 use Exporter;
+no warnings 'experimental';
 
 our @ISA = qw/Exporter/;
 our @EXPORT_OK = qw//;
 our @EXPORT = qw/$defg/;
 our $defg = 'main'; # default group
-
+my $sortName = '_sort';
 =comment new
 my $config = Scripts::Configure->new ($file, $default);
     my $config = Scripts::Configure->new ("${configDir}weather", "${defConfDir}weather");
@@ -16,8 +17,10 @@ my $config = Scripts::Configure->new ($file, $default);
 sub new
 {
     my $class = shift;
-    my $config = parseConf (@_);
+    my $config = { Conf => {}, Sort => {} };
     bless $config, $class;
+    $config->parseConf (@_);
+    $config;
 }
 
 sub readLine
@@ -38,14 +41,8 @@ sub readLine
         ($orig, 'conf', $1, $2);
     }
 }
-#去除errors
 =comment parseConf
-my $ref = Scripts::Configure::parseConf (%args);
-args:
-    fn  filename for parsing
-    fh  filehandle ``
-    str string ``
-    arr array(ref)
+my $ref = Scripts::Configure::parseConf (user-config, default-config);
 =filestyle configure
 [group1]
 var = val
@@ -57,7 +54,7 @@ sub parseConf
 {
     #print @_;
     #local @ARGV = reverse (shift, shift);
-    my ($uf, $df) = @_;
+    my ($self, $uf, $df) = @_;
     my ($user, $default, $userw, $defaultw);
     if ($^O eq 'MSWin32') {
         open $userw, '<', "${uf}.windows" or undef $userw;
@@ -68,77 +65,58 @@ sub parseConf
         open $user, '<', $uf or undef $user;
         open $default, '<', $df or undef $default;
     }
-    my $ret = {};
     for my $fh ($default, $defaultw, $user, $userw) {
         $fh or next;
-        my $group = $defg;
-        my $subg;
-        # 这样,在遍历每个group的时候,如果没有main,不会加进去.
-        #$ret->{$group} = {};
-        my $cfg;# = $ret->{$group};
-        #use Data::Dumper;print Dumper ($cfg), ref($cfg);
-        #say $#conf;
+        my @this;
         while (<$fh>) {
             #say $l;
             #say $_;
             my (undef, $result, @match) = readLine $_;
             next if $result eq 'comment';
-#            say;
-#        while (s/\\$//) # 转行
-#        {
-#            say "'\\' found at EOL.";
-#            $l++;
-#            $_ .= $conf[$l];
-#        }
             if ($result eq 'confg') { # config group
                 #say 'config group';
-                $group = $match[0];
-                $subg = $match[1];
-                $ret->{$group} or ($ret->{$group} = {});
-                $ret->{$group}{$subg} or ($ret->{$group}{$subg} = {});
-                $cfg = $ret->{$group}{$subg};
+                @this = ($match[0], $match[1]);
             } elsif ($result eq 'simple') { # simple group
                 #say 'simple group: '.$1;
-                $group = $match[0];
-                $ret->{$group} or ($ret->{$group} = {});
-                $cfg = $ret->{$group};
+                @this = $match[0];
             } elsif ($result eq 'conf') { # config
                 #say "config:$1 = $2";
-                #print Dumper ($ret), ref($cfg);
-                unless ($cfg) {
-                    $ret->{$group} or ($ret->{$group} = {});
-                    $cfg = $ret->{$group};
-                }
-                $cfg->{$match[0]} = $match[1];# =~ s/\$\[([^\]]+)\]/get ($ret, split '::', $1)/ger;
+                $self->modify(@this, $match[0], $match[1]);
             }
         }
     }
-    #use Data::Dumper;
-    #print Dumper ($ret);
-    return $ret;
+    $self;
 }
 
 sub hash
 {
     my $self = shift;
-    %{$self};
+    %{$self->hashref};
 }
 
 sub hashref
 {
     my $self = shift;
-    $self;
+    $self->{Conf};
 }
 
 sub origValue : lvalue
 {
     my $self = shift;
     my $confhash = $self->hashref;
+    my $sorthash = $self->sortRef;
     if (@_ == 1) {
+        if (not exists $confhash->{$defg}) {
+            $confhash->{$defg} = {};
+            $sorthash->{$defg} = {};
+        } elsif (ref $confhash->{$defg} ne 'HASH') {
+            die;
+        }
         $confhash->{$defg}{$_[0]};
     } elsif (@_ == 2) {
         if (not exists $confhash->{$_[0]}) {
             $confhash->{$_[0]} = {};
+            $sorthash->{$_[0]} = {};
         } elsif (ref $confhash->{$_[0]} ne 'HASH') {
             die;
         }
@@ -146,6 +124,7 @@ sub origValue : lvalue
     } elsif (@_ == 3) {
         if (not exists $confhash->{$_[0]}) {
             $confhash->{$_[0]}{$_[1]} = {};
+            $sorthash->{$_[0]}{$_[1]} = {};
         } elsif (ref $confhash->{$_[0]} ne 'HASH') {
             die;
         } elsif (not exists $confhash->{$_[0]}{$_[1]}) {
@@ -165,13 +144,16 @@ sub getOrigValue
     $@ ? undef : $ret;
 }
 
-sub modify # 似乎并没有用
+sub modify
 {
     my $self = shift;
     my $value = pop;
     my $orig = eval { $self->origValue(@_) };
     return if ref $orig or $@; # cannot modify a group
     $self->origValue(@_) = $value;
+    if (pop eq $sortName) {
+        $self->parseSort(@_);
+    }
     $self;
 }
 =comment get
@@ -195,14 +177,15 @@ sub get
 sub getGroup
 {
     my $confhash = shift->hashref;
+    my $ret;
     if (@_ == 1) {
-        return $confhash->{$_[0]};
+        $ret = $confhash->{$_[0]};
     } elsif (@_ == 2) {
-        return $confhash->{$_[0]}{$_[1]};
+        $ret = $confhash->{$_[0]}{$_[1]};
     } elsif (@_ == 0) {
-        return $confhash->{$defg};
+        $ret = $confhash->{$defg};
     }
-    undef;
+    ref $ret eq 'HASH' ? $ret : undef;
 }
 
 sub getGroups
@@ -216,12 +199,13 @@ sub getGroups
     } elsif (@_ == 0) {
         return keys %$confhash;
     } elsif (@_ == 2) {
+        return if ref $confhash->{$_[0]} ne 'HASH';
         my $ret = $confhash->{ + shift }{ + shift };
         if (ref $ret eq 'HASH') {
             return keys %$ret;
         }
     }
-    undef;
+    return;
 }
 
 sub runHooks
@@ -242,26 +226,188 @@ sub outputFile
     my $h = $self->hashref;
     my $order = sub { $a cmp $b };
     my $ret;
-    for my $group (sort {$order->()} keys %$h) {
-        my @all = sort {$order->()} keys %{$h->{$group}};
+    for my $group ($self->childList) {
+        my @all = $self->childList($group);
+        my $flags = $self->getSortFlags($group);
+        my $entriesFirst = 0;
+        if ($flags->{groupOrder} eq 'G_LAST') {
+            $entriesFirst = 1;
+        }
+        $entriesFirst = !$entriesFirst if $flags->{'reverse'};
         my @subgroups = grep { ref $h->{$group}{$_} eq 'HASH' } @all;
         my @entries = grep { not ref $h->{$group}{$_} } @all;
-        if (@entries) {
-            $ret .= "[${group}]\n";
-            for (@entries) {
-                $ret .= $_.' = '.$h->{$group}{$_}."\n";
+        my $e = sub {
+            if (@entries) {
+                $ret .= "[${group}]\n";
+                for (@entries) {
+                    $ret .= $_.' = '.$h->{$group}{$_}."\n";
+                }
+                $ret .= "\n";
             }
-            $ret .= "\n";
-        }
+        };
+        $e->() if $entriesFirst;
         for my $subg (@subgroups) {
             $ret .= "[${group}]:$subg\n";
-            for my $entry (sort {$order->()} keys %{$h->{$group}{$subg}}) {
+            for my $entry ($self->childList($group, $subg)) {
                 $ret .= $entry . ' = ' . $h->{$group}{$subg}{$entry}."\n";
             }
             $ret .= "\n";
         }
+        $e->() if ! $entriesFirst;
     }
     $ret;
+}
+
+sub childList
+{
+    my $self = shift;
+    my ($g, $sg);
+    eval { ($g, $sg) = ([$self->getGroups(@_)], $self->sortGroup(@_)); };
+    return () if $@;
+    my $func = $self->getSortFunc(@_);
+    sort { $func->($self, $a, $b, @_) } @$g;
+}
+
+sub defaultOrder
+{
+    $a cmp $b;
+}
+
+sub sortRef
+{
+    shift->{Sort};
+}
+
+sub sortGroup : lvalue
+{
+    my $self = shift;
+    my $group = $self->getGroups(@_) or die;
+    my $sorthash = $self->sortRef;
+    if (@_ == 0) {
+        $sorthash->{$defg};
+    } elsif (@_ == 1) {
+        $sorthash->{$_[0]};
+    } elsif (@_ == 2) {
+        $sorthash->{$_[0]}{$_[1]};
+    } else {
+        die;
+    }
+}
+
+sub sortFunc : lvalue
+{
+    my $self = shift;
+    my $group = $self->sortGroup(@_);
+    $group->{__func__};
+}
+
+sub sortWords : lvalue
+{
+    my $self = shift;
+    my $group = $self->sortGroup(@_);
+    $group->{__words__};
+}
+
+sub sortFlags : lvalue
+{
+    my $self = shift;
+    my $group = $self->sortGroup(@_);
+    $group->{__flags__};
+}
+
+sub getSortFunc
+{
+    my $self = shift;
+    my $func;
+    my @path = @_;
+    while (@path) {
+        eval { $func = $self->sortFunc(@path) };
+        $func = undef if $@;
+        last if $func;
+        pop @path;
+    }
+    $func or $func = sub { $_[1] cmp $_[2] };
+    $func;
+}
+my $defaultSortFlags = { defOrder => 'DEF_FIRST', groupOrder => 'G_NORMAL', 'reverse' => 0, };
+sub getSortFlags
+{
+    my $self = shift;
+    my $flags;
+    my @path = @_;
+    while (@path) {
+        eval { $flags = $self->sortFlags(@path) };
+        $flags = undef if $@;
+        last if $flags;
+        pop @path;
+    }
+    $flags or $flags = $defaultSortFlags;
+    $flags;
+}
+
+
+sub byNumber { $_[0] <=> $_[1]; }
+sub byChar { $_[0] cmp $_[1]; }
+sub reversedSort { -shift; }
+sub groupFirst
+{
+    my ($self, $first, $second, @path) = @_;
+    $self->getGroup(@path, $second) cmp $self->getGroup(@path, $first); # '' cmp 'HASH'
+}
+sub groupLast
+{
+    -groupFirst(@_);
+}
+# DEF_FIRST:DEF_LAST:NUM:CHAR:G_FIRST:G_LAST:G_NORMAL:REVERSE:a,b,c,d,e
+# sortFunc ($a, $b, @path);
+sub parseSort
+{
+    my $self = shift;
+
+    eval { $self->sortFlags(@_) = {}; };
+    return if $@;
+    eval { $self->sortFunc(@_) };
+    return if $@;
+
+    my $sortOrder = $self->get(@_, $sortName);
+    my @flags = split /:/, $sortOrder, -1;
+    my @words = split /,/, pop @flags;
+    my $sortFunc;
+    my ($comp, $groupOrder, $defOrder, $reverse)
+        = (\&byChar,
+           $defaultSortFlags->{'groupOrder'},
+           $defaultSortFlags->{'defOrder'},
+           $defaultSortFlags->{'reverse'});
+    for (@flags) {
+        $comp = \&byNumber when 'NUM';
+        $comp = \&byChar when 'CHAR';
+        $defOrder = $_ when /^DEF_(?:FIRST|LAST)$/;
+        $groupOrder = $_ when /^G_(?:FIRST|LAST|NORMAL)$/;
+        $reverse = 1 when 'REVERSE';
+    }
+    $self->sortFlags(@_) = { defOrder => $defOrder, groupOrder => $groupOrder, 'reverse' => $reverse };
+    my $gFunc = sub { 0 };
+    if ($groupOrder eq 'G_FIRST') {
+        $gFunc = \&groupFirst;
+    } elsif ($groupOrder eq 'G_LAST') {
+        $gFunc = \&groupLast;
+    }
+    
+    my $this = $defOrder eq 'DEF_FIRST' ? -1 : 1;
+    my $add = $defOrder eq 'DEF_FIRST' ? -1 : 1;
+    my $w = {};
+    for ($defOrder eq 'DEF_FIRST' ? reverse @words : @words) {
+        $w->{$_} = $this;
+        $this += $add;
+    }
+    $self->sortFunc(@_) = sub {
+        my ($self, $first, $second, @path) = @_;
+        #my $s = $self->sortWords(@path);
+        my $ret = $gFunc->($self, $first, $second, @path) ||
+            $w->{$first} <=> $w->{$second} ||
+            $comp->($first, $second);
+        $reverse ? -$ret : $ret;
+    };
 }
 
 1;
