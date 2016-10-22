@@ -3,23 +3,29 @@ package Scripts::Windy::Addons::Mood;
 use Exporter;
 use 5.012;
 use Scripts::scriptFunctions;
+use Scripts::Windy::Util;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/loadMood addMood curMood/;
 
 my $file = $configDir.'windy-conf/mood.db';
 my @mood = ();
-my $cfg = conf 'windy-conf/mood';
-my $max = $cfg->get('max') // 100;
-my $min = $cfg->get('min') // -100;
-my $maxc = $cfg->get('max-change-after-midnight') // 40;
-my $minc = $cfg->get('min-change-after-midnight') // -40;
-my $posi = $cfg->get('posibility-reverse') // 0.0001; # 最高和最低心情的转化
+my ($max, $min, $maxc, $minc, $posi);
+sub loadConf
+{
+    my $cfg = $windyConf;
+    $max = $cfg->get('mood', 'max') // 100;
+    $min = $cfg->get('mood', 'min') // -100;
+    $maxc = $cfg->get('mood', 'max-change-after-midnight') // 40;
+    $minc = $cfg->get('mood', 'min-change-after-midnight') // -40;
+    $posi = $cfg->get('mood', 'posibility-reverse') // 0.0001; # 鏈�楂樺拰鏈�浣庡績鎯呯殑杞寲
+}
+loadConf;
 sub fixMood
 {
     my $today = time2date;
     my $changed = 0;
     if ($mood[1] ne $today) {
-        $mood[0] += int(rand($maxc-$minc)+$minc);
+        $mood[0] += randFromTo($minc, $maxc);
         $mood[1] = $today;
         $mood[2] = '';
         $changed = 1;
@@ -39,7 +45,6 @@ sub writeMood
     }
 }
 
-# 蹇冩儏鍔犳垚
 # current-mood<tab>date<tab>id
 sub loadMood
 {
@@ -66,12 +71,13 @@ sub addMood
 {
     my ($add, $id) = @_;
     fixMood and writeMood;
+    my $oldMood = $mood[0];
     $mood[0] += $add;
     $mood[1] = time2date;
     $mood[2] = $id;
     fixMood;
     writeMood;
-    $mood[0];
+    wantarray ? ($mood[0], $mood[0]-$oldMood) : $mood[0];
 }
 
 1;

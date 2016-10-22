@@ -36,6 +36,13 @@ sub fromString
     bless $self, $class;
 }
 
+sub part
+{
+    my $self = shift;
+    $self->{part} = 1;
+    $self;
+}
+
 sub run
 {
     my $object = shift;
@@ -48,7 +55,7 @@ sub run
     # Evaluate if code
     # Plain text leave it as-is
     my $ret = join '', map { $self->runExpr($windy, $msg, $_, @_) } @{$object->{pattern}};
-    _utf8_off($ret) if BACKEND eq 'mojo';
+    _utf8_off($ret) if BACKEND eq 'mojo' and not $object->{part};
     $ret;
 }
 

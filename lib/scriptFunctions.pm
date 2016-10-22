@@ -15,7 +15,7 @@ $accountDir $scriptsDir $libDir
 $verbose verbose $debug debug
 conf $pathConf $defg $scriptName
 multiArgs time2date final ln term
-formatTime utf8
+formatTime utf8 randFromTo
 /;
 use Scripts::WindowsSupport;
 sub time2date;
@@ -154,4 +154,10 @@ sub formatTime
 #if ($0 eq 'scriptFunctions.pm') {
 #    main;
 #}
+
+sub randFromTo
+{
+    my ($min, $max) = @_;
+    int(rand($max-$min)+$min);
+}
 1;

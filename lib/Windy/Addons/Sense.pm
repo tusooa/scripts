@@ -7,9 +7,13 @@ use 5.012;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/sense addSense loadSense/;
 
-my $cfg = conf 'windy-conf/sense.conf';
-my $maxAdd = $cfg->get('maxAdd') // 10;#每日最多增加多少好感
-#my $updateTime = $cfg->get('updateTime') // 60*60*24;#刷新时间 默认为一日
+my $cfg = $windyConf;
+my $maxAdd;
+sub loadConf
+{
+    $maxAdd = $cfg->get('sense', 'maxAdd') // 10;#每日最多增加多少好感
+}
+loadConf;
 
 # (id => [sense, added-today, last-time-modified])
 my %sense;

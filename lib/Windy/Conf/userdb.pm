@@ -13,6 +13,7 @@ use utf8;
 use Encode qw/_utf8_on _utf8_off/;
 sub reloadDB;
 sub loadCommands;
+sub reloadConfig;
 sub msgSenderIsAdmin;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/$database/;
@@ -20,7 +21,7 @@ our $database = Scripts::Windy::Userdb->new();
 my $databaseFile = $configDir.'windy-conf/userdb.db';
 our $commands = {};
 my @baseDB;
-my $cfg = conf($mainConf);
+my $cfg = $windyConf;
 loadCommands;
 #sub debug { print @_; }
 my @adminList;
@@ -275,7 +276,7 @@ sub addR
     runCommand(
         $windy, $msg,
         { run => sub {
-            my $ret = $subs->{addR}($name, $rep, $quotemeta); }, },
+            my $ret = addReplacement($name, $rep, $quotemeta); }, },
         @_);
 }
 
@@ -286,7 +287,7 @@ sub getR
     my ($name) = @_;
     runCommand(
         $windy, $msg,
-        { run => sub { my $rep = $subs->{getR}($name, 'AS_IS'); ($rep, $name) },
+        { run => sub { my $rep = getReplacement($name, 'AS_IS'); ($rep, $name) },
           success => 'ret', error => 'ret', failure => 'ret' },
         @_);
 }
@@ -298,7 +299,7 @@ sub reloadAll
     runCommand(
         $windy, $msg,
         { run => sub { loadCommands;
-                       $subs->{reloadR}();
+                       reloadReplacements;
                        reloadDB; }, },
         @_);
 }
@@ -372,6 +373,7 @@ sub repeat
 sub dbToString
 {
     my $num = shift;
+    $num = @{$database->all} + $num - @baseDB if $num < 0;
     my $realNum = $num + @baseDB;
     my $line = $database->all->[$realNum];
     return if ref $line ne 'ARRAY';
@@ -390,7 +392,7 @@ sub dbToString
             $ret = '风儿若问'.$q.'即答'.$a;
         }
     }
-    $subs->{nicknameById}(undef, $line->[0]->{teacher})."第".$num."，".$ret;
+    nicknameById(undef, $line->[0]->{teacher})."第".$num."，".$ret;
 }
 
 sub findDB
@@ -490,6 +492,8 @@ sub queryDB
         @_);
 }
 
+### Config
+
 sub queryConf
 {
     my $windy = shift;
@@ -527,7 +531,7 @@ sub changeConf
                 } else {
                     $val = undef;
                 }
-                loadCommands;
+                reloadConfig($entry[0]); # main type
             } else {
                 $val = undef;
             }
@@ -537,6 +541,18 @@ sub changeConf
         @_);
 }
 
+sub reloadConfig
+{
+    my $type = shift;
+    if ($type eq 'ALL') {
+        loadCommands;
+        loadConfGroup('ALL');
+    } elsif ($type eq 'command') {
+        loadCommands;
+    } else {
+        loadConfGroup($type);
+    }
+}
 sub reloadDB
 {
     @baseDB = (
@@ -575,7 +591,7 @@ sub reloadDB
         [smS(qr/【对我或者私讯】来扫个码/), sub { quit(@_, 0); }],
         [smS(qr/<_我名_><中>(?:从(\d+))?找一下(.+)$/), \&findDB],
         [smS(qr/【对我或者私讯】<删><中>第(\d+)/), \&deleteDB],
-        [smS(qr/【对我或者私讯】第(\d+)条<是><什么>/), \&queryDB],
+        [smS(qr/【对我或者私讯】第(-?\d+)条<是><什么>/), \&queryDB],
         [sm(qr/^wconf\s+g\s+(.+)$/), \&queryConf],
         [sm(qr/^wconf\s+s\s+([^=]+=.+)$/), \&changeConf],
         );

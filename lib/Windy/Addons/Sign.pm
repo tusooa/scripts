@@ -7,8 +7,14 @@ use Scripts::Windy::Util;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/sign loadSign/;
 
-my $conf = conf 'windy-conf/sign.conf';
-my $maxSense = $conf->get('maxSense') // 5;
+my $conf = $windyConf;
+my ($maxSense, $minSense);
+sub loadConf
+{
+    $maxSense = $conf->get('sign', 'maxSense') // 5;
+    $minSense = $conf->get('sign', 'minSense') // 0;
+}
+loadConf;
 my $signFile = $configDir.'windy-conf/sign';
 our %sign = ();
 sub loadSign
@@ -33,10 +39,10 @@ sub sign
             binmode $f, ':unix';
             say $f $id."\t".$sign{$id};
         }
-        (int rand $maxSense) + 1;
+        randFromTo($minSense, $maxSense);
     } else {
         $windy->logger("${id}已经签到过了。");
-        0;
+        undef;
     }
 }
 1;

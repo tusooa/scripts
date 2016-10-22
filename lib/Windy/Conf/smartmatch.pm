@@ -18,7 +18,8 @@ use Exporter;
 use utf8;
 use Encode qw/_utf8_on _utf8_off/;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/$match sm smS sms sr $sl1 $sl2 $sl3 @sl @ml $subs sizeOfMatch/;
+our @EXPORT = qw/$match sm smS sms sr $sl1 $sl2 $sl3 @sl @ml $subs sizeOfMatch
+reloadReplacements addReplacement getReplacement nicknameById loadConfGroup/;
 
 loadNicknames;
 loadSense;
@@ -48,10 +49,13 @@ sub loadAlias;
 sub addAlias;
 sub reloadAlias;
 sub updateSize;
-
-our ($sl1, $sl2, $sl3) = (350, 180, 0);
-our @sl = ($sl1, $sl2, $sl3);
-our @ml = (93, 85, 60, 40, -10, -40);
+sub loadConfGroup;
+sub loadLevels;
+sub loadReply;
+our ($sl1, $sl2, $sl3);
+our @sl;
+our @ml;
+my %reply = ();
 
 our $subs;
 $subs = {
@@ -107,36 +111,8 @@ $subs = {
     },
     addMood => sub {
         my ($self, $windy, $msg, $m1) = @_;
-        my $mood = addMood($m1, uid(msgSender($windy, $msg)));
-        if ((rand) <= .233) {
-            '';
-        } elsif ($m1 > 0) {
-            if ($mood > $ml[0]) {
-                '（好开心呢ww';
-            } elsif ($mood > $ml[1]) {
-                '（开心w';
-            } elsif ($mood > $ml[2]) {
-                '（有点开心';
-            } elsif ($mood > $ml[4]) {
-                '（内心好像。。有一种。。要平静下来的感觉呢qwq';
-            } elsif ($mood > $ml[5]) {
-                '（感觉。。没有。。。那么难过了qaq';
-            } else {
-                '';
-            }
-        } else {
-            if ($mood > $ml[2]) {
-                '';
-            } elsif ($mood > $ml[3]) {
-                '（咱有点不开心了哦qwq？';
-            } elsif ($mood > $ml[4]) {
-                '（再这样的话咱可要生气了呢QAQ';
-            } elsif ($mood > $ml[5]) {
-                '（我可是。。会。黑。化。的。哦？';
-            } else {
-                '';
-            }
-        }
+        my ($mood, $added) = addMood($m1, uid(msgSender($windy, $msg)));
+        $reply{'addMood'}->run($windy, $msg, $added);
     },
     sense => sub {
         my ($self, $windy, $msg) = @_;
@@ -151,39 +127,14 @@ $subs = {
     addSense => sub {
         my ($self, $windy, $msg, $m1) = @_;
         my (undef, $added) = addSense(uid(msgSender($windy, $msg)), $m1);
-        my $sense = $subs->{senseWithMood}($self, $windy, $msg);
-        if (rand >= .233) { # 有一定的概率,显示好感.
-            '';
-        } elsif ($added >= 0) {
-            my $nick = senderNickname($self, $windy, $msg);
-            if ($sense > $sl1) {
-                '（最喜欢'.$nick.'了www';
-            } elsif ($sense > $sl2) {
-                '（咱好像有点喜欢'.$nick.'了呢w';
-            } elsif ($sense > $sl3) {
-                '';
-            } else {
-                ''; # 对于好感是负的人来说...你上辈子做了什么孽呀QAQ
-            }
-        } else {
-            my $nick = senderNickname($self, $windy, $msg);
-            if ($sense > $sl1) {
-                '（'.$nick.'。。是嫌弃人家了嘛呜。。';
-            } elsif ($sense > $sl2) {
-                '（'.$nick.'。。。qwq';
-            } elsif ($sense > $sl3) {
-                '（'.$nick.'，很有趣呀。';
-            } else {
-                '（你还想作死0 0？'; # 对于好感是负的人来说...你上辈子做了什么孽呀QAQ
-            }
-        }
+        $reply{'addSense'}->run($windy, $msg, $added);
     },
     sign => sub {
         my ($self, $windy, $msg) = @_;
         my $s = sign($self, $windy, $msg);
-        if ($s) {
-            debug "sensing: $s";
-            $subs->{addSense}($self, $windy, $msg, $s, @_[3..$#_]);
+        if (defined $s) {
+            my (undef, $added) = addSense(uid(msgSender($windy, $msg)), $s);
+            $reply{'sign'}->run($windy, $msg, $added);
         } else {
             debug "not sensing.";
             '';
@@ -235,22 +186,18 @@ $subs = {
                 userNickname($self,
                              findUserInGroup($windy, $uid, msgGroup($windy, $msg)));
             } else {
-                "神";
+                $reply{'callerName-default'}->run();
             }
         } else {
             undef;
         }
     },
-    reloadR => \&reloadReplacements,
-    addR => \&addReplacement,
-    getR => \&getReplacement,
-    nicknameById => \&nicknameById,
 };
 my @aliases = (
     # Plain
     #[qr/^$d3(.+)?$d4$/, sub { my ($windy, $msg, $m1) = @_; $m1 }],
     # Control structures
-    [qr/^$If(.+?)，$Then(.+?)，$Else(.+)$/, $subs->{IfThenElse}],
+    [qr/^$If(.+?)，$Then(.*?)，$Else(.+)$/, $subs->{IfThenElse}],
     [qr/^$If(.+?)，$Then(.+)$/, $subs->{IfThen}],
     [qr/^心情判[:：]([^,]*),([^,]*),([^,]*),([^,]*)$/, quote(sub {
         ### 多余的(1)??? 好感判亦同。
@@ -426,6 +373,30 @@ $match = Scripts::Windy::SmartMatch->new(
     replacements => {},);
 reloadReplacements;
 loadAlias;
+loadReply;
+loadLevels;
+
+sub loadReply
+{
+    for (qw/addMood addSense sign callerName-default/) {
+        my $text = $windyConf->get('reply', $_);
+        _utf8_on($text);
+        $reply{$_} = sr($text)->part;
+    }
+}
+
+sub loadLevels
+{
+    @sl = ();
+    for (qw/favourite like normal/) {
+        push @sl, $windyConf->get('levels', 'sense', $_);
+    }
+    ($sl1, $sl2, $sl3) = @sl;
+    @ml = ();
+    for (1..6) {
+        push @ml, $windyConf->get('levels', 'mood', $_);
+    }
+}
 
 sub smS
 {
@@ -585,6 +556,29 @@ sub addAlias
         close $f;
     }
     $to;
+}
+
+my %confGroup = (
+    level => \&loadLevels,
+    reply => \&loadReply,
+    sign => \&Scripts::Windy::Sign::loadConf,
+    sense => \&Scripts::Windy::Sense::loadConf,
+    mood => \&Scripts::Windy::Mood::loadConf,
+);
+sub loadConfGroup
+{
+    my $group = shift;
+    if ($group eq 'ALL') {
+        for (keys %confGroup) {
+            $confGroup{$_}->();
+        }
+    } else {
+        if (ref $confGroup{$_} eq 'CODE') {
+            $confGroup{$_}->();
+        } else {
+            undef;
+        }
+    }
 }
 
 1;
