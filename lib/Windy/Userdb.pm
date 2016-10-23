@@ -37,7 +37,20 @@ sub remove
 {
     my $self = shift;
     my $num = shift;
+    return if $num > $#{$self->{words}};
     $self->{words} = [@{$self->{words}}[0 .. $num-1, $num+1 .. (@{$self->{words}} - 1)]];
+    $self;
+}
+
+sub place
+{
+    my ($self, $from, $to) = @_;
+    return if $from > $#{$self->{words}};
+    $to = $#{$self->{words}} if $to > $#{$self->{words}};
+    my $this = $self->{words}->[$from];
+    $self->remove($from);
+    $self->{words} = [@{$self->{words}}[0 .. $to-1], $this, @{$self->{words}}[$to .. (@{$self->{words}} - 1)]];
+    $self;
 }
 
 sub parse

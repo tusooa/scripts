@@ -166,9 +166,6 @@ sub get
     my $self = shift;
     my $confhash = $self->hashref;
     my $ret = $self->getOrigValue (@_);
-#    $ret =~ s/(^|[^\\])\$([a-zA-Z0-9_])/$1$main::$2/g;
-#    $ret =~ s/(^|[^\\])\$\{([a-zA-Z0-9_])\}/$1$main::$2/g;
-#    $ret =~ s/(^|[^\\])\$\[([a-zA-Z0-9_])\]/$1$this->{$2}/g;
     do { $ret =~ s/\$\{([^}]+)}/($1 eq '-') ? '$' : $ENV{$1}/ge;
          $ret =~ s/\$\[([^\]]+)\]/($1 eq '-') ? '$' : $self->get (split '::', $1)/ge; } if $ret;
     $ret;

@@ -93,7 +93,6 @@ $subs = {
     },
     Op => sub {
         my ($self, $windy, $msg, $r1, $e, $r2) = @_;
-        $windy->logger("$r1 $e $r2");
         given ($e) {
             $r1 > $r2 when '大于';
             $r1 == $r2 when '等于';
@@ -359,6 +358,16 @@ my @aliases = (
             default { '夜里'; }
         }
      }],
+    [qr/^\$\[([^\]]+)\]$/, sub {
+        my ($self, $windy, $msg, $entry) = @_;
+        my $ret = $entry eq '-' ? '$' : $windyConf->get(split /::/, $entry);
+        _utf8_on($ret);
+        $ret;
+     }],
+    [qr/^\$\(([^\)]+)\)$/, sub {
+        my ($self, $windy, $msg, $entry) = @_;
+        $entry eq '-' ? '$' : ($reply{$entry} and $reply{$entry}->run($windy, $msg, @_[4..$#_]));
+     }],
     );
 
 $match = Scripts::Windy::SmartMatch->new(
@@ -379,7 +388,8 @@ loadLevels;
 
 sub loadReply
 {
-    for (qw/addMood addSense sign callerName-default/) {
+    %reply = ();
+    for ($windyConf->childList('reply')) {
         my $text = $windyConf->get('reply', $_);
         _utf8_on($text);
         $reply{$_} = sr($text)->part;
@@ -562,9 +572,10 @@ sub addAlias
 my %confGroup = (
     level => \&loadLevels,
     reply => \&loadReply,
-    sign => \&Scripts::Windy::Sign::loadConf,
-    sense => \&Scripts::Windy::Sense::loadConf,
-    mood => \&Scripts::Windy::Mood::loadConf,
+    sign => \&Scripts::Windy::Addons::Sign::loadConf,
+    sense => \&Scripts::Windy::Addons::Sense::loadConf,
+    mood => \&Scripts::Windy::Addons::Mood::loadConf,
+    startstop => \&Scripts::Windy::Addons::StartStop::loadConf,
 );
 sub loadConfGroup
 {
@@ -574,8 +585,8 @@ sub loadConfGroup
             $confGroup{$_}->();
         }
     } else {
-        if (ref $confGroup{$_} eq 'CODE') {
-            $confGroup{$_}->();
+        if (ref $confGroup{$group} eq 'CODE') {
+            $confGroup{$group}->();
         } else {
             undef;
         }

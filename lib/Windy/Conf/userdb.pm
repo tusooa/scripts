@@ -261,7 +261,7 @@ sub sizeOfDB
         $windy, $msg,
         { run => sub {
             my ($dbSize, $matchSize) = ($database->length, sizeOfMatch);
-            ($dbSize, $matchSize, $dbSize + $matchSize); },
+            ($dbSize - @baseDB, $matchSize, $dbSize - @baseDB + $matchSize); },
           success => 'ret',
         },
         @_);
@@ -405,7 +405,7 @@ sub findDB
     if ($pattern) {
         $rPattern = eval { qr/$pattern/ };
         print $rPattern;
-        $pattern = undef if $@;
+        $rPattern = qr/\Q$pattern\E/ if $@;
     }
     runCommand(
         $windy, $msg,
@@ -436,7 +436,7 @@ sub writeDB
 {
     my $base = shift;
     my @db = $database->all;
-    open my $f, '>', $databaseFile;
+    open my $f, '>', $databaseFile or return;
     binmode $f, ':unix';
     for ($base..$#db) {
         my ($ask, $ans) = ($db[$_]->[0], $db[$_]->[1]);
@@ -492,6 +492,25 @@ sub queryDB
         @_);
 }
 
+sub moveDB
+{
+    my $windy = shift;
+    my $msg = shift;
+    my ($num, $to) = @_;
+    runCommand(
+        $windy, $msg,
+        { run => sub {
+            my $realNum = $num + @baseDB;
+            my $realTo = $to + @baseDB;
+            return (undef, $num, $to) unless ($database->all)[$realNum];
+            my $moved = dbToString($num);
+            $database->place($realNum, $realTo) or $moved = undef;
+            writeDB(scalar @baseDB) or $moved = 0;
+            ($moved, $num, $to);
+          },
+          success => 'ret', failure => 'ret', error => 'ret' },
+        @_);
+}
 ### Config
 
 sub queryConf
@@ -505,7 +524,6 @@ sub queryConf
         { run => sub {
             my $orig = $cfg->getOrigValue(@entry);_utf8_on($orig);
             my $parsed = $cfg->get(@entry);_utf8_on($parsed);
-            $windy->logger("orig: $orig, parsed: $parsed");
             ($parsed, $orig, join '::', @entry);
           },
           success => 'ret', error => 'ret', failure => 'ret', },
@@ -587,7 +605,7 @@ sub reloadDB
         [sm("【被屏蔽】"), sr("【截止】")],
         [smS(qr/【对我】回去/), \&stop],
         [smS(qr/<_风妹_><中>当问(.+?)则答(.+)$/), sub { teach(@_, 'S'); }],
-        [smS(qr/<_风妹_><中>被问到(.+?)时回答(.+)$/), sub { $_[3] = $_[3].'【概率0.33好感判：w,,0 0,。】'; teach(@_, 'S'); }],
+        [smS(qr/<_风妹_><中>被问到(.+?)时回答(.+)$/), sub { $_[3] = $_[3].'【$(tail)】'; teach(@_, 'S'); }],
         [smS(qr/<_风妹_><中>对问(.+?)则答(.+)$/), sub { teach(@_, 's'); }],
         [smS(qr/【对我】<怎么>出来/), \&callerName],
         [smS(qr/【对我或者私讯】知道<多少>/), \&sizeOfDB],
@@ -615,6 +633,7 @@ sub reloadDB
         [smS(qr/<_我名_><中>(?:从(\d+))?找一下(.+)$/), \&findDB],
         [smS(qr/【对我或者私讯】<删><中>第(\d+)/), \&deleteDB],
         [smS(qr/【对我或者私讯】第(-?\d+)条<是><什么>/), \&queryDB],
+        [smS(qr/【对我或者私讯】把第(\d+)条放到(\d+)/), \&moveDB],
         [sm(qr/^wconf\s+g\s+(.+)$/), \&queryConf],
         [sm(qr/^wconf\s+s\s+([^=]+=.+)$/), \&changeConf],
         [sm(qr/^wconf\s+l\s+(.*)$/), \&queryConfGroup],
