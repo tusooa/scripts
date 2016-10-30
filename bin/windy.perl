@@ -142,7 +142,7 @@ sub loadMainGroup
     if ($mainGroupId) {
         $mainGroup = $t->search_group(gnumber => $mainGroupId);
     }
-    $mainGroup;
+    $windy->{mainGroup} = $mainGroup;
 }
 sub loadAdmins
 {

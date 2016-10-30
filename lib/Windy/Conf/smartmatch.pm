@@ -18,7 +18,7 @@ use Exporter;
 use utf8;
 use Encode qw/_utf8_on _utf8_off/;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/$match sm smS sms sr $sl1 $sl2 $sl3 @sl @ml $subs sizeOfMatch
+our @EXPORT = qw/$match sm smS sms sr $sl1 $sl2 $sl3 @sl @ml $subs %reply sizeOfMatch
 reloadReplacements addReplacement getReplacement nicknameById loadConfGroup/;
 
 loadNicknames;
@@ -55,7 +55,7 @@ sub loadReply;
 our ($sl1, $sl2, $sl3);
 our @sl;
 our @ml;
-my %reply = ();
+our %reply = ();
 
 our $subs;
 $subs = {
@@ -179,14 +179,15 @@ $subs = {
             and isStartOn(msgGroupId($windy, $msg));
     },
     callerName => sub {
-        my ($self, $windy, $msg) = @_;
+        my $self = shift;
+        my ($windy, $msg) = @_;
         if (isGroupMsg($windy, $msg)
             and my $uid = isStartOn(msgGroupId($windy, $msg))) {
             if ($uid != -1) {
                 userNickname($self,
                              findUserInGroup($windy, $uid, msgGroup($windy, $msg)));
             } else {
-                $reply{'callerName-default'}->run();
+                $reply{'callerName-default'}->run(@_);
             }
         } else {
             undef;
@@ -280,16 +281,8 @@ my @aliases = (
     [qr/^难过极了$/, sub { (curMood) <= $ml[4] }],
     [qr/^黑化$/, sub { (curMood) <= $ml[5] }],
     [qr/^心情判$/, sub {
-        my $mood = curMood;
-        if ($mood > $ml[1]) {
-            'w';
-        } elsif ($mood > $ml[3]) {
-            'qwq';
-        } elsif ($mood > $ml[5]) {
-            'QAQ';
-        } else {
-            '。';
-        }
+        my $self = shift;
+        $reply{'default-mood-p'}->run(@_);
      }],
     [qr/^(?:增|加|增加)(-?\d+)好感$/, $subs->{addSense}],
     [qr/^好感(?:度)?$/, $subs->{senseWithMood}],

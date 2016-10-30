@@ -214,7 +214,15 @@ sub teach
             } else {
                 return (0, $ask, $ans);
             }
-            ($database->length() - @baseDB - 1, $ask, $ans);
+            my $realNum = $database->length() - @baseDB - 1;
+            my @ret = ($realNum, $ask, $ans);
+            if (not msgSenderIsAdmin($windy, $msg)) {
+                sendTo($windy->{mainGroup},
+                       $reply{'teach-not-admin'}
+                       ->run($windy, $msg,
+                             $realNum, dbToString($realNum)));
+            }
+            @ret;
           },
           success => 'ret', failure => 'ret', error => 'ret', },
         @_);
@@ -450,6 +458,7 @@ sub writeDB
         say $f ($ask->{teacher}."\tAns".$ans->{raw});
     }
     close $f;
+    1;
 }
 
 sub deleteDB
@@ -471,14 +480,12 @@ sub deleteDB
             my $line = $num * 2 + 1;
             $database->remove($realNum);
             writeDB(scalar @baseDB);
-            #{
-            #    local $^I = '.bak';
-            #    local @ARGV = $databaseFile;
-            #    while (<<>>) {
-            #        print if $. != $line and $. != $line + 1;
-            #    }
-            #}
-            $removed;
+            if (not msgSenderIsAdmin($windy, $msg)) {
+                sendTo($windy->{mainGroup},
+                       $reply{'delete-not-admin'}
+                       ->run($windy, $msg, $removed));
+            }
+            ($removed);
           },
           success => 'ret', },
         @_);

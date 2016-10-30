@@ -318,7 +318,7 @@ sub getSortFunc
     my $self = shift;
     my $func;
     my @path = @_;
-    while (@path) {
+    for (0..@path) {
         eval { $func = $self->sortFunc(@path) };
         $func = undef if $@;
         if ($func) {
@@ -336,7 +336,7 @@ sub getSortFlags
     my $self = shift;
     my $flags;
     my @path = @_;
-    while (@path) {
+    for (0..@path) {
         eval { $flags = $self->sortFlags(@path) };
         $flags = undef if $@;
         last if $flags;
