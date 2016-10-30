@@ -71,4 +71,19 @@ sub read
     }
 }
 
+sub readByRegex
+{
+    my ($self, $pattern) = @_;
+    $pattern or return;
+    my $rPattern = eval { qr/$pattern/ };
+    $rPattern = qr/\Q$pattern\E/ if $@;
+    if ($rPattern) {
+        my @a = grep $_->[0] =~ $rPattern, @{$self->{sentences}};
+        @a ? @{$a[int rand @a]} : ();
+    } else { # 每句平等概率，并给出出处。
+        my @all = @{$self->{sentences}};
+        @{$all[int rand @all]};
+    }
+}
+
 1;

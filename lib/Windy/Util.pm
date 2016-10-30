@@ -15,7 +15,8 @@ msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender
 uid uName isAt isAtId findUserInGroup isPrivateMsg
 group invite friend $nextMessage $atPrefix $atSuffix
 parseRichText $mainConf msgPosStart msgPosEnd
-msgReceiver receiverName outputLog isMsg BACKEND $windyConf/;
+msgReceiver receiverName outputLog isMsg BACKEND $windyConf
+sendTo/;
 our @EXPORT_OK = qw//;
 
 our $nextMessage = "\n\n";

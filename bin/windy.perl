@@ -16,21 +16,7 @@ if (open my $w, '<', $file) {
 } else {
     die term "打不开文件 $file: $!\n";
 }
-=comment
-my $mailAccount = {};
-if (open my $f, '<', $accountDir.'windy-mail') {
-    while (<$f>) {
-        chomp;
-        if (/^(.+?)=(.+)$/) {
-            $mailAccount->{$1} = $2;
-        }
-    }
-    close $f;
-    $mailAccount->{auth} = {login => $mailAccount->{user}, password => $mailAccount->{pass}};
-} else {
-    warn term "打不开mail文件: $!\n";
-}
-=cut
+
 my $mainGroupFile = $configDir.'windy-conf/main-group';
 my $mainGroupId = undef;
 my $mainGroup = undef;
@@ -120,9 +106,7 @@ sub onReceive
     if ($resp) {
         $windy->logger("送出 `".$resp."`, 在 ".( time - $time )." 秒内");
         my $to = recordLast($m, $context);
-        for (split $nextMessage, $resp) { # 算是一个workaround吧。不知道为什么reply不能发私讯。
-            $to->send($_);
-        }
+        sendTo($to, $resp);
     }
 }
 $t->interval(60, \&saveLast);
@@ -136,13 +120,20 @@ $t->on(receive_pic => sub {
     say "receive image: ", $filepath;
     say "sender is: ", $sender->displayname;
        });
-my @reply = ("差点就被兔姐姐丢在门外了呢。。", "我又回来了哦w", "早上好呐w");
+
+my $replyScan = Scripts::Windy::Conf::smartmatch::sr($windyConf->get('initMsg', 'scancode'));
+my @reply = map
+{ Scripts::Windy::Conf::smartmatch::sr($windyConf->get('initMsg', 'normal', $_)) }
+$windyConf->childList('initMsg', 'normal');
+
+use Scripts::Windy::FakeMessage;
+my $loginMsg = Scripts::Windy::FakeMessage->loginMsg(_client => $t, receiver => $t->user, _context => $lastChannel);
 $t->on(login => sub {
     my $scancode = $_[1];
     if (loadLast) {
         $windy->logger("正发送初始讯息。");
-        $scancode and $lastChannel->[0]->send($reply[0]);
-        $lastChannel->[0]->send($reply[ int(rand(@reply-1)) + 1]);
+        $scancode and sendTo($lastChannel->[0], $replyScan->run($windy, $loginMsg));
+        sendTo($lastChannel->[0], $reply[int rand @reply]->run($windy, $loginMsg));
     }
        });
 # 管理权限和主群联通

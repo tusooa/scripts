@@ -342,7 +342,13 @@ sub getSandbook
     my ($db) = @_;
     runCommand(
         $windy, $msg,
-        { run => sub { $sandbook->read($db); },
+        { run => sub {
+            if ($db =~ m{^/(.+)/$}) {
+                $sandbook->readByRegex($1);
+            } else {
+                $sandbook->read($db);
+            }
+          },
           success => 'ret' },
         @_);
 }
@@ -627,7 +633,7 @@ sub reloadDB
         [smS(qr/【对我或者私讯】消失于?(?:欢迎加入.+?，群号码：)?(\d+)/), \&stopG],
         [smS(qr/【对我或者私讯】以神之名义命令<中>重生/), sub { quit(@_, 1); }],
         [smS(qr/【对我或者私讯】主群拉<一下>/), \&inviteMG],
-        [sm(qr/^沙书\s*([^\s]*)\s*$/), \&getSandbook],
+        [sm(qr/^沙书\s*(.*?)\s*$/), \&getSandbook],
         [smS(qr/<_我名_><中>加一?句(.+?)「(.+)」$/s), \&addSandbook],
         [smS(qr/【对我或者私讯】来扫个码/), sub { quit(@_, 0); }],
         [smS(qr/<_我名_><中>(?:从(\d+))?找一下(.+)$/), \&findDB],

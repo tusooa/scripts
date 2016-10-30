@@ -12,7 +12,7 @@ msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender
 uid uName isAt isAtId findUserInGroup isPrivateMsg
 group invite friend $nextMessage $atPrefix $atSuffix
 parseRichText $mainConf msgPosStart msgPosEnd
-msgReceiver receiverName outputLog isMsg/;
+msgReceiver receiverName outputLog isMsg sendTo/;
 our @EXPORT_OK = qw//;
 
 our $nextMessage = "\n\n";
@@ -24,7 +24,7 @@ sub isGroupMsg
 {
     my $windy = shift;
     my $msg = shift;
-    ref $msg eq 'Mojo::Webqq::Message::Recv::GroupMessage';
+    $msg->type eq 'group_message';
 }
 
 sub isPrivateMsg
@@ -193,5 +193,15 @@ sub outputLog
 sub isMsg
 {
     1;
+}
+
+sub sendTo
+{
+    my ($to, $text) = @_;
+    $to or return;
+    _utf8_off($text);
+    for (split $nextMessage, $text) {
+        $to->send($_);
+    }
 }
 1;
