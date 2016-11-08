@@ -5,7 +5,8 @@
 #define BOOST_SPIRIT_THREADSAFE
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-
+#include "call-api.hpp"
+#include <windows.h>
 //Added for the default_resource example
 #include <fstream>
 #include <vector>
@@ -25,36 +26,39 @@ typedef SimpleWeb::Client<SimpleWeb::HTTP> HttpClient;
 //void default_resource_send(const HttpServer &server, shared_ptr<HttpServer::Response> response,
 //                           shared_ptr<ifstream> ifs, shared_ptr<vector<char> > buffer);
 
-int main() {
-    //HTTP-server at port 8080 using 1 thread
-    //Unless you do more heavy non-threaded processing in the resources,
-    //1 thread is usually faster than several threads
-    HttpServer server(RECV_PORT, 1);
-    
-    //POST-example for the path /json, responds firstName+" "+lastName from the posted json
-    //Responds with an appropriate error message if the posted json is not valid, or if firstName or lastName is missing
-    //Example posted json:
-    //{
-    //  "firstName": "John",
-    //  "lastName": "Smith",
-    //  "age": 25
-    //}
-    server.resource["^/api/call$"]["POST"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
-        try {
-            ptree pt;
-            //set<string> args;
-            read_json(request->content, pt);
-            string name=pt.get<string>("func")+"(";
-            for (boost::property_tree::ptree::value_type &v : pt.get_child("args")) {
-              name += (v.second.data()) + ", ";
-            }
-            name += ")";
+//int main() {}
+static __attribute__((destructor)) void final()
+{
+  //freeLibs();
+}
+HttpServer server(RECV_PORT, 1);
+static __attribute__((constructor)) void startServer()
+{
+  cout << "out"<<endl;
+  loadLibs();
+  
+  server.resource["^/api/call$"]["POST"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+    try {
+      ptree pt;
+      //set<string> args;
+      read_json(request->content, pt);
+      vector<string> args;
+      string func = pt.get<string>("func");
+      string name=func + "(";
+      for (boost::property_tree::ptree::value_type &v : pt.get_child("args")) {
+        args.push_back(v.second.data());
+      }
+      for (string a : args) {
+        name += a + ", ";
+      }
+      name += ")=";
+      name += callApi(func, args);
 
-            *response << "HTTP/1.1 200 OK\r\n"
-                      << "Content-Type: application/json\r\n"
-                      << "Content-Length: " << name.length() << "\r\n\r\n"
-                      << name;
-        }
+      *response << "HTTP/1.1 200 OK\r\n"
+      << "Content-Type: text/plain\r\n"
+      << "Content-Length: " << name.length() << "\r\n\r\n"
+      << name;
+    }
         catch(exception& e) {
             *response << "HTTP/1.1 400 Bad Request\r\nContent-Length: " << strlen(e.what()) << "\r\n\r\n" << e.what();
         }
@@ -80,24 +84,28 @@ int main() {
     auto r3=client.request("POST", "/json", json_string);
     cout << r3->content.rdbuf() << endl;
     */
-    server_thread.join();
+    server_thread.detach();
     
-    return 0;
+    return;
 }
-/*
-void default_resource_send(const HttpServer &server, shared_ptr<HttpServer::Response> response,
-                           shared_ptr<ifstream> ifs, shared_ptr<vector<char> > buffer) {
-    streamsize read_length;
-    if((read_length=ifs->read(&(*buffer)[0], buffer->size()).gcount())>0) {
-        response->write(&(*buffer)[0], read_length);
-        if(read_length==static_cast<streamsize>(buffer->size())) {
-            server.send(response, [&server, response, ifs, buffer](const boost::system::error_code &ec) {
-                if(!ec)
-                    default_resource_send(server, response, ifs, buffer);
-                else
-                    cerr << "Connection interrupted" << endl;
-            });
-        }
-    }
+#define EXTERN extern "C"
+#define RET_DONE 1
+#define RET_PASS 0
+#define RET_STOP 2
+
+EXTERN __declspec(dllexport) char * info() { return "Dude."; }
+EXTERN __declspec(dllexport) void about() {}
+EXTERN __declspec(dllexport) int end() { return 1; }
+EXTERN __declspec(dllexport) int
+EventFun(char *tencent, int type, int subtype, char *source, char *subject, char *object, char *msg, char *rawmsg, char *backptr);
+
+extern __declspec(dllexport) int
+EventFun(char *tencent, int type, int subtype, char *source, char *subject, char *object, char *msg, char *rawmsg, char *backptr)
+{
+  //if (type >= 1 && type <= 4 && std::string(msg) == text) {
+  //  Api_GroupInvitation(tencent, subject, (char *)mainGroup.c_str());
+  //  return RET_DONE;
+  //}
+  return RET_PASS;
 }
-*/
+

@@ -2,7 +2,7 @@
 use 5.012;
 
 my $cxx = 'g++';
-my $CFLAGS = "-pthread -std=gnu++11 -Wall -ISimple-Web-Server";
+my $CFLAGS = "-shared -pthread -std=gnu++11 -Wall -ISimple-Web-Server -Iport";
 my $boost = $ENV{BOOST_ROOT} || "C:/Home/Programs/boost-install";
 my $tc = "mgw49";
 my $boostVer = '1_62';
@@ -20,7 +20,7 @@ for my $lib (qw/regex system thread date_time/) {
 }
 $CFLAGS .= ' -lws2_32 -lwsock32';
 my $source = 'windy.cpp';
-my $output = 'windy.exe';
+my $output = 'windy.xx.dll';
 my $cmd = qq/"$cxx" -o "$output" $source $CFLAGS/;
 say $cmd;
 system $cmd;
