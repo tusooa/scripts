@@ -413,12 +413,17 @@ sub findDB
 {
     my $windy = shift;
     my $msg = shift;
-    my ($startFrom, $pattern) = @_;
+    my ($where, $startFrom, $maxCount, $pattern) = @_;
+    my $id = 0;
+    if ($where eq '答') {
+        $id = 1;
+    } elsif ($where eq '问') {
+        $id = 0;
+    }
     my $rPattern;
-    my $maxCount = 5;
+    my $maxCount = $maxCount || 5;
     if ($pattern) {
         $rPattern = eval { qr/$pattern/ };
-        print $rPattern;
         $rPattern = qr/\Q$pattern\E/ if $@;
     }
     runCommand(
@@ -431,7 +436,7 @@ sub findDB
             for ($database->all) {
                 $i += 1,next if $i < 0;
                 if (#$pattern =~ $_->[0]->{pattern} or 
-                    $_->[0]->{raw} =~ $rPattern) {
+                    $_->[$id]->{raw} =~ $rPattern) {
                     $count += 1;
                     if ($count > 0) {
                         push @found, dbToString($i);
@@ -531,7 +536,7 @@ sub queryConf
     my $windy = shift;
     my $msg = shift;
     my ($text) = @_;
-    my @entry = split /\s+/, $text;
+    my @entry = split /(?:\s+|::)/, $text;
     runCommand(
         $windy, $msg,
         { run => sub {
@@ -548,7 +553,7 @@ sub changeConf
     my $msg = shift;
     my ($text) = @_;
     my ($key, $val) = split /=/, $text, 2;
-    my @entry = split /\s+/, $key;
+    my @entry = split /(?:\s+|::)/, $key;
     runCommand(
         $windy, $msg,
         { run => sub {
@@ -584,7 +589,7 @@ sub queryConfGroup
     my $windy = shift;
     my $msg = shift;
     my ($text) = @_;
-    my @entry = split /\s+/, $text;
+    my @entry = split /(?:\s+|::)/, $text;
     runCommand(
         $windy, $msg,
         { run => sub {
@@ -643,12 +648,12 @@ sub reloadDB
         [sm(qr/^沙书\s*(.*?)\s*$/), \&getSandbook],
         [smS(qr/<_我名_><中>加一?句(.+?)「(.+)」$/s), \&addSandbook],
         [smS(qr/【对我或者私讯】来扫个码/), sub { quit(@_, 0); }],
-        [smS(qr/<_我名_><中>(?:从(\d+))?找一下(.+)$/), \&findDB],
+        [smS(qr/<_我名_><中>(?:在(问|答)里)?(?:从(\d+))?找(?:一下|(\d+)个)(.+)$/), \&findDB],
         [smS(qr/【对我或者私讯】<删><中>第(\d+)/), \&deleteDB],
-        [smS(qr/【对我或者私讯】第(-?\d+)条<是><什么>/), \&queryDB],
-        [smS(qr/【对我或者私讯】把第(\d+)条放到(\d+)/), \&moveDB],
+        [smS(qr/【对我或者私讯】第(-?\d+)条?<是><什么>/), \&queryDB],
+        [smS(qr/【对我或者私讯】把第?(\d+)条?放[到在去]第?(\d+)/), \&moveDB],
         [sm(qr/^wconf\s+g\s+(.+)$/), \&queryConf],
-        [sm(qr/^wconf\s+s\s+([^=]+=.+)$/), \&changeConf],
+        [sm(qr/^wconf\s+s\s+([^=]+=.*)$/), \&changeConf],
         [sm(qr/^wconf\s+l\s+(.*)$/), \&queryConfGroup],
         );
     $database->set(@baseDB);
