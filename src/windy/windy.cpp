@@ -32,32 +32,34 @@ static __attribute__((destructor)) void final()
   //freeLibs();
 }
 HttpServer server(RECV_PORT, 1);
+//HttpClient client(SEND_ADDR);
 static __attribute__((constructor)) void startServer()
 {
-  cout << "out"<<endl;
   loadLibs();
   
   server.resource["^/api/call$"]["POST"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
-      ptree pt;
+      ptree input;
       //set<string> args;
-      read_json(request->content, pt);
-      vector<string> args;
-      string func = pt.get<string>("func");
-      string name=func + "(";
-      for (boost::property_tree::ptree::value_type &v : pt.get_child("args")) {
-        args.push_back(v.second.data());
+      read_json(request->content, input);
+      ptree output;
+      for (ptree::value_type &f : input.get_child("seq")) {
+        ptree curFunc = f.second;
+        vector<string> args;
+        string func = curFunc.get<string>("func");
+        for (ptree::value_type &v : curFunc.get_child("args")) {
+          args.push_back(v.second.data());
+        }
+        string result = callApi(func, args);
+        output.add("seq", result);
       }
-      for (string a : args) {
-        name += a + ", ";
-      }
-      name += ")=";
-      name += callApi(func, args);
-
+      stringstream content;
+      output.write_json(content);
+      content.seekp(0, ios::end);
       *response << "HTTP/1.1 200 OK\r\n"
-      << "Content-Type: text/plain\r\n"
-      << "Content-Length: " << name.length() << "\r\n\r\n"
-      << name;
+      << "Content-Type: application/json\r\n"
+      << "Content-Length: " << content.tellp() << "\r\n\r\n"
+      << content.rdbuf();
     }
         catch(exception& e) {
             *response << "HTTP/1.1 400 Bad Request\r\nContent-Length: " << strlen(e.what()) << "\r\n\r\n" << e.what();
@@ -93,7 +95,7 @@ static __attribute__((constructor)) void startServer()
 #define RET_PASS 0
 #define RET_STOP 2
 
-EXTERN __declspec(dllexport) char * info() { return "Dude."; }
+EXTERN __declspec(dllexport) char * info() { return "Mew~~~"; }
 EXTERN __declspec(dllexport) void about() {}
 EXTERN __declspec(dllexport) int end() { return 1; }
 EXTERN __declspec(dllexport) int
@@ -102,10 +104,25 @@ EventFun(char *tencent, int type, int subtype, char *source, char *subject, char
 extern __declspec(dllexport) int
 EventFun(char *tencent, int type, int subtype, char *source, char *subject, char *object, char *msg, char *rawmsg, char *backptr)
 {
-  //if (type >= 1 && type <= 4 && std::string(msg) == text) {
-  //  Api_GroupInvitation(tencent, subject, (char *)mainGroup.c_str());
-  //  return RET_DONE;
-  //}
-  return RET_PASS;
+  int retvalue;
+  try {
+    ptree send;
+    send.add("tencent", string(tencent));
+    send.add("type", type);
+    send.add("subtype", subtype);
+    send.add("source", string(source));
+    send.add("subject", string(subject));
+    send.add("object", string(object));
+    send.add("msg", string(msg));
+    send.add("rawmsg", string(rawmsg));
+    stringstream jsonStream;
+    send.write_json(jsonStream);
+    
+    auto ret = client.request("POST", "/", jsonStream.rdbuf());
+    retvalue = stoi(ret->content.rdbuf());
+  } catch(const exception &e) {
+    retvalue = RET_PASS;
+  }
+  return retvalue;
 }
 

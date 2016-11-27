@@ -158,6 +158,6 @@ sub formatTime
 sub randFromTo
 {
     my ($min, $max) = @_;
-    int(rand($max-$min)+$min);
+    int(rand($max + 1 - $min)+$min);
 }
 1;

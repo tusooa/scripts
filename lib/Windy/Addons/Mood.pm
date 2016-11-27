@@ -5,11 +5,11 @@ use 5.012;
 use Scripts::scriptFunctions;
 use Scripts::Windy::Util;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/loadMood addMood curMood/;
+our @EXPORT = qw/loadMood addMood curMood moodedSense/;
 
 my $file = $configDir.'windy-conf/mood.db';
 my @mood = ();
-my ($max, $min, $maxc, $minc, $posi);
+my ($max, $min, $maxc, $minc, $posi, $base, $full, $factor);
 sub loadConf
 {
     my $cfg = $windyConf;
@@ -18,6 +18,9 @@ sub loadConf
     $maxc = $cfg->get('mood', 'max-change-after-midnight') // 40;
     $minc = $cfg->get('mood', 'min-change-after-midnight') // -40;
     $posi = $cfg->get('mood', 'posibility-reverse') // 0.0001; # 最高和最低心情的转化
+    $base = $cfg->get('mood', 'base-sense') // 20;
+    $full = $cfg->get('mood', 'full-sense') // 350;
+    $factor = $cfg->get('mood', 'factor') // 120;
 }
 loadConf;
 sub fixMood
@@ -78,6 +81,21 @@ sub addMood
     fixMood;
     writeMood;
     wantarray ? ($mood[0], $mood[0]-$oldMood) : $mood[0];
+}
+
+sub moodedSense
+{
+    my ($sense, $zeroPoint) = @_;
+    my $mood = curMood;
+    my $i;
+    if (abs($sense) < $base) {
+        $i = $base;
+    } elsif (abs($sense) > $full) {
+        $i = $full;
+    } else {
+        $i = $sense;
+    }
+    int($sense + ($i) * ($mood-$zeroPoint) / $factor);
 }
 
 1;

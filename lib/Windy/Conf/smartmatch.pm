@@ -121,8 +121,7 @@ $subs = {
     senseWithMood => sub {
         my ($self, $windy, $msg) = @_;
         my $sense = $subs->{sense}(@_);
-        my $mood = $subs->{mood}(@_);
-        int($sense + (abs($sense) > 20 ? abs($sense) : 20) * ($mood-$ml[2]) / 120);
+        moodedSense($sense, $ml[2]);
     },
     addSense => sub {
         my ($self, $windy, $msg, $m1) = @_;
