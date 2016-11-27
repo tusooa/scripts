@@ -5,7 +5,9 @@ use Exporter;
 use Scripts::scriptFunctions;
 use utf8;
 use Encode qw/_utf8_on _utf8_off/;
-use constant BACKEND => 'mojo';
+#no warnings qw/experimental/;
+use constant BACKEND => $ENV{WINDY_BACKEND} =~ /^(?:mojo|mpq)$/ ? $ENV{WINDY_BACKEND} : 'mojo';
+use Scripts::Windy::Util::Base;
 use if BACKEND eq 'mpq', 'Scripts::Windy::Util::MPQ';
 use if BACKEND eq 'mojo', 'Scripts::Windy::Util::Mojo';
 
@@ -16,11 +18,7 @@ uid uName isAt isAtId findUserInGroup isPrivateMsg
 group invite friend $nextMessage $atPrefix $atSuffix
 parseRichText $mainConf msgPosStart msgPosEnd
 msgReceiver receiverName outputLog isMsg BACKEND $windyConf
-sendTo/;
+sendTo replyToMsg/;
 our @EXPORT_OK = qw//;
-
-our $nextMessage = "\n\n";
-our $mainConf = "windy-conf/main.conf";
-our $windyConf = conf $mainConf;
 
 1;

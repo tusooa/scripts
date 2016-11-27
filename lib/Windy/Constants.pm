@@ -4,7 +4,7 @@ use 5.012;
 use Scripts::scriptFunctions;
 use Exporter;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/%EventRet %Events %Status/;
+our @EXPORT = qw/%EventRet %Events %EventId %Status/;
 
 our %EventRet = (
     pass => 0,
@@ -65,4 +65,6 @@ our %Events = (
     'plugin-clicked' => 12003,
     'receive-money' => 80001,
     'undefined' => -1,
-);
+    );
+our %EventId = reverse %Events;
+1;

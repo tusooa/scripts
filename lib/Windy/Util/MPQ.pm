@@ -5,7 +5,6 @@ use Exporter;
 use Scripts::scriptFunctions;
 use utf8;
 use Encode qw/_utf8_on _utf8_off/;
-use MPQ;
 use Scripts::Windy::Constants;
 no warnings 'experimental';
 #use Data::Dumper;
@@ -15,13 +14,12 @@ msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender
 uid uName isAt isAtId findUserInGroup isPrivateMsg
 group invite friend $nextMessage $atPrefix $atSuffix
 parseRichText $mainConf msgPosStart msgPosEnd
-msgReceiver receiverName replyToMsg outputLog getAdminList isMsg/;
+msgReceiver receiverName replyToMsg outputLog getAdminList isMsg
+sendTo/;
 our @EXPORT_OK = qw//;
-
-our $nextMessage = "\n\n";
+use Scripts::Windy::Util::Base;
 our $atPrefix = "[\@";
 our $atSuffix = "]";
-our $mainConf = "windy-conf/main.conf";
 my @privMsg = map $Events{$_}, 'friend-msg', 'sess-msg';
 my @multMsg = map $Events{$_}, 'group-msg','discuss-msg';
 
@@ -62,27 +60,18 @@ sub parseRichText
     msgText($windy, $msg);
 }
 
+sub sendTo
+{
+    my ($to, $content) = @_;
+    $to or return;
+    $to->send($content);
+}
+
 sub replyToMsg
 {
     my ($windy, $msg, $content) = @_;
-    if (not $msg->isMessage) {
-        my $ret;
-        if ($content eq int $content) {
-            $ret = $content;
-        } elsif (defined $EventRet{$content}) {
-            $ret = $EventRet{$content};
-        } else {
-            $ret = $EventRet{pass};
-        }
-        return $ret;
-    }
-    $content or return $EventRet{pass};
-    my $sendTo = ($msg->{type} ~~ @multMsg) ? '' : msgSender($windy, $msg);
-    
-    MPQ::SendMsg(msgReceiver($windy, $msg),
-                 $msg->{type}, 0, $msg->{source}, $sendTo,
-                 term $_) for split $nextMessage, $content; # to euc-cn
-    $EventRet{done};
+    $msg or return;
+    $msg->reply($content);
 }
 
 
@@ -135,7 +124,7 @@ sub invite
 {
     my ($windy, $msg, $group, $person) = @_;
     return unless $group and $person;
-    not MPQ::GroupInvitation(msgReceiver($windy, $msg), $person, $group);
+    #not MPQ::GroupInvitation(msgReceiver($windy, $msg), $person, $group);
 }
 
 sub msgGroupHas
@@ -153,7 +142,7 @@ sub msgStopping : lvalue
 sub getAdminList
 {
     my ($windy, $msg, $group) = @_;
-    my $list = MPQ::GetAdminList(msgReceiver($windy, $msg), $group);
+    my $list;# = MPQ::GetAdminList(msgReceiver($windy, $msg), $group);
     my @ret = grep $_, map s/\r//gr, split /\n+/, $list;
     $windy->logger($_) for @ret;
     @ret;
@@ -207,7 +196,7 @@ sub findUserInGroup
 
 sub outputLog
 {
-    MPQ::OutPut(term(@_));
+    #MPQ::OutPut(term(@_));
 }
 
 sub isMsg

@@ -1,48 +1,24 @@
 #!/usr/bin/env perl
 
+BEGIN
+{
+    $ENV{WINDY_BACKEND} = 'mojo';
+}
 use 5.012;
 use Scripts::scriptFunctions;
 use Mojo::Webqq;
 use Mojo::Util qw/md5_sum/;
-use Scripts::Windy;
 use Time::HiRes qw/time/;
 use Scripts::Windy::Util;
 no warnings 'experimental';
-my $file = $accountDir.'windy';
-my $uid;
-if (open my $w, '<', $file) {
-    chomp ($uid = <$w>);
-    close $w;
-} else {
-    die term "打不开文件 $file: $!\n";
-}
+use Scripts::Windy::Startup;
 
-my $mainGroupFile = $configDir.'windy-conf/main-group';
-my $mainGroupId = undef;
 my $mainGroup = undef;
-sub loadMainGroupId
-{
-    if (open my $f, '<', $mainGroupFile) {
-        chomp($mainGroupId = <$f>);
-        close $f;
-    }
-}
-loadMainGroupId;
-my $windy = Scripts::Windy->new(Admin => [], MainGroup => $mainGroupId);
-
 my $t = Mojo::Webqq->new(
     qq => $uid,
     login_type => 'qrlogin',
     tmpdir => $configDir.'windy-cache/',
     qrcode_path => $Scripts::scriptFunctions::home.'/OneDrive/windy.png',
-#    is_init_friend => 0,
-#    is_init_group => 0,
-#    is_init_discuss => 0,
-#    is_init_recent => 0,
-#    is_update_user => 0,
-#    is_update_group => 0,
-#    is_update_friend => 0,
-#    is_update_discuss => 0,
     );
 # last channel
 my $lastChannelFile = $configDir."windy-conf/last-channel";
@@ -120,11 +96,6 @@ $t->on(receive_pic => sub {
     say "receive image: ", $filepath;
     say "sender is: ", $sender->displayname;
        });
-
-my $replyScan = Scripts::Windy::Conf::smartmatch::sr($windyConf->get('initMsg', 'scancode'));
-my @reply = map
-{ Scripts::Windy::Conf::smartmatch::sr($windyConf->get('initMsg', 'normal', $_)) }
-$windyConf->childList('initMsg', 'normal');
 
 use Scripts::Windy::FakeMessage;
 my $loginMsg = Scripts::Windy::FakeMessage->loginMsg(_client => $t, receiver => $t->user, _context => $lastChannel);
