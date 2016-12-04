@@ -85,7 +85,7 @@ sub send
     my $tencent = $self->{receiver};
     my @call;
     for (split $nextMessage, $text) {
-        push @call, ['SendMsg', $tencent, @{$self->{sendArgs}}, term $_];
+        push @call, ['SendMsg', $tencent, @{$self->{sendArgs}}, $_];
     }
     callApi(@call);
 }

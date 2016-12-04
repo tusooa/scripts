@@ -100,9 +100,11 @@ sub utf8
 {
     my $str = join '', @_;
     my $ret;
-    $ret = encode 'utf-8', decode 'GBK', $str;
+    $ret = eval { decode 'GBK', $str };
+    $ret = $str if $@;
     _utf8_on($ret);
     $ret;
+    #$ret;
 }
 
 sub term #蛋痛的euc-cn <=> utf-8 转换。只有闻道死才需要。和谐。

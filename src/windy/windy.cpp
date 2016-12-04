@@ -32,7 +32,7 @@ static __attribute__((destructor)) void final()
   //freeLibs();
 }
 HttpServer server(RECV_PORT, 1);
-//HttpClient client(SEND_ADDR);
+HttpClient client(SEND_ADDR);
 static __attribute__((constructor)) void startServer()
 {
   loadLibs();
@@ -54,7 +54,7 @@ static __attribute__((constructor)) void startServer()
         output.add("seq", result);
       }
       stringstream content;
-      output.write_json(content);
+      write_json(content, output);
       content.seekp(0, ios::end);
       *response << "HTTP/1.1 200 OK\r\n"
       << "Content-Type: application/json\r\n"
@@ -116,10 +116,12 @@ EventFun(char *tencent, int type, int subtype, char *source, char *subject, char
     send.add("msg", string(msg));
     send.add("rawmsg", string(rawmsg));
     stringstream jsonStream;
-    send.write_json(jsonStream);
-    
-    auto ret = client.request("POST", "/", jsonStream.rdbuf());
-    retvalue = stoi(ret->content.rdbuf());
+    write_json(jsonStream, send);
+    string ss = jsonStream.str();
+    auto ret = client.request("POST", "/recv", ss);
+    ptree retval;
+    read_json(ret->content, retval);
+    retvalue = stoi(retval.get<string>("ret"));
   } catch(const exception &e) {
     retvalue = RET_PASS;
   }

@@ -9,7 +9,7 @@
 using namespace std;
 
 string callApi(string func, vector<string> args) {
-  if (func == "Api_SendMsg") {
+  if (func == "SendMsg") {
     return
       to_string(Api_SendMsg
              ((char *)(args[0].c_str()),
@@ -19,7 +19,7 @@ string callApi(string func, vector<string> args) {
               (char *)(args[4].c_str()),
               (char *)(args[5].c_str())));
   }
-  return string("undefined");
+  return string("");
 }
 
 #endif

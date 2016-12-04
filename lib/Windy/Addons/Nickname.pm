@@ -17,13 +17,13 @@ sub userNickname
     my ($self, $user) = @_;
     $user or return;
     my $id = uid($user);
-    $nick{$id}->[0] // do { my $name = uName($user); _utf8_on($name); $name; };
+    $nick{$id}->[0] or do { my $name = uName($user); _utf8_on($name); $name; };
 }
 
 sub nicknameById
 {
     my ($self, $id) = @_;
-    $nick{$id}->[0] // $id;
+    $nick{$id}->[0] or $id;
 }
 
 sub senderNickname

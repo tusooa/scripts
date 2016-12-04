@@ -306,7 +306,7 @@ sub reloadAll
     my $msg = shift;
     runCommand(
         $windy, $msg,
-        { run => sub { reloadConfig('ALL');
+        { run => sub { reloadConfig($windy, 'ALL');
                        reloadReplacements;
                        reloadDB; }, },
         @_);
@@ -384,11 +384,25 @@ sub repeat
         @_);
 }
 
+sub realDBId
+{
+    my $num = shift;
+    my ($numNow, $realNum);
+    if ($num < 0) {
+        $realNum = @{$database->all} + $num;
+        $numNow = $realNum - @baseDB + 1;
+    } else {
+        $realNum = $num + @baseDB - 1;
+        $numNow = $num;
+    }
+    wantarray ? ($realNum, $numNow) : $realNum;
+}
+
 sub dbToString
 {
     my $num = shift;
-    $num = @{$database->all} + $num - @baseDB if $num < 0;
-    my $realNum = $num + @baseDB;
+    my $realNum;
+    ($realNum, $num) = realDBId $num;
     my $line = $database->all->[$realNum];
     return if ref $line ne 'ARRAY';
     my ($ask, $ans) = @{$line};
@@ -474,7 +488,7 @@ sub deleteDB
     runCommand(
         $windy, $msg,
         { run => sub {
-            my $realNum = $num + @baseDB;
+            my $realNum = realDBId $num;
             return unless ($database->all)[$realNum];
             my $teacher = ($database->all)[$realNum]->[0]->{teacher};
             if ((isAdmin($windy, $msg, $teacher) or not msgSenderIsAdmin($windy, $msg))
@@ -518,8 +532,8 @@ sub moveDB
     runCommand(
         $windy, $msg,
         { run => sub {
-            my $realNum = $num + @baseDB;
-            my $realTo = $to + @baseDB;
+            my $realNum = realDBId $num;
+            my $realTo = realDBId $to;
             return (undef, $num, $to) unless ($database->all)[$realNum];
             my $moved = dbToString($num);
             $database->place($realNum, $realTo) or $moved = undef;
@@ -574,7 +588,7 @@ sub changeConf
                     } else {
                         $val = undef;
                     }
-                    reloadConfig($entry[0]); # main type
+                    reloadConfig($windy, @entry == 1 ? $Scripts::Configure::defg : $entry[0]); # main type
                 } else {
                     $val = undef;
                 }
@@ -602,14 +616,14 @@ sub queryConfGroup
 }
 sub reloadConfig
 {
-    my $type = shift;
+    my ($windy, $type) = shift;
     if ($type eq 'ALL') {
         loadCommands;
-        loadConfGroup('ALL');
+        loadConfGroup($windy, 'ALL');
     } elsif ($type eq 'command') {
         loadCommands;
     } else {
-        loadConfGroup($type);
+        loadConfGroup($windy, $type);
     }
 }
 sub reloadDB
@@ -626,7 +640,7 @@ sub reloadDB
         [smS(qr/<_风妹_><中>被问到(.+?)时回答(.+)$/), sub { $_[3] = $_[3].'【$(tail)】'; teach(@_, 'S'); }],
         [smS(qr/<_风妹_><中>对问(.+?)则答(.+)$/), sub { teach(@_, 's'); }],
         [smS(qr/【对我】<怎么>出来/), \&callerName],
-        [smS(qr/【对我或者私讯】知道<多少>/), \&sizeOfDB],
+        [smS(qr/【对我或者私讯】<知道><多少>/), \&sizeOfDB],
         [smS(qr/<_我名_><中>若问(.+?)即答(.+)$/s), \&teach],
         [smS(qr/<_我名_><中>问(.+?)答(.+)$/s), sub { $_[2] = '^'.$_[2].'$'; teach(@_); }],
         [smS(qr/<_我名_><中>(?:<以后>)?<称呼><我>(?:作|为|叫)?(.+?)(?:<就好>)?$/), \&newNickname],

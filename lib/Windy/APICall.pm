@@ -3,9 +3,13 @@ package Scripts::Windy::APICall;
 use 5.012;
 use Mojo::UserAgent;
 use Exporter;
+use Scripts::scriptFunctions;
+use Encode qw/encode decode _utf8_on _utf8_off/;
+use utf8;
+use Mojo::JSON qw/encode_json decode_json from_json to_json/;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/callApi/;
-
+my $callAddr = "http://127.0.0.1:7456/api/call";
 my $ua = Mojo::UserAgent->new;
 sub callApi
 {
@@ -17,16 +21,22 @@ sub callApi
         $this->{args} = [@line];
         push @{$json->{seq}}, $this;
     }
-    use Data::Dumper;
-    print Dumper($json);
-=comment
-    my $tx = $ua->post('https://metacpan.org/search' => json => $json);
-    if (my $res = $tx->success) { say $res->body }
+    my $send = term to_json($json);
+    say $send;
+    my $tx = $ua->post($callAddr => $send);
+    if (my $res = $tx->success) {
+        my $orig = utf8 $res->body;
+        #_utf8_off $orig;
+        my $json = from_json $orig;
+        use Data::Dumper;
+        say Dumper($json);
+        wantarray ? @{$json->{seq}} : $json->{seq};
+    }
     else {
         my $err = $tx->error;
-        die "$err->{code} response: $err->{message}" if $err->{code};
-        die "Connection error: $err->{message}";
+        say "$err->{code} response: $err->{message}" if $err->{code};
+        say "Connection error: $err->{message}";
+        undef;
     }
-=cut
 }
 1;

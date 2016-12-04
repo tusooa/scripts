@@ -568,17 +568,18 @@ my %confGroup = (
     sense => \&Scripts::Windy::Addons::Sense::loadConf,
     mood => \&Scripts::Windy::Addons::Mood::loadConf,
     startstop => \&Scripts::Windy::Addons::StartStop::loadConf,
+    main => sub { my $windy = shift; $windy->loadConf; },
 );
 sub loadConfGroup
 {
-    my $group = shift;
+    my ($windy, $group) = @_;
     if ($group eq 'ALL') {
         for (keys %confGroup) {
-            $confGroup{$_}->();
+            $confGroup{$_}->(@_);
         }
     } else {
         if (ref $confGroup{$group} eq 'CODE') {
-            $confGroup{$group}->();
+            $confGroup{$group}->(@_);
         } else {
             undef;
         }

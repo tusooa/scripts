@@ -87,7 +87,7 @@ sub run
     my $msg = shift;
     my @ret = $object->match($windy, $msg);
     # 先执行regex，然后判定是否符合条件。
-    if (@ret and (@pattern ? all { $self->runExpr($windy, $msg, $_, @_); } @pattern : 1)) {
+    if (@ret and (@pattern ? all { $self->runExpr($windy, $msg, $_, @ret); } @pattern : 1)) {
         @ret;
     } else {
         ();
