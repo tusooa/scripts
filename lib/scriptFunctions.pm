@@ -12,10 +12,10 @@ our @EXPORT_OK = qw/$appsDir/;
 our @EXPORT = qw/$home
 $configDir $cacheDir $dataDir
 $accountDir $scriptsDir $libDir
-$verbose verbose $debug debug
+$verbose verbose debug
 conf $pathConf $defg $scriptName
 multiArgs time2date final ln term
-formatTime utf8 randFromTo
+formatTime utf8 randFromTo debugOn debugOff
 /;
 use Scripts::WindowsSupport;
 sub time2date;
@@ -30,7 +30,7 @@ sub formatTime;
 our $home = $^O eq 'MSWin32' ? $ENV{HOMEDRIVE}.$ENV{HOMEPATH} : $ENV{HOME};
 our $scriptName= basename $0;
 our $verbose   = 0;
-our $debug     = 0;
+our %debug     = ();
 # 目录，其名称最后一定要加上/，可能是eexp最差的一个设计了。然而却提升了伊的流动性。
 my $xdgConf   = $ENV{XDG_CONFIG_HOME} ? "$ENV{XDG_CONFIG_HOME}/" : "$home/.config/";
 our $configDir = "${xdgConf}Scripts/";
@@ -121,9 +121,22 @@ sub final
     say term "\n开始我们的战争\e[4D\e[1A\e[1;7;32mDate\e[0m\e[1B吧w";
 }
 
+sub debugOn
+{
+    my $pack = (caller 0)[0];
+    $debug{$pack} = 1;
+}
+
+sub debugOff
+{
+    my $pack = (caller 0)[0];
+    $debug{$pack} = 0;
+}
+
 sub debug
 {
-    if ($debug) {
+    my $pack = (caller 0)[0];
+    if ($debug{$pack}) {
         for (ref (my $s = shift)) {
             when ('CODE') {
                 $s->(@_);
