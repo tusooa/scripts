@@ -214,13 +214,13 @@ sub teach
             } else {
                 return (0, $ask, $ans);
             }
-            my $realNum = $database->length() - @baseDB - 1;
-            my @ret = ($realNum, $ask, $ans);
+            my (undef, $absNum) = realDBId(-1);
+            my @ret = ($absNum, $ask, $ans);
             if (not msgSenderIsAdmin($windy, $msg)) {
                 sendTo($windy->{mainGroup},
                        $reply{'teach-not-admin'}
                        ->run($windy, $msg,
-                             $realNum, dbToString($realNum)));
+                             $absNum, dbToString(-1)));
             }
             @ret;
           },
@@ -453,7 +453,7 @@ sub findDB
                     $_->[$id]->{raw} =~ $rPattern) {
                     $count += 1;
                     if ($count > 0) {
-                        push @found, dbToString($i);
+                        push @found, dbToString($i+1);
                     }
                 }
                 last if $count >= $maxCount;
@@ -616,7 +616,7 @@ sub queryConfGroup
 }
 sub reloadConfig
 {
-    my ($windy, $type) = shift;
+    my ($windy, $type) = @_;
     if ($type eq 'ALL') {
         loadCommands;
         loadConfGroup($windy, 'ALL');

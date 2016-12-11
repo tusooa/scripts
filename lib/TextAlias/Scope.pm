@@ -12,11 +12,38 @@ sub new
     $parent = undef if ref $parent ne __PACKAGE__;
     my $self = {
         parser => $ta,
-        var => $var,
+        vars => $var,
         list => $list,
         parent => $parent,
     };
     bless $self, $class;
+}
+
+sub clone
+{
+    my ($self) = @_;
+    my $class = ref $self;
+    my $new = {
+        parser => $self->{parser},
+        vars => { %{$self->{vars}} },
+        list => $self->{list},
+        parent => $self->{parent},
+    };
+    bless $new, $class;
+}
+
+sub add
+{
+    my $self = shift;
+    push @{$self->{list}}, @_;
+    $self;
+}
+
+sub goThrough
+{
+    my $self = shift;
+    my $ta = $self->ta;
+    map { $ta->getValue($_) } @{$self->{list}};
 }
 
 sub ta
@@ -40,7 +67,7 @@ sub var
         $scope->setVar($var, $val);
         $self;
     } else {
-        $self->getVar($var) or $self->ta->var($var);
+        $self->varScope($var) ? $self->getVar($var) : $self->ta->var($var);
     }
 }
 

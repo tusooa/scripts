@@ -7,7 +7,8 @@ use Scripts::scriptFunctions;
 use 5.012;
 use Data::Dumper;
 use Scripts::TextAlias::Expr;
-#debugOn;
+use Scripts::TextAlias::SpecialVars;
+debugOn;
 
 my @delims = qw/command string escape paren/;  
 sub new
@@ -21,7 +22,7 @@ sub new
                    paren => [[qw/( )/]],
                  },
                      regex => {},
-                     vars => [] };
+                     vars => {} };
     bless $self, $class;
     $self->setDelim($args{delim}) if ref $args{delim} eq 'HASH';
     $self->regenRegex;
@@ -112,6 +113,47 @@ sub parse
     Scripts::TextAlias::Expr->new($self, $text);
 }
 
+sub isScope
+{
+    ref shift eq 'Scripts::TextAlias::Scope';
+}
+
+sub isVar
+{
+    ref shift eq 'Scripts::TextAlias::Expr';
+}
+
+sub getValue
+{
+    my $self = shift;
+    my $expr = shift;
+    return $expr if not isScope($expr) and not isVar($expr);
+    my $name = $expr->{var};
+    if (isScope($expr)) {
+        my $clone = $expr->clone;
+        $clone->var($specVar{'arglist'}, [@_]);
+        @ret = $clone->goThrough;
+    } elsif (not $name) {
+        $expr->{args}[0];
+    } else {
+        my $var = $expr->parent->var($name);
+        my $e = 0;
+        my @args = ();
+        if (exprQuoted($var)) {
+            $e = 1;
+            @args = @{$expr->{args}};
+        } elsif (ref $var eq 'CODE') {
+            $e = 1;
+            @args = map { $self->getValue($_) } @{$expr->{args}};
+        }
+        if ($e) {
+            $var->($expr, @args);
+        } else {
+            $var;
+        }
+    }
+}
+
 1;
 __END__
 ``set(num ''one``)''
@@ -145,3 +187,10 @@ toplevel
 |- literal: "There's more than "
 |- symbol: num
 |- literal: " way to do it."
+
+
+---
+``(set max-in-two scope(
+arguments(num1 num2)
+if(>(num1 num2) num1 num2)))''
+``max-in-two(4 5)''
