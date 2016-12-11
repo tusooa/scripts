@@ -2,7 +2,6 @@ package Scripts::Windy::Conf::userdb;
 
 use 5.018;
 use Scripts::scriptFunctions;
-#$Scripts::scriptFunctions::debug = 0;
 no warnings 'experimental';
 use Scripts::Windy::Util;
 use Scripts::Windy::Userdb;

@@ -2,6 +2,7 @@ package Scripts::scriptFunctions;
 use Exporter;
 use Scripts::Configure qw/$defg/;
 use 5.014;
+use feature ();
 use File::Basename qw/basename dirname/;
 no if $] >= 5.018, warnings => "experimental";
 use Encode qw/encode decode _utf8_on _utf8_off/;
