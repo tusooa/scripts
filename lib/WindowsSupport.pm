@@ -6,7 +6,12 @@ use Encode qw/encode decode/;
 our $VERSION = 0.1;
 our @ISA = qw/Exporter/;
 our @EXPORT_OK = qw//;
-our @EXPORT = qw/%winFunc/;
+our @EXPORT = qw/%winFunc isWindows/;
+
+sub isWindows
+{
+    $^O eq 'MSWin32';
+}
 
 our %winFunc = (
             ln => sub {
@@ -27,5 +32,10 @@ our %winFunc = (
             }
 );
 
+if (isWindows) {
+    # 才可以使用终端颜色。
+    system '';
+}
+
 1;
-# 原来是这样啊
+

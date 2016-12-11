@@ -27,7 +27,7 @@ sub final;
 sub debug;
 sub formatTime;
 
-our $home = $^O eq 'MSWin32' ? $ENV{HOMEDRIVE}.$ENV{HOMEPATH} : $ENV{HOME};
+our $home = isWindows ? $ENV{HOMEDRIVE}.$ENV{HOMEPATH} : $ENV{HOME};
 our $scriptName= basename $0;
 our $verbose   = 0;
 our %debug     = ();
