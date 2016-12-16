@@ -2,12 +2,12 @@ package Scripts::TextAlias;
 use Exporter;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw//;
-use utf8;
-use Scripts::scriptFunctions;
-use 5.012;
+use Scripts::Base;
 use Data::Dumper;
 use Scripts::TextAlias::Expr;
-use Scripts::TextAlias::SpecialVars;
+use Scripts::TextAlias::Scope;
+use Scripts::TextAlias::Env;
+
 debugOn;
 
 my @delims = qw/command string escape paren/;  
@@ -28,6 +28,24 @@ sub new
     $self->regenRegex;
     $self->addVars(@{$args{vars}}) if ref $args{vars} eq 'ARRAY';
     $self;
+}
+
+sub newExpr
+{
+    my $self = shift;
+    Scripts::TextAlias::Expr->new(parser => $self, @_);
+}
+
+sub newEnv
+{
+    my $self = shift;
+    Scripts::TextAlias::Env->new($self, @_);
+}
+
+sub newScope
+{
+    my $self = shift;
+    Scripts::TextAlias::Scope->new($self, @_);
 }
 
 sub regenRegex
@@ -113,11 +131,6 @@ sub parse
     Scripts::TextAlias::Expr->new($self, $text);
 }
 
-sub isScope
-{
-    ref shift eq 'Scripts::TextAlias::Scope';
-}
-
 sub isVar
 {
     ref shift eq 'Scripts::TextAlias::Expr';
@@ -127,30 +140,11 @@ sub getValue
 {
     my $self = shift;
     my $expr = shift;
-    return $expr if not isScope($expr) and not isVar($expr);
-    my $name = $expr->{var};
-    if (isScope($expr)) {
-        my $clone = $expr->clone;
-        $clone->var($specVar{'arglist'}, [@_]);
-        @ret = $clone->goThrough;
-    } elsif (not $name) {
-        $expr->{args}[0];
+    my $env = shift;
+    if (isVar($expr)) {
+        $expr->value($env);
     } else {
-        my $var = $expr->parent->var($name);
-        my $e = 0;
-        my @args = ();
-        if (exprQuoted($var)) {
-            $e = 1;
-            @args = @{$expr->{args}};
-        } elsif (ref $var eq 'CODE') {
-            $e = 1;
-            @args = map { $self->getValue($_) } @{$expr->{args}};
-        }
-        if ($e) {
-            $var->($expr, @args);
-        } else {
-            $var;
-        }
+        $expr;
     }
 }
 
@@ -190,7 +184,11 @@ toplevel
 
 
 ---
-``(set max-in-two scope(
+``set(max-in-two scope(
 arguments(num1 num2)
 if(>(num1 num2) num1 num2)))''
 ``max-in-two(4 5)''
+``set(max max-in-two) #(''get 0``)
+set(max P(max-in-two)) #(''get a scope``)
+``set(max-num max-in-two(4 5))''
+max(4 5)''

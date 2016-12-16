@@ -1,8 +1,6 @@
-package Scripts::TextAlias::VarCall;
-use utf8;
-use 5.012;
-use Scripts::scriptFunctions;
-use Scripts::TextAlias::Scope;
+package Scripts::TextAlias::Expr;
+use Scripts::Base;
+use Scripts::TextAlias::Lambda;
 use Exporter;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/quoteExpr exprQuoted/;
@@ -10,14 +8,17 @@ debugOn;
 
 sub new
 {
-    my ($class, $ta, $scope, $var, @args) = @_;
-    $scope = Scripts::TextAlias::Scope->new($ta) if ref $scope ne 'Scripts::TextAlias::Scope';
+    my ($class, %data) = @_;
+    $data{parser} or return;
     my $self = {
-        parser => $ta,
-        parent => $scope,
-        var => $var, # name of var
-        args => [@args],
+        parser => $data{parser},
+        args => [ref $data{args} eq 'ARRAY' ? @{$data{args}} : ()],
     };
+    if ($data{varname}) {
+        $self->{varname} = $data{varname};
+    } else {
+        $self->{expr} = $data{expr};
+    }
     bless $self, $class;
 }
 
@@ -27,29 +28,26 @@ sub ta
     $self->{parser};
 }
 
-sub parent
-{
-    my $self = shift;
-    $self->{parent};
-}
-
 sub value
 {
     my $self = shift;
+    my $env = shift;
     my $ta = $self->ta;
-    my $name = $self->{var};
-    my $var = $self->parent->var($name);
-    my $e = 0;
-    my @args = ();
-    if (exprQuoted($var)) {
-        $e = 1;
-        @args = @{$self->{args}};
-    } elsif (ref $var eq 'CODE') {
-        $e = 1;
-        @args = map { $ta->getValue($_) } @{$expr->{args}};
-    }
-    if ($e) {
-        $var->($expr, @args);
+    my $name = $self->{varname};
+    my $var = $name ? $env->scope->var($name) : $self->{expr};
+    if (exprIsFunc($var)) {
+        my $args = [];
+        if (exprQuoted($var)) {
+            $args = [@{$self->{args}}];
+        } else {
+            $args = [map { $ta->getValue($_, $env) } @{$self->{args}}];
+        }
+        my $scope = $ta->newScope($env->scope);
+        $scope->var($argListVN, $args);
+        my $childEnv = $ta->newEnv($scope);
+        $var->($childEnv);
+    } elsif (isLambda($var)) {
+        $var->value($env, @{$self->{args}});
     } else {
         $var;
     }
@@ -68,4 +66,9 @@ sub exprQuoted
     ref $expr eq 'Scripts::TextAlias::Quote';
 }
 
+sub exprIsFunc
+{
+    my $expr = shift;
+    exprQuoted($expr) or ref $expr eq 'CODE';
+}
 1;

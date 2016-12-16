@@ -1,19 +1,24 @@
 package Scripts::TextAlias::Scope;
-use utf8;
-use 5.012;
-use Scripts::scriptFunctions;
+use Scripts::Base;
+use Exporter;
+our @ISA = qw/Exporter/;
+our @EXPORT = qw/isScope $argListVN/;
+our $argListVN = 'ArgList';
 debugOn;
+
+sub isScope
+{
+    ref shift eq __PACKAGE__;
+}
 
 sub new
 {
-    my ($class, $ta, $var, $list, $parent) = @_;
+    my ($class, $ta, $parent, $var) = @_;
     $var = {} if ref $var ne 'HASH';
-    $list = [] if ref $list ne 'ARRAY';
-    $parent = undef if ref $parent ne __PACKAGE__;
+    isScope($parent) or $parent = undef;
     my $self = {
         parser => $ta,
         vars => $var,
-        list => $list,
         parent => $parent,
     };
     bless $self, $class;
@@ -26,24 +31,9 @@ sub clone
     my $new = {
         parser => $self->{parser},
         vars => { %{$self->{vars}} },
-        list => $self->{list},
         parent => $self->{parent},
     };
     bless $new, $class;
-}
-
-sub add
-{
-    my $self = shift;
-    push @{$self->{list}}, @_;
-    $self;
-}
-
-sub goThrough
-{
-    my $self = shift;
-    my $ta = $self->ta;
-    map { $ta->getValue($_) } @{$self->{list}};
 }
 
 sub ta

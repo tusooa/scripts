@@ -11,13 +11,11 @@ my $addAll = 0;
 my $realGit = 0;
 my @args;
 GetOptions ('a|add-all' => \$addAll,
-    'd|debug' => \$Scripts::scriptFunctions::debug,
+    'd|debug' => sub { debugOn; },
     'o' => sub { $realGit = 1; @args = @ARGV; @ARGV = (); }
     );
 @args or @args = @ARGV;
-if ($^O eq 'MSWin32') {
-    say term "你的确应当用```GitHub for Windows'''这个软件。";
-}
+
 my $conf = conf 'git.perl';
 my $git = $conf->get('git-exec');
 $git or $git = ($^O eq 'MSWin32' ? 'C:\\Home\\usr\\Git\\bin\\git.exe' : 'git');
