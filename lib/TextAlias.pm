@@ -8,7 +8,7 @@ use Scripts::TextAlias::Expr;
 use Scripts::TextAlias::Scope;
 use Scripts::TextAlias::Env;
 use Scripts::TextAlias::Lambda;
-debugOn;
+#debugOn;
 
 my @delims = qw/command string escape paren/;  
 sub new
@@ -174,59 +174,57 @@ sub error
 sub parse
 {
     my $self = shift;
-    my $r = $self->{regex};
     my $text = shift;
-    my $state = 'literal';
-    my $tree = [];
-    my $literalR = qr/^(.*?)($r->{command}{start}|$)/s;
-
-    while ($text) {
-        if ($text =~ s/$literalR//) {
-            my ($l, $delim) = ($1, $2);
-            if (length $l) {
-                debug "literal: $l";
-                push @$tree, $l;
-            }
-            if ($delim) {
-                my $new;
-                ($text, $new) = $self->parseCommand($text, $delim);
-                if (not $new) {
-                    $self->error("Died at $text");
-                    return;
-                }
-                push @$tree, @$new;
-            } else {
-                $text = '';
-            }
-        } else {
-            debug "mewmewmew?";
-            last;
-            # 喵喵喵？？
-        }
+    my $tree;
+    ($text, $tree) = $self->parseCommand($text);
+    if (not $tree) {
+        $self->error("Died at $text");
+        return;
     }
+
     $self->newLambda(@$tree);
 }
 
 sub parseCommand
 {
-    my ($self, $text, $delim, $depth, $paren) = @_;
+    my ($self, $text, $delim, $depth, $paren, $state) = @_;
     my $r = $self->{regex};
-    my $endDelim = $r->{'command'}{'pair'}{$delim};
-    my $endParen = $r->{'paren'}{'pair'}{$paren};
+    my $endDelim = $r->{'command'}{'pair'}{$delim} // $r->{command}{end};
+    my $endParen = $r->{'paren'}{'pair'}{$paren} // $r->{paren}{end};
+    $depth //= 0;
     my $indent = '  ' x $depth;
-    my $state = 'command';
+    $state //= 'literal';
     my $tree = [];
-    my $literalR = qr/^$r->{wsornot}$endDelim/s;
+    my $literalSR = qr/^(.*?)($r->{command}{start}|$)/s;
+    my $literalER = qr/^$r->{wsornot}$endDelim/s;;
     my $numR = qr/^$r->{wsornot}($r->{purenum})/s;
-    my $symbolR = qr/^($r->{notspecial})/s;
+    my $symbolR = qr/^$r->{wsornot}($r->{notspecial})/s;
     my $parenR = qr/^$r->{wsornot}($r->{paren}{start})/s;
     my $parenEndR = qr/^$r->{wsornot}$endParen/s;
     my $stringR = qr/^$r->{wsornot}($r->{string}{start})/s;
     debug $indent."entering level $depth";
     while ($text) {
-        if ($text =~ s/$literalR//) {
+        if ($state eq 'literal') {
+            if ($text =~ s/$literalSR//) {
+                my $l;
+                ($l, $delim) = ($1, $2);
+                if (length $l) {
+                    debug $indent."literal: $l";
+                    push @$tree, $l;
+                }
+                if ($delim) {
+                    debug $indent."entering command: $delim";
+                    $state = 'command';
+                    $endDelim = $r->{'command'}{'pair'}{$delim};
+                    $literalER = qr/^$r->{wsornot}$endDelim/s;
+                }
+            }
+        } elsif ($state eq 'command') {
+        if ($text =~ s/$literalER//) {
             debug $indent."returning to literal";
-            return ($text, $tree);
+            $state = 'literal';
+            $endDelim = $r->{command}{end};
+            $literalER = qr/^$r->{wsornot}$endDelim/s;
         } elsif ($text =~ s/$numR//) {
             my $number = $1;
             debug $indent."number: $number";
@@ -234,7 +232,7 @@ sub parseCommand
         } elsif ($text =~ s/$stringR//) {
             my $startD = $1;
             my $str;
-            ($text, $str) = $self->parseStr($text, $startD);
+            ($text, $str) = $self->parseStr($text, $startD, $depth);
             debug $indent. "string: $str";
             push @$tree, $str;
         } elsif ($text =~ s/$symbolR//) {
@@ -243,17 +241,20 @@ sub parseCommand
             my $args = [];
             if ($text =~ s/$parenR//) {
                 my $thisParen = $1;
-                ($text, $args) = $self->parseCommand($text, $delim, $depth + 1, $thisParen);
+                debug $indent."paren: $thisParen";
+                ($text, $args) = $self->parseCommand($text, $delim, $depth + 1, $thisParen, $state);
                 debug $indent."--with args.";
             }
             my $expr = $self->newExpr(varname => $symName, args => $args);
             push @$tree, $expr;
         } elsif ($text =~ s/$parenEndR//) {
+            debug $indent."leaving level: $depth";
             return ($text) if ($depth <= 0);
-            $depth -= 1;
             return ($text, $tree);
         } else {
-            last;
+            debug $indent."dont know what to do with $text";
+            return ($text);
+        }
         }
     }
     ($text, $tree);
@@ -261,13 +262,13 @@ sub parseCommand
 
 sub parseStr
 {
-    my ($self, $text, $startD) = @_;
+    my ($self, $text, $startD, $outerDepth) = @_;
+    my $indent = '  ' x $outerDepth;
     my $r = $self->{regex};
     my $endD = $self->delim('string', 'start', $startD);
     my $notEndD = qr/[^$endD]/;
     my $startDelim = qr/\Q$startD\E/;
     my $endDelim = $r->{'string'}{'pair'}{$startD};
-    debug $endDelim;
     my $esc = quotemeta $self->delim('escape');
     my $normalCharR = qr/^([^$startD$endD$esc]+)/s;
     my $escapedR = qr/^$esc(.)/s;
@@ -278,23 +279,23 @@ sub parseStr
     while ($text) {
         if ($text =~ s/$normalCharR//) {
             $str .= $1;
-            debug "normal: $1";
+            debug $indent."normal: $1";
         } elsif ($text =~ s/$escapedR//) {
             my $escaped = $1;
-            debug "escaped char: ".$escaped;
+            debug $indent."escaped char: ".$escaped;
             $str .= $self->{esc}{$escaped} // $escaped;
         } elsif ($text =~ s/$endR//) {
             my $s = $1;
-            debug "end delim: $s";
+            debug $indent."end delim: $s";
             if ($depth <= 0) {
-                debug "string end. remaining: ". $text;
+                debug $indent."string end.";
                 last;
             }
             $str .= $s;
             $depth -= 1;
         } elsif ($text =~ s/$startR//) {
             my $s = $1;
-            debug "start delim: $s";
+            debug $indent."start delim: $s";
             $str .= $s;
             $depth += 1;
         }

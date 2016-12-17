@@ -42,10 +42,7 @@ sub value
         } else {
             $args = [map { $ta->getValue($_, $env) } @{$self->{args}}];
         }
-        my $scope = $ta->newScope($env->scope);
-        $scope->var($argListVN, $args);
-        my $childEnv = $ta->newEnv($scope);
-        $var->($childEnv);
+        $var->($env, $args);
     } elsif (isLambda($var)) {
         $var->value($env, @{$self->{args}});
     } else {

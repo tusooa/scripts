@@ -27,7 +27,7 @@ sub value
     my $scope = $ta->newScope($env->scope);
     $scope->var($argListVN, [@_]);
     my $childEnv = $ta->newEnv($scope);
-    map { $ta->getValue($_, $childEnv) } @{$self->{list}};
+    (map { $ta->getValue($_, $childEnv) } @{$self->{list}})[-1];
 }
 
 sub isLambda
