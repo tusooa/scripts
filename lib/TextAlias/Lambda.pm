@@ -9,8 +9,14 @@ our $argListVN = 'ArgList';
 sub new
 {
     my $class = shift;
-    my $self = { list => [@_], quoted => 0 };
+    my $ta = shift;
+    my $self = { parser => $ta, list => [@_], quoted => 0 };
     bless $self, $class;
+}
+
+sub ta
+{
+    shift->{parser};
 }
 
 sub value
