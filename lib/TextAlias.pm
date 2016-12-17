@@ -195,7 +195,8 @@ sub parseCommand
     my $indent = '  ' x $depth;
     $state //= 'literal';
     my $tree = [];
-    my $literalSR = qr/^(.*?)($r->{command}{start}|$)/s;
+    my $literalSR = qr/^(\n+?|.*?)($r->{command}{start}|$)/s; #写法好难看啊.
+    debug $literalSR;
     my $literalER = qr/^$r->{wsornot}$endDelim/s;;
     my $numR = qr/^$r->{wsornot}($r->{purenum})/s;
     my $symbolR = qr/^$r->{wsornot}($r->{notspecial})/s;
@@ -218,6 +219,10 @@ sub parseCommand
                     $endDelim = $r->{'command'}{'pair'}{$delim};
                     $literalER = qr/^$r->{wsornot}$endDelim/s;
                 }
+                debug $indent."remaining: `$text'";
+            } else {
+                debug $indent."dont know what to do with `$text'";
+                return ($text);
             }
         } elsif ($state eq 'command') {
         if ($text =~ s/$literalER//) {
@@ -255,6 +260,9 @@ sub parseCommand
             debug $indent."dont know what to do with $text";
             return ($text);
         }
+        } else {
+            debug $indent. "dont know what to do with `$text'";
+            return ($text);
         }
     }
     ($text, $tree);
