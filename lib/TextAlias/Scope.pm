@@ -53,7 +53,7 @@ sub var
     my $self = shift;
     my ($var, $val) = @_;
     if (@_ == 2) {
-        my $scope = $self->varScope($var) // $self;
+        my $scope = $self->varScopeRW($var) // $self;
         $scope->setVar($var, $val);
         $self;
     } else {
@@ -99,6 +99,43 @@ sub varScope
     } else {
         undef;
     }
+}
+
+sub varScopeRW
+{
+    my $self = shift;
+    my $var = shift;
+    if ($self->hasVarInScope($var)) {
+        if ($self->isRO) {
+            undef;
+        } else {
+            $self;
+        }
+    } elsif ($self->parent) {
+        $self->parent->varScope($var);
+    } else {
+        undef;
+    }
+}
+
+sub makeRO
+{
+    my $self = shift;
+    $self->{readonly} = 1;
+    $self;
+}
+
+sub makeRW
+{
+    my $self = shift;
+    $self->{readonly} = 0;
+    $self;
+}
+
+sub isRO
+{
+    my $self = shift;
+    $self->{readonly};
 }
 
 sub makeVar

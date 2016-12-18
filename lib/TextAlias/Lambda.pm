@@ -19,7 +19,7 @@ sub ta
     shift->{parser};
 }
 
-sub value
+sub valueWithScope
 {
     my $self = shift;
     my $ta = $self->ta;
@@ -27,7 +27,14 @@ sub value
     my $scope = $ta->newScope($env->scope);
     $scope->var($argListVN, [@_]);
     my $childEnv = $ta->newEnv($scope);
-    (map { $ta->getValue($_, $childEnv) } @{$self->{list}})[-1];
+    my @ret = ($scope, (map { $ta->getValue($_, $childEnv) } @{$self->{list}})[-1]);
+    @ret;
+}
+
+sub value
+{
+    my $self = shift;
+    ($self->valueWithScope(@_))[-1];
 }
 
 sub isLambda

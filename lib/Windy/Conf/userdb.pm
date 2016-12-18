@@ -6,6 +6,7 @@ no warnings 'experimental';
 use Scripts::Windy::Util;
 use Scripts::Windy::Userdb;
 use Scripts::Windy::Conf::smartmatch;
+use Scripts::TextAlias::Parser;
 use Exporter;
 use Data::Dumper;
 use utf8;
@@ -613,6 +614,31 @@ sub queryConfGroup
           success => 'ret', error => 'ret', failure => 'ret', },
         @_);
 }
+
+## text-alias config
+my $taPrint = ta->newScope();
+$taPrint->makeVar('PRINT-RESULT');
+topScope->var('print', sub {
+    my ($env, $args) = @_;
+    $taPrint->var('PRINT-RESULT', join '', $taPrint->var('PRINT-RESULT'), @$args);
+});
+sub evalTA
+{
+    my $windy = shift;
+    my $msg = shift;
+    my ($text) = @_;
+    runCommand($windy, $msg,
+               { run => sub {
+                   $taPrint->makeVar('PRINT-RESULT');
+                   my $byte = ta->parse($text);
+                   $byte or return (0, ta->error);
+                   my ($scope, $result) = $byte->valueWithScope(topEnv);
+                   (1, $taPrint->var('PRINT-RESULT'));
+                 },
+                 success => 'ret', error => 'ret', failure => 'ret',
+               }, @_);
+}
+
 sub reloadConfig
 {
     my ($windy, $type) = @_;
@@ -625,6 +651,7 @@ sub reloadConfig
         loadConfGroup($windy, $type);
     }
 }
+
 sub reloadDB
 {
     @baseDB = (
@@ -668,6 +695,7 @@ sub reloadDB
         [sm(qr/^wconf\s+g\s+(.+)$/), \&queryConf],
         [sm(qr/^wconf\s+s\s+([^=]+=.*)$/), \&changeConf],
         [sm(qr/^wconf\s+l\s+(.*)$/), \&queryConfGroup],
+        [sm(qr/^eval\s*(.+)$/s), \&evalTA],
         );
     $database->set(@baseDB);
     $database->{_match} = $match;

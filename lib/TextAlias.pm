@@ -27,7 +27,8 @@ sub new
                  },
                      esc => {t => "\t", n => "\n", "\\" => "\\",},
                      regex => {},
-                     vars => {} };
+                     vars => {},
+                     handler => {}, };
     bless $self, $class;
     $self->setDelim($args{delim}) if ref $args{delim} eq 'HASH';
     $self->regenRegex;
@@ -83,6 +84,27 @@ sub regenRegex
     }
     $self->{regex} = {%r};
     $self;
+}
+
+sub handler
+{
+    my ($self, $type, @args) = @_;
+    if (UNIVERSAL::isa($self->{handler}{$type}, 'CODE')) {
+        $self->{handler}{$type}(@args);
+    } else {
+        @args;
+    }
+}
+
+sub addHandler
+{
+    my ($self, $type, $func) = @_;
+    if (UNIVERSAL::isa($func, 'CODE')) {
+        $self->{handler}{$type} = $func;
+        $self;
+    } else {
+        undef;
+    }
 }
 
 sub delim
@@ -160,6 +182,19 @@ sub getValue
     }
 }
 
+sub valueTrue
+{
+    my ($self, $value) = @_;
+    if (ref $value eq 'ARRAY') {
+        (@$value);
+    } elsif (ref $value eq 'HASH') {
+        my @s = (%$value);
+        @s;
+    } else {
+        $value;
+    }
+}
+
 sub error
 {
     my $self = shift;
@@ -211,7 +246,8 @@ sub parseCommand
                 ($l, $delim) = ($1, $2);
                 if (length $l) {
                     debug $indent."literal: $l";
-                    push @$tree, $l;
+                    my @handled = $self->handler('literal', $l);
+                    push @$tree, @handled;
                 }
                 if ($delim) {
                     debug $indent."entering command: $delim";

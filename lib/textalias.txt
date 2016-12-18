@@ -1,0 +1,125 @@
+指令写在`` ''之内
+基本调用格式是``这啥(那啥)''和``这啥''
+然后指明了一些函数
+比较基本的
+    {啥东东} 一个字串
+    1.234 .0001 -142 数字
+    ''这里跟字串也差不多了``
+    def(诶喵) 定义变量
+    set(诶喵 {嗯喵?}) 设值
+    print({喵喵喵?})
+    #(''这是个注释``) 其实就是个空操作符写成#({喵喵喵})也行
+运算
+    +(1 2 3 4) （结果是10）
+    * /和+是差不多的
+    减号如果只有一个数就取反，多于一个就连减
+    -(1) （=-1）
+    -(1 2) （=-1）
+    -(1 2 3) （=-4）
+    .({})
+比较
+    >(3 2 1 0) 意思是如果一个比一个大就为真，下面类似
+    < = >= <= != eq lt gt ne le ge
+    其中!=和ne是每相邻两个都不相等
+    and(1 2 3) or not
+    false(假)的定义是0,空字串，字串"0"和空列表
+判定
+    if(条件 条件成立了做什么 条件不成立做什么)
+    第三个和以后的参数都会在条件不成立的时候被执行
+    所以如果「成立」的时候要执行不止一条，用一个progn
+    if(今天要去援交 progn(叫人 啪 收钱) 在家躺着 睡觉)
+函数
+    用lambda定义一个函数
+    lambda(arguments(攻受)
+        if(eq(攻受 1)
+           print({你要啪谁？})
+           print({今天要被谁啪啊？})))
+    但是定义了是没有用的因为没法调用所以要设到一个变量上
+    set(援交 lambda(...)) #({我比较懒})
+    然后就可以像调用一般的函数一样调用了
+    援交(1)
+    援交 #({没参数，那就默认是受了})
+    如果嫌这个名字太长了可以设一个别名
+    set(啪 q(援交))
+    啪(1)
+    q表示取变量本身而非结果
+    其实也可以覆盖掉本身的函数
+    set(+ lambda(
+        arguments(n1 n2)
+        if(and(=(n1 2) =(n2 2)) 5 0)))
+    +(2 2) #({结果是5})
+    但是如果要找回自带的+就要拿出一个SUPER
+    set(本来的加号 SUPER(+))
+    本来的加号(2 2) #({4})
+    set(+ lambda(arguments(n1 n2)
+          if(and(=(n1 2) =(n2 2))
+             5
+             本来的加号(n1 n2))))
+    有的时候不想用这个奇怪的变量
+    set(+ lambda(arguments(n1 n2)
+          if(and(=(n1 2) =(n2 2))
+             5
+             call(SUPER(+) n1 n2))))
+
+下面是一些转化
+TextAlias--Emacs Lisp--Perl
+
+``var''
+var
+$var; # or @var, %var, etc.
+
+``func(args)''
+(func args)
+func(@args);
+
+``func-taking-no-args''
+(func-taking-no-args)
+funcTakingNoArgs;
+
+``{string}''
+"string"
+"string"
+
+and 'lite\ral"
+"and 'lite\\ral\""
+'and \'lite\ral"'
+
+``set(foo {bar})''
+(setq foo "bar")
+$foo = "bar";
+
+``def(local vars)''
+(let ((local nil) (vars nil))
+     ...)
+my ($local, $vars);
+
+``#(''this is a comment``)''
+;this is a comment
+#this is a comment
+
+``q(var)''
+'var
+\$var
+
+``lambda(arguments(foo bar) +(foo bar))''
+(lambda (foo bar) (+ foo bar))
+sub { my ($foo, $bar) = @_; $foo + $bar; }
+
+``set(func lambda(arguments(a) a))''
+(defun func(a) a)
+sub func { my $a = shift; $a; }
+
+``if(cond progn(s1 s2 s3) t1 t2 t3)''
+(if cond
+    (progn s1 s2 s3)
+    t1 t2 t3)
+if ($cond) {
+   $s1;$s2;$s3;
+} else {
+   $t1;$t2;$t3;
+}
+
+``and(1 0 2)''
+(and 1 0 2)
+1 and 0 and 2
+

@@ -3,9 +3,10 @@ use Scripts::Base;
 use Scripts::TextAlias;
 use Scripts::TextAlias::Scope qw/$argListVN/;
 use Scripts::TextAlias::Expr qw/quoteExpr/;
+use Scripts::TextAlias::SpecialVars;
 use Exporter;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/ta topEnv/;
+our @EXPORT = qw/ta topEnv topScope/;
 
 my $parser = Scripts::TextAlias->new;
 my $topScope = $parser->newScope;
@@ -37,7 +38,8 @@ $func{set} = quoteExpr sub {
     my $ta = $env->ta;
     my @kv = @{$args};
     for (1..(@kv/2)) {
-        $env->scope->var($kv[2*$_-2]->{varname}, $ta->getValue($kv[2*$_-1], $env));
+        my $value = $ta->getValue($kv[2*$_-1], $env);
+        $env->scope->var($kv[2*$_-2]->{varname}, $value);
     }
 };
 $func{print} = sub {
@@ -93,6 +95,7 @@ $func{'q'} = quoteExpr sub { # quote
     $list[0];
 };
 $func{'#'} = quoteExpr sub {}; # do nothing
+#list func
 $func{'list'} = sub {
     my ($env, $args) = @_;
     $args;
@@ -103,6 +106,27 @@ $func{'xth'} = sub {
     UNIVERSAL::isa($list, 'ARRAY') or return;
     $list->[$num];
 };
+$func{'push'} = sub {
+    my ($env, $args) = @_;
+    my ($list, @rest) = @$args;
+    push @$list, @rest;
+};
+$func{'pop'} = sub {
+    my ($env, $args) = @_;
+    my ($list, @rest) = @$args;
+    pop @$list, @rest;
+};
+$func{'shift'} = sub {
+    my ($env, $args) = @_;
+    my ($list, @rest) = @$args;
+    shift @$list, @rest;
+};
+$func{'unshift'} = sub {
+    my ($env, $args) = @_;
+    my ($list, @rest) = @$args;
+    unshift @$list, @rest;
+};
+#conditions
 $func{'progn'} = sub {
     my ($env, $args) = @_;
     $args->[-1];
@@ -111,12 +135,193 @@ $func{'if'} = quoteExpr sub {
     my ($env, $args) = @_;
     my $ta = $env->ta;
     my ($cond, $true, @false) = @$args;
-    if ($ta->getValue($cond, $env)) {
+    if ($ta->valueTrue($ta->getValue($cond, $env))) {
         $ta->getValue($true, $env);
     } else {
         (map { $ta->getValue($_, $env) } @false)[-1];
     }
 };
+$func{'and'} = quoteExpr sub {
+    my ($env, $args) = @_;
+    my $ta = $env->ta;
+    my $result;
+    for (@$args) {
+        if (not $ta->valueTrue($result = $ta->getValue($_, $env))) {
+            last;
+        }
+    }
+    $result;
+};
+$func{'or'} = quoteExpr sub {
+    my ($env, $args) = @_;
+    my $ta = $env->ta;
+    my $result;
+    for (@$args) {
+        if ($ta->valueTrue($result = $ta->getValue($_, $env))) {
+            last;
+        }
+    }
+    $result;
+};
+$func{'not'} = sub {
+    my ($env, $args) = @_;
+    not $env->valueTrue($args->[0]);
+};
+# comparisons
+$func{'>'} = sub {
+    my ($env, $args) = @_;
+    my @nums = @$args;
+    my $ret = 1;
+    for (0..$#nums-1) {
+        if (not $nums[$_] > $nums[$_+1]) {
+            $ret = 0;
+            last;
+        }
+    }
+    $ret;
+};
+$func{'='} = sub {
+    my ($env, $args) = @_;
+    my @nums = @$args;
+    my $ret = 1;
+    for (0..$#nums-1) {
+        if (not $nums[$_] == $nums[$_+1]) {
+            $ret = 0;
+            last;
+        }
+    }
+    $ret;
+};
+$func{'<'} = sub {
+    my ($env, $args) = @_;
+    my @nums = @$args;
+    my $ret = 1;
+    for (0..$#nums-1) {
+        if (not $nums[$_] < $nums[$_+1]) {
+            $ret = 0;
+            last;
+        }
+    }
+    $ret;
+};
+$func{'>='} = sub {
+    my ($env, $args) = @_;
+    my @nums = @$args;
+    my $ret = 1;
+    for (0..$#nums-1) {
+        if (not $nums[$_] >= $nums[$_+1]) {
+            $ret = 0;
+            last;
+        }
+    }
+    $ret;
+};
+$func{'<='} = sub {
+    my ($env, $args) = @_;
+    my @nums = @$args;
+    my $ret = 1;
+    for (0..$#nums-1) {
+        if (not $nums[$_] <= $nums[$_+1]) {
+            $ret = 0;
+            last;
+        }
+    }
+    $ret;
+};
+$func{'!='} = sub {
+    my ($env, $args) = @_;
+    my @nums = @$args;
+    my $ret = 1;
+    for (0..$#nums-1) {
+        if (not $nums[$_] != $nums[$_+1]) {
+            $ret = 0;
+            last;
+        }
+    }
+    $ret;
+};
+$func{'gt'} = sub {
+    my ($env, $args) = @_;
+    my @nums = @$args;
+    my $ret = 1;
+    for (0..$#nums-1) {
+        if (not $nums[$_] gt $nums[$_+1]) {
+            $ret = 0;
+            last;
+        }
+    }
+    $ret;
+};
+$func{'lt'} = sub {
+    my ($env, $args) = @_;
+    my @nums = @$args;
+    my $ret = 1;
+    for (0..$#nums-1) {
+        if (not $nums[$_] lt $nums[$_+1]) {
+            $ret = 0;
+            last;
+        }
+    }
+    $ret;
+};
+$func{'eq'} = sub {
+    my ($env, $args) = @_;
+    my @nums = @$args;
+    my $ret = 1;
+    for (0..$#nums-1) {
+        if (not $nums[$_] eq $nums[$_+1]) {
+            $ret = 0;
+            last;
+        }
+    }
+    $ret;
+};
+$func{'ge'} = sub {
+    my ($env, $args) = @_;
+    my @nums = @$args;
+    my $ret = 1;
+    for (0..$#nums-1) {
+        if (not $nums[$_] ge $nums[$_+1]) {
+            $ret = 0;
+            last;
+        }
+    }
+    $ret;
+};
+$func{'le'} = sub {
+    my ($env, $args) = @_;
+    my @nums = @$args;
+    my $ret = 1;
+    for (0..$#nums-1) {
+        if (not $nums[$_] le $nums[$_+1]) {
+            $ret = 0;
+            last;
+        }
+    }
+    $ret;
+};
+$func{'ne'} = sub {
+    my ($env, $args) = @_;
+    my @nums = @$args;
+    my $ret = 1;
+    for (0..$#nums-1) {
+        if (not $nums[$_] ne $nums[$_+1]) {
+            $ret = 0;
+            last;
+        }
+    }
+    $ret;
+};
+
+#loops
+=comment
+$func{'while'} = quoteExpr sub {
+    my ($env, $args) = @_;
+    my $ta = $env->ta;
+    my ($cond, @list) = @$args;
+    while ($ta->valueTrue($ta->getValue($cond)))
+}
+=cut
 $func{'SUPER'} = quoteExpr sub {
     my ($env, $args) = @_;
     my $ta = $env->ta;
@@ -132,11 +337,12 @@ $func{'call'} = quoteExpr sub {
                             args => [map { $ta->getValue($_, $env) } @list]);
     $expr->value($env);
 };
+# regexp func
 $func{'rx'} = sub {
     my ($env, $args) = @_;
     my ($regex, $modifiers) = @$args;
     if ($modifiers and $modifiers =~ /^[msixpadlun]$/) {
-        qr/(^$modifiers:)/;
+        qr/(^$modifiers:$regex)/;
     } else {
         qr/$regex/;
     }
@@ -144,7 +350,9 @@ $func{'rx'} = sub {
 $func{'m'} = sub {
     my ($env, $args) = @_;
     my ($regex, $string) = @$args;
-    [$string =~ /$regex/];
+    my @match = $string =~ /$regex/;
+    $env->scope->var($matchVN, [@match]);
+    @match;
 };
 $func{'s'} = sub {
     my ($env, $args) = @_;
