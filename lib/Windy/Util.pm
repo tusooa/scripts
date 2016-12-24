@@ -18,7 +18,8 @@ uid uName isAt isAtId findUserInGroup isPrivateMsg
 group invite friend $nextMessage $atPrefix $atSuffix
 parseRichText $mainConf msgPosStart msgPosEnd
 msgReceiver receiverName outputLog isMsg BACKEND $windyConf
-sendTo replyToMsg $mainConf msgGroupMembers setGroupCard/;
+sendTo replyToMsg $mainConf msgGroupMembers setGroupCard
+msgTextNoAt/;
 our @EXPORT_OK = qw//;
 
 1;

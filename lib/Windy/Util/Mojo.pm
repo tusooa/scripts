@@ -14,7 +14,7 @@ uid uName isAt isAtId findUserInGroup isPrivateMsg
 group invite friend $atPrefix $atSuffix
 parseRichText msgPosStart msgPosEnd
 msgReceiver receiverName outputLog isMsg sendTo
-msgGroupMembers setGroupCard/;
+msgGroupMembers setGroupCard msgTextNoAt/;
 our @EXPORT_OK = qw//;
 
 our $atPrefix = "\tat";
@@ -38,7 +38,7 @@ sub parseRichText
     my ($windy, $msg) = @_;
     my $match = $windy->{_db}->{_match};
     my @raw = @{ $msg->raw_content };
-    my $text;
+    my ($text, $noAt);
     while (@raw) {
         my $head = shift @raw;
         if ($head->{type} eq 'txt'
@@ -52,11 +52,13 @@ sub parseRichText
             _utf8_off($at);
             $text .= $atPrefix.$at.$atSuffix;
         } else {
+            $noAt .= $head->{content};
             $text .= $head->{content};
         }
     }
     my $name = $msg->receiver->displayname;
     isAt($windy, $msg) = $text =~ /\Q$atPrefix\E\@\Q$name$atSuffix\E/;
+    msgTextNoAt($windy, $msg) = $noAt;
     msgText($windy, $msg) = $text;
     _utf8_on($text);
     my ($pre, $post) = ($match->{preMatch}, $match->{postMatch});
@@ -84,6 +86,12 @@ sub msgText : lvalue
     my $windy = shift;
     my $msg = shift;
     $msg->{__rich_text};
+}
+
+sub msgTextNoAt : lvalue
+{
+    my ($windy, $msg) = @_;
+    $msg->{__text_no_at};
 }
 
 sub msgGroup

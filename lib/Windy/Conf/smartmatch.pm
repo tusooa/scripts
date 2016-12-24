@@ -315,7 +315,7 @@ my @aliases = (
     [qr/^签到$/, $subs->{sign}],
     [qr/^(?:对|艾特)(?:我|你)$/, sub {
         my ($self, $windy, $msg) = @_;
-        my $text = msgText($windy, $msg);
+        my $text = msgTextNoAt($windy, $msg);
         _utf8_on($text); # 别忘。
         isAt($windy, $msg) or $text =~ $caller;
      }],
