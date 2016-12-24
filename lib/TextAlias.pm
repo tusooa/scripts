@@ -28,7 +28,8 @@ sub new
                      esc => {t => "\t", n => "\n", "\\" => "\\",},
                      regex => {},
                      vars => {},
-                     handler => {}, };
+                     handler => {},
+                     maxdepth => -1, };
     bless $self, $class;
     $self->setDelim($args{delim}) if ref $args{delim} eq 'HASH';
     $self->regenRegex;
@@ -230,7 +231,7 @@ sub parseCommand
     my $indent = '  ' x $depth;
     $state //= 'literal';
     my $tree = [];
-    my $literalSR = qr/^(\n+?|.*?)($r->{command}{start}|$)/s; #写法好难看啊.
+    my $literalSR = qr/^(\n+?|.*?)($r->{command}{start}|$)/s; #鍐欐硶濂介毦鐪嬪晩.
     debug $literalSR;
     my $literalER = qr/^$r->{wsornot}$endDelim/s;;
     my $numR = qr/^$r->{wsornot}($r->{purenum})/s;

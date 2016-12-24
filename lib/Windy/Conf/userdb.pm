@@ -616,12 +616,14 @@ sub queryConfGroup
 }
 
 ## text-alias config
-my $taPrint = ta->newScope();
-$taPrint->makeVar('PRINT-RESULT');
-topScope->var('print', sub {
-    my ($env, $args) = @_;
-    $taPrint->var('PRINT-RESULT', join '', $taPrint->var('PRINT-RESULT'), @$args);
-});
+#my $taPrint = ta->newScope();
+#$taPrint->makeVar('PRINT-RESULT');
+#topScope->var('print', sub {
+#    my ($env, $args) = @_;
+#    $taPrint->var('PRINT-RESULT', join '', $taPrint->var('PRINT-RESULT'), @$args);
+#});
+=comment
+
 sub evalTA
 {
     my $windy = shift;
@@ -639,6 +641,55 @@ sub evalTA
                }, @_);
 }
 
+=cut
+
+sub changeCard
+{
+    my $windy = shift;
+    my $msg = shift;
+    my ($uid, $style) = @_;
+    runCommand($windy, $msg,
+               { run => sub {
+                   #$windy->logger("uID:", $uid);
+                   #$windy->logger("style:".$style);
+                   my @members = $uid ? msgGroupHas($windy, $msg, $uid) : msgGroupMembers($windy, $msg);
+                   my ($regex, @r, @changeTo, $rFlag);
+                   if ($style =~ s{^/(.+)/$}{$1}) {
+                       $rFlag = 1;
+                   }
+                   if ($style =~ /<([^>]*)>/) {
+                       @r = ($`, '.*', $');
+                       @changeTo = ($`, $1, $');
+                   } else {
+                       @r = ($style, '.*');
+                       @changeTo = ($style, undef, undef);
+                   }
+                   if ($rFlag) {
+                       eval { $regex = qr/$r[0]$r[1]$r[2]/ };
+                       return 0 if $@;
+                   } else {
+                       eval { $regex = qr/^\Q$r[0]\E$r[1]\Q$r[2]\E$/ };
+                       return 0 if $@;
+                   }
+                   #$windy->logger("REGEX:". $regex);
+                   #$windy->logger("CHANGETO:", @changeTo);
+                   my $count = 0;
+                   for (@members) {
+                       my $oldName = uName($_);
+                       #$windy->logger("OLDNAME:" . $oldName);
+                       _utf8_on($oldName);
+                       next if $oldName =~ $regex;
+                       my $middle = $changeTo[1] || Scripts::Windy::Addons::Nickname->userNickname($_);
+                       my $newName = $changeTo[0] . $middle . $changeTo[2];
+                       setGroupCard($windy, $msg, $_, $newName);
+                       #$windy->logger(uid($_).'('.$oldName.')->'.$newName);
+                       $count++;
+                   }
+                   (1, $count);
+                 },
+                 success => 'ret', error => 'ret', failure => 'ret',
+               }, @_);
+}
 sub reloadConfig
 {
     my ($windy, $type) = @_;
@@ -695,7 +746,8 @@ sub reloadDB
         [sm(qr/^wconf\s+g\s+(.+)$/), \&queryConf],
         [sm(qr/^wconf\s+s\s+([^=]+=.*)$/), \&changeConf],
         [sm(qr/^wconf\s+l\s+(.*)$/), \&queryConfGroup],
-        [sm(qr/^eval\s*(.+)$/s), \&evalTA],
+        [smS(qr/<_我名_><中>把(?:(\d+)|<所有人>)改(?:成|作)(.+)$/), \&changeCard],
+        #[sm(qr/^eval\s*(.+)$/s), \&evalTA],
         );
     $database->set(@baseDB);
     $database->{_match} = $match;

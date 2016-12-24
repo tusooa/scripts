@@ -13,7 +13,8 @@ msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender
 uid uName isAt isAtId findUserInGroup isPrivateMsg
 group invite friend $atPrefix $atSuffix
 parseRichText msgPosStart msgPosEnd
-msgReceiver receiverName outputLog isMsg sendTo/;
+msgReceiver receiverName outputLog isMsg sendTo
+msgGroupMembers setGroupCard/;
 our @EXPORT_OK = qw//;
 
 our $atPrefix = "\tat";
@@ -203,4 +204,18 @@ sub sendTo
         $to->send($_);
     }
 }
+
+sub msgGroupMembers
+{
+    my ($windy, $msg) = @_;
+    isGroupMsg(@_) and $msg->group->members;
+}
+sub setGroupCard
+{
+    my ($windy, $msg, $member, $card) = @_;
+    _utf8_off($card);
+    $member or return;
+    $member->set_card($card);
+}
+
 1;

@@ -126,6 +126,12 @@ $func{'unshift'} = sub {
     my ($list, @rest) = @$args;
     unshift @$list, @rest;
 };
+$func{'|'} = sub { # flatten
+    my ($env, $args) = @_;
+    my ($list) = @$args;
+    UNIVERSAL::isa($list, 'ARRAY') or return;
+    @$list;
+};
 #conditions
 $func{'progn'} = sub {
     my ($env, $args) = @_;
