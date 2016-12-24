@@ -657,18 +657,25 @@ sub changeCard
                    if ($style =~ s{^/(.+)/$}{$1}) {
                        $rFlag = 1;
                    }
-                   if ($style =~ /<([^>]*)>/) {
-                       @r = ($`, '.*', $');
-                       @changeTo = ($`, $1, $');
+                   if ((@changeTo = split /<([^>]*)>/, $style, -1) != 1) {
+                       @r = @changeTo;
+                       for (0..$#r) {
+                           if ($_ % 2 != 0) {
+                               $r[$_] = '.*';
+                           } else {
+                               $r[$_] = quotemeta $r[$_] unless $rFlag;
+                           }
+                       }
                    } else {
-                       @r = ($style, '.*');
+                       @r = ($rFlag ? quotemata $style : $style, '.*');
                        @changeTo = ($style, undef, undef);
                    }
+                   $regex = join '', @r;
                    if ($rFlag) {
-                       eval { $regex = qr/$r[0]$r[1]$r[2]/ };
+                       eval { $regex = qr/$regex/ };
                        return 0 if $@;
                    } else {
-                       eval { $regex = qr/^\Q$r[0]\E$r[1]\Q$r[2]\E$/ };
+                       eval { $regex = qr/^$regex$/ };
                        return 0 if $@;
                    }
                    #$windy->logger("REGEX:". $regex);
@@ -679,8 +686,13 @@ sub changeCard
                        #$windy->logger("OLDNAME:" . $oldName);
                        _utf8_on($oldName);
                        next if $oldName =~ $regex;
-                       my $middle = $changeTo[1] || Scripts::Windy::Addons::Nickname->userNickname($_);
-                       my $newName = $changeTo[0] . $middle . $changeTo[2];
+                       my $nick = Scripts::Windy::Addons::Nickname->userNickname($_);
+                       my @c = @changeTo;
+                       for (1..((@c-1)/2)) {
+                           my $num = 2 * $_ - 1;
+                           $c[$num] = $c[$num] eq '*' ? $nick : $c[$num];
+                       }
+                       my $newName = join '', @c;
                        setGroupCard($windy, $msg, $_, $newName);
                        #$windy->logger(uid($_).'('.$oldName.')->'.$newName);
                        $count++;
