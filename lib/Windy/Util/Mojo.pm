@@ -37,9 +37,9 @@ sub shortenDName
 {
     my $name = shift;
     _utf8_on($name);
-    substr $name, 0, 7;
+    my $subset = substr $name, 0, 7;
     _utf8_off($name);
-    $name;
+    $subset;
 }
 
 sub parseRichText
@@ -58,7 +58,7 @@ sub parseRichText
             and $raw[0]->{type} eq 'txt'
             and $raw[0]->{content} eq '') {
             shift @raw;
-            my $at = shortenDName($head->{content} =~ s/^@//r);
+            my $at = shortenDName($head->{content} =~ s/^\@//r);
             isAt($windy, $msg) = 1 if $at eq $name;
             $text .= $atPrefix.'@'.$at.$atSuffix;
         } else {
