@@ -48,7 +48,9 @@ sub parseRichText
     my $match = $windy->{_db}->{_match};
     my @raw = @{ $msg->raw_content };
     my ($text, $noAt);
-    my $name = shortenDName($msg->receiver->displayname);
+    my $oName = $msg->receiver->displayname;
+    _utf8_on($oName);
+    my $name = shortenDName($oName =~ s/$match->{notShownInAt}//gr);
     while (@raw) {
         my $head = shift @raw;
         if ($head->{type} eq 'txt'
