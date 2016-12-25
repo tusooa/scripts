@@ -231,9 +231,9 @@ sub parseCommand
     my $indent = '  ' x $depth;
     $state //= 'literal';
     my $tree = [];
-    my $literalSR = qr/^(\n+?|.*?)($r->{command}{start}|$)/s; #鍐欐硶濂介毦鐪嬪晩.
+    my $literalSR = qr/^(\n+?|.*?)($r->{command}{start}|$)/s;
     debug $literalSR;
-    my $literalER = qr/^$r->{wsornot}$endDelim/s;;
+    my $literalER = qr/^$r->{wsornot}$endDelim/s;
     my $numR = qr/^$r->{wsornot}($r->{purenum})/s;
     my $symbolR = qr/^$r->{wsornot}($r->{notspecial})/s;
     my $parenR = qr/^$r->{wsornot}($r->{paren}{start})/s;

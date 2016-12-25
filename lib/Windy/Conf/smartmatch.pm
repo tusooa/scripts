@@ -263,7 +263,7 @@ my @aliases = (
     [qr/^讯息$/, sub { my ($self, $windy, $msg) = @_; isMsg($windy, $msg); }],
     [qr/^群讯开启$/, $subs->{fromGroup}],
     [qr/^私讯$/, sub { my ($self, $windy, $msg) = @_; isPrivateMsg($windy, $msg); }],
-    [qr/^截止$/, sub { msgStopping($_[1], $_[2]) = 1; '' } ],
+    [qr/^截止(?:[：:](.+))?$/, sub { msgStopping($_[1], $_[2]) = $_[3] || 1; '' } ],
     [qr/^(?:来讯者(?:名|的名字))$/, \&senderNickname],
     [qr/^我名$/, sub { shift; receiverName(@_) },],
     [qr/^来讯者(?:的|之)?(?:[Ii][Dd]|[Qq][Qq])$/, sub {

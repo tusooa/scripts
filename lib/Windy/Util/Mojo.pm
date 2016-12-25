@@ -33,12 +33,22 @@ sub isPrivateMsg
     $msg->type =~ /^(?:sess_)?message$/;
 }
 
+sub shortenDName
+{
+    my $name = shift;
+    _utf8_on($name);
+    substr $name, 0, 7;
+    _utf8_off($name);
+    $name;
+}
+
 sub parseRichText
 {
     my ($windy, $msg) = @_;
     my $match = $windy->{_db}->{_match};
     my @raw = @{ $msg->raw_content };
     my ($text, $noAt);
+    my $name = shortenDName($msg->receiver->displayname);
     while (@raw) {
         my $head = shift @raw;
         if ($head->{type} eq 'txt'
@@ -46,18 +56,14 @@ sub parseRichText
             and $raw[0]->{type} eq 'txt'
             and $raw[0]->{content} eq '') {
             shift @raw;
-            my $at = $head->{content};
-            _utf8_on($at);
-            $at = substr $at, 0, 8; # 只能有七个字。
-            _utf8_off($at);
-            $text .= $atPrefix.$at.$atSuffix;
+            my $at = shortenDName($head->{content} =~ s/^@//r);
+            isAt($windy, $msg) = 1 if $at eq $name;
+            $text .= $atPrefix.'@'.$at.$atSuffix;
         } else {
             $noAt .= $head->{content};
             $text .= $head->{content};
         }
     }
-    my $name = $msg->receiver->displayname;
-    isAt($windy, $msg) = $text =~ /\Q$atPrefix\E\@\Q$name$atSuffix\E/;
     msgTextNoAt($windy, $msg) = $noAt;
     msgText($windy, $msg) = $text;
     _utf8_on($text);
@@ -183,7 +189,7 @@ sub isAtId
 {
     my ($windy, $msg, $id) = @_;
     my $user = msgGroupHas($windy, $msg, $id) or return;
-    my $name = $user->displayname;
+    my $name = shortenDName($user->displayname);
     msgText($windy, $msg) =~ /\Q$atPrefix\E\@\Q$name$atSuffix\E/;
 }
 

@@ -90,9 +90,9 @@ sub match
             #$windy->logger("一个可选的回复是: ".$ret);
             #debug 'matching, returning '.$ret;
             push @ret, $ret if $ret; # 若有返回值，则添加到回复列表。
-            if (msgStopping($windy, $msg)) {
+            if (my $reason = msgStopping($windy, $msg)) {
                 @ret = $ret ? ($ret) : ();
-                $windy->logger("这条信息到此为止了。");
+                $windy->logger("这条信息".($reason eq 1 ? '' : '因为'.$reason)."到此为止了。");
                 last;
             }
         }
