@@ -29,7 +29,6 @@ $func{arguments} = quoteExpr sub {
     my @vars = @{$_[0]};
     #my @varname = map { $_->{varname} } @$vars;
     my @arg = @{ $env->scope->var($argListVN) };
-    use Data::Dumper;print Dumper @arg;
     for (0..$#vars) {
         my $v = $vars[$_];
         if (not isVar($v)) {
