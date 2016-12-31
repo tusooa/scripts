@@ -105,7 +105,7 @@ $func{'+'} = sub {
 };
 $func{'-'} = sub {
     my ($env, $args) = @_;
-    my @list = $args;
+    my @list = @$args;
     my $result = shift @list;
     if (@list) {
         $result -= $_ for @list;
@@ -151,6 +151,10 @@ $func{'list'} = sub {
     my ($env, $args) = @_;
     $args;
 };
+$func{'qw'} = sub {
+    my ($env, $args) = @_;
+    split /\s+/, $args->[0];
+};
 $func{'xth'} = sub {
     my ($env, $args) = @_;
     my ($list, $num) = @$args;
@@ -184,6 +188,7 @@ $func{'|'} = sub { # flatten
     @$list;
 };
 #conditions
+$func{'nil'} = sub { undef };
 $func{'progn'} = sub {
     my ($env, $args) = @_;
     $args->[-1];
@@ -408,7 +413,10 @@ $func{'m'} = sub {
     my ($env, $args) = @_;
     my ($regex, $string) = @$args;
     my @match = $string =~ /$regex/;
-    $env->scope->var($matchVN, [@match]);
+    if (@match) {
+        $env->scope->makeVar($matchVN);
+        $env->scope->var($matchVN, [@match]);
+    }
     @match;
 };
 $func{'s'} = sub {

@@ -7,6 +7,7 @@ use Scripts::Windy::Util;
 use Scripts::Windy::Userdb;
 use Scripts::Windy::Conf::smartmatch;
 use Scripts::TextAlias::Parser;
+use Scripts::Windy::SmartMatch::TextAlias;
 use Scripts::Windy::SmartMatch::MPQStyle;
 use Exporter;
 use Data::Dumper;
@@ -118,6 +119,7 @@ sub runCommand
     } else {
         @args = @_;
     }
+    msgTAEnv($windy, $msg)->scope->var($msgMatchVN, [@args]);
     $commands->{$cmd}{$status}->run($windy, $msg, @args);
 }
 
@@ -233,7 +235,11 @@ sub autoTeach
     my ($windy, $msg, $ask, $ans) = @_;
     $ask = mpq2sm($ask);
     $ans = mpq2sr($ans);
-    $ans = $ans.'【$(tail)】'; teach($windy, $msg, $ask, $ans, 'S');
+    my $tail = isTALike($ans) ? q/``reply({tail})''/ : '【$(tail)】';
+    if ($ans !~ $match->{tailing}) {
+        $ans = $ans.$tail;
+    }
+    teach($windy, $msg, $ask, $ans, 'S');
 }
 sub newNickname
 {
@@ -623,6 +629,7 @@ sub queryConfGroup
 }
 
 ## text-alias config
+ta->{maxdepth} = 100;
 #my $taPrint = ta->newScope();
 #$taPrint->makeVar('PRINT-RESULT');
 #topScope->var('print', sub {

@@ -11,7 +11,9 @@ use POSIX qw/strftime/;
 use Scripts::Windy::SmartMatch;
 use Scripts::Windy::Quote;
 use Scripts::Windy::Util;
-
+use Scripts::TextAlias::Parser;
+use Scripts::Windy::SmartMatch::TextAlias;
+use Scripts::TextAlias::Expr qw/quoteExpr/;
 use List::Util qw/sum/;
 use Scripts::scriptFunctions;
 use Exporter;
@@ -192,6 +194,37 @@ $subs = {
             undef;
         }
     },
+    toMe => sub {
+        my ($self, $windy, $msg) = @_;
+        my $text = msgTextNoAt($windy, $msg);
+        _utf8_on($text); # 别忘。
+        isAt($windy, $msg) or $text =~ $caller;
+    },
+    stop => sub { msgStopping($_[1], $_[2]) = $_[3] || 1; '' },
+    privMsg => sub { my ($self, $windy, $msg) = @_; isPrivateMsg($windy, $msg); },
+    partOfDay => sub {
+        my ($min, $hour) = (localtime)[1,2];
+        given ($hour + $min/60) {
+            '凌晨' when $_ <= 4;
+            '黎明' when $_ <= 6;
+            '早上' when $_ <= 8;
+            '上午' when $_ <= 11;
+            '中午' when $_ <= 13;
+            '下午' when $_ <= 17;
+            '晚上' when $_ <= 23;
+            default { '夜里'; }
+        }
+    },
+    replyTemplate => sub {
+        my ($self, $windy, $msg, $entry) = @_;
+        $entry eq '-' ? '$' : ($reply{$entry} and $reply{$entry}->run($windy, $msg, @_[4..$#_]));
+    },
+    windyConf => sub {
+        my ($self, $windy, $msg, $entry) = @_;
+        my $ret = $entry eq '-' ? '$' : $windyConf->get(split /::/, $entry);
+        _utf8_on($ret);
+        $ret;
+    },
 };
 my @aliases = (
     # Plain
@@ -262,8 +295,8 @@ my @aliases = (
     # Functions
     [qr/^讯息$/, sub { my ($self, $windy, $msg) = @_; isMsg($windy, $msg); }],
     [qr/^群讯开启$/, $subs->{fromGroup}],
-    [qr/^私讯$/, sub { my ($self, $windy, $msg) = @_; isPrivateMsg($windy, $msg); }],
-    [qr/^截止(?:[：:](.+))?$/, sub { msgStopping($_[1], $_[2]) = $_[3] || 1; '' } ],
+    [qr/^私讯$/, $subs->{privMsg}],
+    [qr/^截止(?:[：:](.+))?$/, $subs->{stop} ],
     [qr/^(?:来讯者(?:名|的名字))$/, \&senderNickname],
     [qr/^我名$/, sub { shift; receiverName(@_) },],
     [qr/^来讯者(?:的|之)?(?:[Ii][Dd]|[Qq][Qq])$/, sub {
@@ -313,12 +346,7 @@ my @aliases = (
         $s <= $sl3;
      }],
     [qr/^签到$/, $subs->{sign}],
-    [qr/^(?:对|艾特)(?:我|你)$/, sub {
-        my ($self, $windy, $msg) = @_;
-        my $text = msgTextNoAt($windy, $msg);
-        _utf8_on($text); # 别忘。
-        isAt($windy, $msg) or $text =~ $caller;
-     }],
+    [qr/^(?:对|艾特)(?:我|你)$/, $subs->{toMe}],
     [qr/^左$/, sub { shift->{d1} }],
     [qr/^右$/, sub { shift->{d2} }],
     [qr/^群(?:中|里|内)有(\d+)$/, sub {
@@ -338,34 +366,116 @@ my @aliases = (
     [qr/^换行$/, sub { "\n" }],
     [qr/^下讯$/, sub { $nextMessage }],
     [qr/^当下时间$/, sub { formatTime; }],
-    [qr/^时间段$/, sub {
-        my ($min, $hour) = (localtime)[1,2];
-        given ($hour + $min/60) {
-            '凌晨' when $_ <= 4;
-            '黎明' when $_ <= 6;
-            '早上' when $_ <= 8;
-            '上午' when $_ <= 11;
-            '中午' when $_ <= 13;
-            '下午' when $_ <= 17;
-            '晚上' when $_ <= 23;
-            default { '夜里'; }
-        }
-     }],
+    [qr/^时间段$/, $subs->{partOfDay}],
     [qr/^随机数[：:](\d+),(\d+)$/, sub {
         my ($self, $windy, $msg, $bot, $top) = @_;
         randFromTo($bot, $top);
      }],
-    [qr/^\$\[([^\]]+)\]$/, sub {
-        my ($self, $windy, $msg, $entry) = @_;
-        my $ret = $entry eq '-' ? '$' : $windyConf->get(split /::/, $entry);
-        _utf8_on($ret);
-        $ret;
-     }],
-    [qr/^\$\(([^\)]+)\)$/, sub {
-        my ($self, $windy, $msg, $entry) = @_;
-        $entry eq '-' ? '$' : ($reply{$entry} and $reply{$entry}->run($windy, $msg, @_[4..$#_]));
-     }],
+    [qr/^\$\[([^\]]+)\]$/, $subs->{windyConf}],
+    [qr/^\$\(([^\)]+)\)$/, $subs->{replyTemplate}],
     );
+
+sub windyMsgArgs
+{
+    my ($env, $args) = @_;
+    my $scope = $env->scope;
+    my ($windy, $msg) = ($scope->var('windy'), $scope->var('msg'));
+    ($windy, $msg, @$args);
+}
+
+topScope->var('smart-match', $match);
+topScope->var('c', quoteExpr sub {
+    my ($env, $args) = @_;
+    my $cond = $env->scope->var($condVN);
+    push @$cond, @$args;
+    undef;
+              });
+topScope->var('p', sub {
+    my ($env, $args) = @_;
+    my (undef, undef, $p) = windyMsgArgs(@_);
+    $env->scope->var($patternVN, $p);
+});
+topScope->var('posi', quoteExpr sub {
+    my ($env) = @_;
+    my (undef, undef, $posi, @rest) = windyMsgArgs(@_);
+    if (ta->getValue($posi) >= rand) {
+        map { ta->getValue($_); } @rest;
+    }
+              });
+topScope->var('sender-name', sub { senderNickname($match, windyMsgArgs(@_)); });
+topScope->var('my-name', sub { receiverName(windyMsgArgs(@_)); });
+topScope->var('sense', sub { $subs->{senseWithMood}($match, windyMsgArgs(@_)); });
+topScope->var('mood', sub { $subs->{mood}($match, windyMsgArgs(@_)); });
+topScope->var('add-sense', sub { $subs->{addSense}($match, windyMsgArgs(@_)); });
+topScope->var('add-mood', sub { $subs->{addMood}($match, windyMsgArgs(@_)); });
+topScope->var('cap', sub {
+    my ($env) = @_;
+    my (undef, undef, $num) = windyMsgArgs(@_);
+    $env->scope->var($msgMatchVN)->[$num-1];
+              });
+topScope->var('to-me', sub { $subs->{toMe}($match, windyMsgArgs(@_)); });
+topScope->var('stop', sub { $subs->{stop}($match, windyMsgArgs(@_)); });
+topScope->var('priv-msg', sub { $subs->{privMsg}($match, windyMsgArgs(@_)); });
+topScope->var('from-group', sub { $subs->{fromGroup}($match, windyMsgArgs(@_)); });
+topScope->var('group-name', sub { msgGroupName(windyMsgArgs(@_)); });
+topScope->var('group-id', sub { msgGroupId(windyMsgArgs(@_)) });
+topScope->var('nl', "\n");
+topScope->var('next', $nextMessage);
+topScope->var('time-now', sub { formatTime });
+topScope->var('part-of-day', $subs->{partOfDay});
+topScope->var('rand-int', sub { my (undef, undef, @a) = msgWindyArgs(@_); randFromTo(@a); });
+topScope->var('reply', sub {
+    my ($env) = @_;
+    my $msgMatch = $env->scope->var($msgMatchVN);
+    my ($windy, $msg, $entry) = windyMsgArgs(@_);
+    $reply{$entry} and $reply{$entry}->run($windy, $msg, @$msgMatch); });
+topScope->var('conf', sub { $subs->{windyConf}($match, windyMsgArgs(@_)); });
+topScope->var('by-sense', quoteExpr sub {
+    my ($env) = @_;
+    my ($windy, $msg, @args) = windyMsgArgs(@_);
+    my @lvl = ();
+    given (scalar @args) {
+        @lvl = @args when $_ >= 4;
+        @lvl = (@args[0..1], undef, $args[2]) when 3;
+        @lvl = (undef, $args[0], undef, $args[1]) when 2;
+        @lvl = (undef, undef, undef, @args) when 1;
+        default { return; }
+    }
+    my $sense = $subs->{senseWithMood}($match, $windy, $msg);
+    given ($sense) {
+            when ($_ > $sl1) { ta->getValue($lvl[0], $env) // continue; }
+            when ($_ > $sl2) { ta->getValue($lvl[1], $env) // continue; }
+            when ($_ > $sl3) { ta->getValue($lvl[2], $env) // continue; }
+            default { ta->getValue($lvl[3], $env); }
+        }
+              });
+topScope->var('by-mood', quoteExpr sub {
+    my ($env) = @_;
+    my ($windy, $msg, @args) = windyMsgArgs(@_);
+    my @lvl = ();
+    given (scalar @args) {
+        @lvl = @args when $_ >= 7;
+        @lvl = (undef, @args) when 6;
+        @lvl = (undef, $args[0], $args[1], $args[2], undef, $args[3], $args[4]) when 5;
+        @lvl = (undef, $args[0], undef, $args[1], undef, $args[2], $args[3]) when 4;
+        @lvl = (undef, $args[0], undef, $args[1], undef, undef, $args[2]) when 3;
+        @lvl = (undef, undef, undef, $args[0], undef, undef, $args[1]) when 2;
+        $lvl[6] = $args[0] when 1;
+        default { return; }
+    }
+    my $mood = curMood;
+    given ($mood) {
+        when ($_ > $ml[0]) { ta->getValue($lvl[0], $env) // continue; }
+        when ($_ > $ml[1]) { ta->getValue($lvl[1], $env) // continue; }
+        when ($_ > $ml[2]) { ta->getValue($lvl[2], $env) // continue; }
+        when ($_ > $ml[3]) { ta->getValue($lvl[3], $env) // continue; }
+        when ($_ > $ml[4]) { ta->getValue($lvl[4], $env) // continue; }
+        when ($_ > $ml[5]) { ta->getValue($lvl[5], $env) // continue; }
+        default { ta->getValue($lvl[6], $env); }
+    }
+});
+ta->addHandler('literal', sub { $match->parseText(@_); } );
+topScope->makeRO;
 
 $match = Scripts::Windy::SmartMatch->new(
     d1 => '【',
@@ -468,6 +578,8 @@ sub reloadReplacements
     $match->{preMatch} = qr/^$pre/;
     my $post = getReplacement("后");
     $match->{postMatch} = qr/$post$/;
+    my $tailing = getReplacement("_尾_");
+    $match->{tailing} = qr/$tailing$/;
     updateSize;
 }
 

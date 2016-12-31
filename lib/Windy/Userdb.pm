@@ -3,9 +3,12 @@ use 5.012;
 no warnings 'experimental';
 use Scripts::scriptFunctions;
 use Scripts::Windy::Util;
+use Scripts::TextAlias::Parser;
+use Scripts::Windy::SmartMatch::TextAlias;
 use Data::Dumper;
 use utf8;
-#$Scripts::scriptFunctions::debug = 1;
+#debugOn;
+
 sub new
 {
     my $class = shift;
@@ -73,22 +76,26 @@ sub match
     my $windy = shift;
     my $msg = shift;
     debug 'running match';
-    #$windy->logger("正在处理此行: ".msgText($windy, $msg));
+    debug 'msg text is '.msgText($windy, $msg);
+    my $msgScope = ta->newScope(topScope);
+    $msgScope->makeVar('windy', 'msg');
+    $msgScope->var('windy', $windy);
+    $msgScope->var('msg', $msg);
+    $msgScope->makeRO;
     my @ret = ();
     for (@{$self->{words}}) {
-        #        my $m = $words->[$_];
-        #say term 'word: '. $_->[0]->{raw};
-        #debug 'word:'.Dumper ($_->[0]);
-        if ((my @a = #(ref $_->[0] eq 'CODE' ?
-             #$_->[0]->($windy, $msg) :
-             $_->[0]->run($windy, $msg))) {
-            #debug '@a:'. Dumper (@a);
-            #debug 'scalar @a:'. scalar @a;
+        debug 'ask: '.$_->[0];
+        debug 'ans: '.$_->[1];
+        my $scope = ta->newScope($msgScope);
+        my $env = ta->newEnv($scope);
+        msgTAEnv($windy, $msg) = $env;
+        if ((my @a = $_->[0]->run($windy, $msg))) {
+            debug "cond passed-";
+            $scope->makeVar($msgMatchVN);
+            $scope->var($msgMatchVN, [@a]);
             my $ret = ref $_->[1] eq 'CODE' ?
                 $_->[1]->($windy, $msg, @a) :
                 $_->[1]->run($windy, $msg, @a);
-            #$windy->logger("一个可选的回复是: ".$ret);
-            #debug 'matching, returning '.$ret;
             push @ret, $ret if $ret; # 若有返回值，则添加到回复列表。
             if (my $reason = msgStopping($windy, $msg)) {
                 @ret = $ret ? ($ret) : ();

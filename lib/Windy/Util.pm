@@ -12,6 +12,15 @@ use if BACKEND eq 'mpq', 'Scripts::Windy::Util::MPQ';
 use if BACKEND eq 'mojo', 'Scripts::Windy::Util::Mojo';
 
 our @ISA = qw/Exporter/;
+our @EXPORT = (@Scripts::Windy::Util::Base::EXPORT, 'BACKEND');
+if (BACKEND eq 'mpq') {
+    push @EXPORT, @Scripts::Windy::Util::MPQ::EXPORT;
+} elsif (BACKEND eq 'mojo') {
+    push @EXPORT, @Scripts::Windy::Util::Mojo::EXPORT;
+} else {
+    
+}
+=comment
 our @EXPORT = qw/isGroupMsg msgText msgGroup msgGroupId
 msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender
 uid uName isAt isAtId findUserInGroup isPrivateMsg
@@ -20,6 +29,7 @@ parseRichText $mainConf msgPosStart msgPosEnd
 msgReceiver receiverName outputLog isMsg BACKEND $windyConf
 sendTo replyToMsg $mainConf msgGroupMembers setGroupCard
 msgTextNoAt msgGroupName/;
+=cut
 our @EXPORT_OK = qw//;
 
 1;

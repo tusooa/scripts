@@ -58,7 +58,8 @@ sub value
         } else {
             $args = [map { $ta->getValue($_, $env) } @{$self->{args}}];
         }
-        $var->($env, $args);
+        my @ret = $var->($env, $args);
+        wantarray ? @ret : $ret[-1];
     } elsif (isLambda($var)) {
         $var->value($env, map { $ta->getValue($_, $env) } @{$self->{args}});
     } else {

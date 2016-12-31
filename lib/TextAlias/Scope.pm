@@ -4,7 +4,7 @@ use Exporter;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/isScope $argListVN/;
 our $argListVN = 'ArgList';
-debugOn;
+#debugOn;
 
 sub isScope
 {
@@ -20,7 +20,11 @@ sub new
         parser => $ta,
         vars => $var,
         parent => $parent,
+        depth => $parent ? $parent->{depth} + 1 : 1,
     };
+    if ($self->{parser}{maxdepth} > 0 and $self->{depth} > $self->{parser}{maxdepth}) {
+        die "exceeding max depth.";
+    }
     bless $self, $class;
 }
 

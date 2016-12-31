@@ -12,6 +12,7 @@ if (not $code) {
     close FILE;
 }
 topEnv->scope->var('ARGS', [@ARGV]);
+#ta->{maxdepth} = 100;
 use Data::Dumper;
 my $byte = ta->parse($code);
 $byte->value(topEnv);
