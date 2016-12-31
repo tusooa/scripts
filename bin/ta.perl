@@ -12,6 +12,7 @@ if (not $code) {
     close FILE;
 }
 topEnv->scope->var('ARGS', [@ARGV]);
+use Data::Dumper;
 my $byte = ta->parse($code);
 $byte->value(topEnv);
 

@@ -9,8 +9,12 @@ our $argListVN = 'ArgList';
 sub new
 {
     my $class = shift;
-    my $ta = shift;
-    my $self = { parser => $ta, list => [@_], quoted => 0 };
+    my %args = @_;
+    my $ta = $args{parser};
+    my @list = @{$args{list}};
+    my $scope = $args{defscope};
+    my $quoted = $args{quoted};
+    my $self = { parser => $ta, list => [@list], defscope => $scope, quoted => $quoted };
     bless $self, $class;
 }
 
@@ -27,6 +31,7 @@ sub valueWithScope
     my $scope = $ta->newScope($env->scope);
     $scope->var($argListVN, [@_]);
     my $childEnv = $ta->newEnv($scope);
+    $childEnv->{defscope} = $self->{defscope};
     my @ret = ($scope, (map { $ta->getValue($_, $childEnv) } @{$self->{list}})[-1]);
     @ret;
 }

@@ -4,6 +4,7 @@ use Scripts::TextAlias;
 use Scripts::TextAlias::Scope qw/$argListVN/;
 use Scripts::TextAlias::Expr qw/quoteExpr/;
 use Scripts::TextAlias::SpecialVars;
+use List::Util qw/all/;
 use Exporter;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/ta topEnv topScope/;
@@ -15,19 +16,66 @@ sub ta { $parser; }
 sub topEnv { $topEnv; }
 sub topScope { $topScope; }
 my %func;
+
+sub optionalP {
+    my $var = shift;
+    $var->{varname} eq '&opt';
+}
+sub restP { shift->{varname} eq '&rest' }
 $func{arguments} = quoteExpr sub {
     my $env = shift;
+    my $self = $env->{parser};
     my $ta = $env->ta;
-    my $vars = shift;
-    my @varname = map { $_->{varname} } @$vars;
+    my @vars = @{$_[0]};
+    #my @varname = map { $_->{varname} } @$vars;
     my @arg = @{ $env->scope->var($argListVN) };
-    for (0..$#varname) {
-        $env->scope->makeVar($varname[$_]);
-        $env->scope->var($varname[$_], $ta->getValue($arg[$_], $env));
+    use Data::Dumper;print Dumper @arg;
+    for (0..$#vars) {
+        my $v = $vars[$_];
+        if (not isVar($v)) {
+            $self->error("arguments(): `$v' is not a variable.");
+            return;
+        } elsif (optionalP($v)) {
+            my @rest = @vars[($_+1) .. $#vars];
+            if (@rest and not all { optionalP $v; } @rest) {
+                $self->error("arguments(): optional var followed by compulsary var.");
+                return;
+            }
+            my @a = @{$v->{args}};
+            if (not defined $a[0]) {
+                $self->error("arguments(): what is the varname?");
+                return;
+            }
+            my $name = $a[0]->{varname};
+            my $value = $ta->getValue($a[1], $env);
+            $env->scope->makeVar($name);
+            if (@arg) {
+                $value = shift @arg;
+            }
+            $env->scope->var($name, $value);
+        } elsif (restP($v)) {
+            my @rest = @vars[($_+1) .. $#vars];
+            if (@rest) {
+                $self->error("arguments(): &rest is not the last var");
+                return;
+            }
+            my $var = $v->{args}->[0];
+            if (not defined $var) {
+                $self->error("arguments(): what is the varname?");
+                return;
+            }
+            my $name = $var->{varname};
+            $env->scope->makeVar($name);
+            $env->scope->var($name, [@arg]);
+        } else {
+            my $name = $v->{varname};
+            $env->scope->makeVar($name);
+            $env->scope->var($name, shift @arg);
+        }
     }
 };
 $func{def} = quoteExpr sub {
-    my ($env, $args) = shift;
+    my ($env, $args) = @_;
     for (@$args) {
         $env->scope->makeVar($_->{varname});
     }
@@ -39,12 +87,16 @@ $func{set} = quoteExpr sub {
     my @kv = @{$args};
     for (1..(@kv/2)) {
         my $value = $ta->getValue($kv[2*$_-1], $env);
-        $env->scope->var($kv[2*$_-2]->{varname}, $value);
+        $env->var($kv[2*$_-2]->{varname}, $value);
     }
 };
 $func{print} = sub {
     my ($env, $args) = @_;
     print @$args;
+};
+$func{say} = sub {
+    my ($env, $args) = @_;
+    say @$args;
 };
 $func{'+'} = sub {
     my ($env, $args) = @_;
@@ -87,7 +139,7 @@ $func{'.'} = sub { # str concat
 $func{'lambda'} = quoteExpr sub {
     my ($env, $args) = @_;
     my @list = @$args;
-    $env->ta->newLambda(@list);
+    $env->ta->newLambda(defscope => $env->scope, list => [@list]);
 };
 $func{'q'} = quoteExpr sub { # quote
     my ($env, $args) = @_;
@@ -141,7 +193,7 @@ $func{'if'} = quoteExpr sub {
     my ($env, $args) = @_;
     my $ta = $env->ta;
     my ($cond, $true, @false) = @$args;
-    if ($ta->valueTrue($ta->getValue($cond, $env))) {
+    if (my $c = $ta->valueTrue($ta->getValue($cond, $env))) {
         $ta->getValue($true, $env);
     } else {
         (map { $ta->getValue($_, $env) } @false)[-1];

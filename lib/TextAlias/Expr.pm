@@ -27,14 +27,30 @@ sub ta
     my $self = shift;
     $self->{parser};
 }
-
+sub getVar
+{
+    my ($self, $name, $env) = @_;
+    my $scope = $env->scope;
+    my $defScope = $env->{defscope};
+    if (not $defScope) {
+        $scope->var($name);
+    } else {
+        if ($scope->hasVarInScope) {
+            $scope->var($name);
+        } elsif (my $ret = $defScope->var($name)) {
+            $ret;
+        } else {
+            $scope->var($name);
+        }
+    }
+}
 sub value
 {
     my $self = shift;
     my $env = shift;
     my $ta = $self->ta;
     my $name = $self->{varname};
-    my $var = $name ? $env->scope->var($name) : $self->{expr};
+    my $var = $name ? $env->var($name) : $self->{expr};
     if (exprIsFunc($var)) {
         my $args = [];
         if (exprQuoted($var)) {
@@ -44,7 +60,7 @@ sub value
         }
         $var->($env, $args);
     } elsif (isLambda($var)) {
-        $var->value($env, @{$self->{args}});
+        $var->value($env, map { $ta->getValue($_, $env) } @{$self->{args}});
     } else {
         $var;
     }

@@ -1,7 +1,7 @@
 package Scripts::TextAlias;
 use Exporter;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw//;
+our @EXPORT = qw/isVar/;
 use Scripts::Base;
 use Data::Dumper;
 use Scripts::TextAlias::Expr;
@@ -58,7 +58,7 @@ sub newScope
 sub newLambda
 {
     my $self = shift;
-    Scripts::TextAlias::Lambda->new($self, @_);
+    Scripts::TextAlias::Lambda->new(parser => $self, @_);
 }
 
 sub regenRegex
@@ -218,7 +218,7 @@ sub parse
         return;
     }
 
-    $self->newLambda(@$tree);
+    $self->newLambda(list => [@$tree]);
 }
 
 sub parseCommand
