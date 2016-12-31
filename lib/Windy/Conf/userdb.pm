@@ -7,6 +7,7 @@ use Scripts::Windy::Util;
 use Scripts::Windy::Userdb;
 use Scripts::Windy::Conf::smartmatch;
 use Scripts::TextAlias::Parser;
+use Scripts::Windy::SmartMatch::MPQStyle;
 use Exporter;
 use Data::Dumper;
 use utf8;
@@ -227,7 +228,13 @@ sub teach
           success => 'ret', failure => 'ret', error => 'ret', },
         @_);
 }
-
+sub autoTeach
+{
+    my ($windy, $msg, $ask, $ans) = @_;
+    $ask = mpq2sm($ask);
+    $ans = mpq2sr($ans);
+    $ans = $ans.'【$(tail)】'; teach($windy, $msg, $ask, $ans, 'S');
+}
 sub newNickname
 {
     my $windy = shift;
@@ -379,7 +386,7 @@ sub repeat
     my ($content) = @_;
     runCommand(
         $windy, $msg,
-        { run => sub { sr($content)->run($windy, $msg, @_); },
+        { run => sub { sr(mpq2sr($content))->run($windy, $msg, @_); },
           success => 'ret' },
         @_);
 }
@@ -726,7 +733,7 @@ sub reloadDB
         [sm("【被屏蔽】"), sr("【截止:被屏蔽】")],
         [smS(qr/【对我】回去/), \&stop],
         [smS(qr/<_风妹_><中>当问(.+?)则答(.+)$/), sub { teach(@_, 'S'); }],
-        [smS(qr/<_风妹_><中>被问到(.+?)时回答(.+)$/), sub { $_[3] = $_[3].'【$(tail)】'; teach(@_, 'S'); }],
+        [smS(qr/<_风妹_><中>被问到(.+?)时回答(.+)$/), \&autoTeach],
         [smS(qr/<_风妹_><中>对问(.+?)则答(.+)$/), sub { teach(@_, 's'); }],
         [smS(qr/【对我】<怎么>出来/), \&callerName],
         [smS(qr/【对我或者私讯】<知道><多少>/), \&sizeOfDB],
@@ -785,4 +792,5 @@ sub reloadDB
         debug 'cannot open';
     }
 }
+loadConfGroup(undef, 'ALL');
 1;

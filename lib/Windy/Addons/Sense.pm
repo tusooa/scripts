@@ -13,7 +13,6 @@ sub loadConf
 {
     $maxAdd = $cfg->get('sense', 'maxAdd') // 10;#每日最多增加多少好感
 }
-loadConf;
 
 # (id => [sense, added-today, last-time-modified])
 my %sense;

@@ -334,6 +334,7 @@ my @aliases = (
         onBlackList(uid(msgSender($windy, $msg)));
      }],
     [qr/^群[Ii][Dd]$/, sub { my ($self, $windy, $msg) = @_; msgGroupId($windy, $msg); }],
+    [qr/^群名$/, sub { my ($self, $windy, $msg) = @_; msgGroupName($windy, $msg); }],
     [qr/^换行$/, sub { "\n" }],
     [qr/^下讯$/, sub { $nextMessage }],
     [qr/^当下时间$/, sub { formatTime; }],
@@ -349,6 +350,10 @@ my @aliases = (
             '晚上' when $_ <= 23;
             default { '夜里'; }
         }
+     }],
+    [qr/^随机数[：:](\d+),(\d+)$/, sub {
+        my ($self, $windy, $msg, $bot, $top) = @_;
+        randFromTo($bot, $top);
      }],
     [qr/^\$\[([^\]]+)\]$/, sub {
         my ($self, $windy, $msg, $entry) = @_;
@@ -570,7 +575,7 @@ my %confGroup = (
     sense => \&Scripts::Windy::Addons::Sense::loadConf,
     mood => \&Scripts::Windy::Addons::Mood::loadConf,
     startstop => \&Scripts::Windy::Addons::StartStop::loadConf,
-    main => sub { my $windy = shift; $windy->loadConf; },
+    main => sub { my $windy = shift; $windy and $windy->loadConf; },
 );
 sub loadConfGroup
 {

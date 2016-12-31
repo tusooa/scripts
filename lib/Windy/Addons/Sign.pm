@@ -11,10 +11,10 @@ my $conf = $windyConf;
 my ($maxSense, $minSense);
 sub loadConf
 {
-    $maxSense = $conf->get('sign', 'maxSense') // 5;
-    $minSense = $conf->get('sign', 'minSense') // 0;
+    $maxSense = Scripts::Windy::Conf::smartmatch::sr($conf->get('sign', 'maxSense') // 5);
+    $minSense = Scripts::Windy::Conf::smartmatch::sr($conf->get('sign', 'minSense') // 0);
 }
-loadConf;
+
 my $signFile = $configDir.'windy-conf/sign';
 our %sign = ();
 sub loadSign
@@ -32,6 +32,8 @@ sub sign
     my ($self, $windy, $msg) = @_;
     my $thisTime = time2date;
     my $id = uid(msgSender($windy, $msg));
+    my $max = $maxSense->run($windy, $msg);
+    my $min = $minSense->run($windy, $msg);
     if ($sign{$id} ne $thisTime) {
         $windy->logger("${id}签到了。");
         $sign{$id} = $thisTime;
@@ -39,7 +41,7 @@ sub sign
             binmode $f, ':unix';
             say $f $id."\t".$sign{$id};
         }
-        randFromTo($minSense, $maxSense);
+        randFromTo($min, $max);
     } else {
         $windy->logger("${id}已经签到过了。");
         undef;

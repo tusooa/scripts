@@ -22,7 +22,7 @@ sub loadConf
     $full = $cfg->get('mood', 'full-sense') // 350;
     $factor = $cfg->get('mood', 'factor') // 120;
 }
-loadConf;
+
 sub fixMood
 {
     my $today = time2date;

@@ -8,7 +8,7 @@ use utf8;
 use Encode qw/_utf8_on _utf8_off/;
 #use Data::Dumper;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/isGroupMsg msgText msgGroup msgGroupId
+our @EXPORT = qw/isGroupMsg msgText msgGroup msgGroupId msgGroupName
 msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender
 uid uName isAt isAtId findUserInGroup isPrivateMsg
 group invite friend $atPrefix $atSuffix
@@ -112,6 +112,12 @@ sub msgGroupId
 {
     my ($windy, $msg) = @_;
     isGroupMsg(@_) and $msg->group->gnumber;
+}
+
+sub msgGroupName
+{
+    my ($windy, $msg) = @_;
+    isGroupMsg(@_) and $msg->group->gname;
 }
 
 sub friend

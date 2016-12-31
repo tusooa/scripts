@@ -14,7 +14,6 @@ sub loadConf
 {
     $default = $windyConf->get('startstop', 'default') // -1;
 }
-loadConf;
 
 my $file = $configDir.'windy-conf/channels';
 sub loadGroups

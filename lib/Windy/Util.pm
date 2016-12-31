@@ -19,7 +19,7 @@ group invite friend $nextMessage $atPrefix $atSuffix
 parseRichText $mainConf msgPosStart msgPosEnd
 msgReceiver receiverName outputLog isMsg BACKEND $windyConf
 sendTo replyToMsg $mainConf msgGroupMembers setGroupCard
-msgTextNoAt/;
+msgTextNoAt msgGroupName/;
 our @EXPORT_OK = qw//;
 
 1;
