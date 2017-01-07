@@ -661,16 +661,35 @@ sub changeCard
 {
     my $windy = shift;
     my $msg = shift;
-    my ($uid, $style) = @_;
+    my ($uid, $mark, $old, $style) = @_;
     runCommand($windy, $msg,
                { run => sub {
                    #$windy->logger("uID:", $uid);
                    #$windy->logger("style:".$style);
                    my @members = $uid ? msgGroupHas($windy, $msg, $uid) : msgGroupMembers($windy, $msg);
                    my ($regex, @r, @changeTo, $rFlag);
-                   if ($style =~ s{^/(.+)/$}{$1}) {
-                       $rFlag = 1;
+                   if ($mark) {
+                       if ($old =~ s{^/(.+)/$}{$1}) {
+                           $regex = eval { qr/$old/; };
+                           return (0) if $@;
+                       } else {
+                           $old = quotemeta $old;
+                           $regex = qr/$old/;
+                       }
+                       my $count = 0;
+                       for (@members) {
+                           my $oldName = uName($_);
+                           _utf8_on($oldName);
+                           my $newName = $oldName =~ s/$regex/$style/r;
+                           if ($oldName ne $newName) {
+                               length $newName or undef $newName;
+                               setGroupCard($windy, $msg, $_, $newName);
+                               $count += 1;
+                           }
+                       }
+                       return (1, $count);
                    }
+
                    if ((@changeTo = split /<([^>]*)>/, $style, -1) != 1) {
                        @r = @changeTo;
                        for (0..$#r) {
@@ -772,7 +791,7 @@ sub reloadDB
         [sm(qr/^wconf\s+g\s+(.+)$/), \&queryConf],
         [sm(qr/^wconf\s+s\s+([^=]+=.*)$/), \&changeConf],
         [sm(qr/^wconf\s+l\s+(.*)$/), \&queryConfGroup],
-        [smS(qr/<_我名_><中>把(?:(\d+)|<所有人>)改(?:成|作)(.+)$/), \&changeCard],
+        [smS(qr/<_我名_><中>把(?:(\d+)|<所有人>)(?:(从)(?|「([^」]*)」|(.*?)))?改(?:成|作)(.*)$/), \&changeCard],
         #[sm(qr/^eval\s*(.+)$/s), \&evalTA],
         );
     $database->set(@baseDB);
