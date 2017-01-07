@@ -2,7 +2,7 @@ package Scripts::TextAlias::Parser;
 use Scripts::Base;
 use Scripts::TextAlias;
 use Scripts::TextAlias::Scope qw/$argListVN/;
-use Scripts::TextAlias::Expr qw/quoteExpr/;
+use Scripts::TextAlias::Expr;
 use Scripts::TextAlias::SpecialVars;
 use List::Util qw/all/;
 use Exporter;
@@ -143,7 +143,14 @@ $func{'lambda'} = quoteExpr sub {
 $func{'q'} = quoteExpr sub { # quote
     my ($env, $args) = @_;
     my @list = @$args;
-    $list[0];
+    my $var = $list[0]->{varname};
+    my @a = @{$list[0]->{args}};
+    my $func = $env->var($var);
+    my $ret = sub {
+        my ($env, $args) = @_;
+        ta->newExpr(expr => $func, args => [@a, @$args])->value($env);
+    };
+    exprQuoted($func) ? quoteExpr($ret) : $ret ;    
 };
 $func{'#'} = quoteExpr sub {}; # do nothing
 #list func

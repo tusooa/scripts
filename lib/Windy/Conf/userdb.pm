@@ -682,7 +682,7 @@ sub changeCard
                        }
                    } else {
                        @r = ($rFlag ? quotemata $style : $style, '.*');
-                       @changeTo = ($style, undef, undef);
+                       @changeTo = ($style, '*', undef);
                    }
                    $regex = join '', @r;
                    if ($rFlag) {
