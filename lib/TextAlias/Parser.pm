@@ -160,8 +160,21 @@ $func{'list'} = sub {
 };
 $func{'qw'} = sub {
     my ($env, $args) = @_;
-    split /\s+/, $args->[0];
+    [split /\s+/, $args->[0]];
 };
+sub qwLiteral
+{
+    my @args = @_;
+    for (@args) {
+        if (isVar($_) and $_->{varname} eq 'qw'
+            and all { not isVar($_) } @{$_->{args}}) { # are all literals
+            my @arr = split /\s+/, @{$_->{args}};
+            $_ = [@arr];
+        }
+    }
+    @args;
+}
+ta->addHandler('expr', \&qwLiteral);
 $func{'xth'} = sub {
     my ($env, $args) = @_;
     my ($list, $num) = @$args;
@@ -416,6 +429,19 @@ $func{'rx'} = sub {
         qr/$regex/;
     }
 };
+sub rxLiteral
+{
+    my @args = @_;
+    for (@args) {
+        if (isVar($_) and $_->{varname} eq 'rx'
+            and all { not isVar($_) } @{$_->{args}}) { # are all literals
+            my $regex = join '', @{$_->{args}};
+            $_ = qr/$regex/;
+        }
+    }
+    @args;
+}
+ta->addHandler('expr', \&rxLiteral);
 $func{'m'} = sub {
     my ($env, $args) = @_;
     my ($regex, $string) = @$args;

@@ -8,7 +8,7 @@ use utf8;
 use Encode qw/_utf8_on _utf8_off/;
 #use Data::Dumper;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/isGroupMsg msgText msgGroup msgGroupId msgGroupName
+our @EXPORT = qw/isGroupMsg msgText msgGroup msgGroupId msgGroupName msgDiscussName
 msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender
 uid uName isAt isAtId findUserInGroup isPrivateMsg
 group invite friend $atPrefix $atSuffix
@@ -27,10 +27,16 @@ sub isGroupMsg
     $msg->type eq 'group_message';
 }
 
+sub isDiscussMsg
+{
+    my ($windy, $msg) = @_;
+    $msg->type eq 'discuss_message';
+}
+
 sub isPrivateMsg
 {
     my ($windy, $msg) = @_;
-    $msg->type =~ /^(?:sess_)?message$/;
+    $msg->type =~ /^(?:sess|friend)_message$/;
 }
 
 sub shortenDName
@@ -66,13 +72,13 @@ sub parseRichText
             $text .= $head->{content};
         }
     }
+    _utf8_on($noAt);
     msgTextNoAt($windy, $msg) = $noAt;
-    msgText($windy, $msg) = $text;
     _utf8_on($text);
+    msgText($windy, $msg) = $text;
     my ($pre, $post) = ($match->{preMatch}, $match->{postMatch});
     $text =~ $pre; msgPosStart($windy, $msg) = length $&;
     $text =~ $post; msgPosEnd($windy, $msg) = length $&;
-    _utf8_off($text);
     msgText($windy, $msg);
 }
 
@@ -117,7 +123,19 @@ sub msgGroupId
 sub msgGroupName
 {
     my ($windy, $msg) = @_;
-    isGroupMsg(@_) and $msg->group->gname;
+    isGroupMsg(@_) or return;
+    my $name = $msg->group->gname;
+    _utf8_on($name);
+    $name;
+}
+
+sub msgDiscussName
+{
+    my ($windy, $msg) = @_;
+    isDiscussMsg(@_) or return;
+    my $name = $msg->discuss->dname;
+    _utf8_on($name);
+    $name;
 }
 
 sub friend
@@ -174,7 +192,9 @@ sub uid
 
 sub uName
 {
-    shift->displayname;
+    my $name = shift->displayname;
+    _utf8_on($name);
+    $name;
 }
 
 sub receiverName

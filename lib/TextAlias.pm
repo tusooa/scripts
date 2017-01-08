@@ -90,8 +90,12 @@ sub regenRegex
 sub handler
 {
     my ($self, $type, @args) = @_;
-    if (UNIVERSAL::isa($self->{handler}{$type}, 'CODE')) {
-        $self->{handler}{$type}(@args);
+    my $h = $self->{handler}{$type};
+    if (UNIVERSAL::isa($h, 'ARRAY')) {
+        for (@$h) {
+            @args = $_->(@args) if UNIVERSAL::isa($_, 'CODE');
+        }
+        @args;
     } else {
         @args;
     }
@@ -101,7 +105,8 @@ sub addHandler
 {
     my ($self, $type, $func) = @_;
     if (UNIVERSAL::isa($func, 'CODE')) {
-        $self->{handler}{$type} = $func;
+        $self->{handler}{$type} //= [];
+        push @{$self->{handler}{$type}}, $func;
         $self;
     } else {
         undef;
@@ -201,6 +206,7 @@ sub error
     my $self = shift;
     if (@_) {
         $self->{error} = join '', @_;
+        die @_;
         $self;
     } else {
         $self->{error};
@@ -270,13 +276,15 @@ sub parseCommand
         } elsif ($text =~ s/$numR//) {
             my $number = $1;
             debug $indent."number: $number";
-            push @$tree, $number;
+            my @handled = $self->handler('number', $number);
+            push @$tree, @handled;
         } elsif ($text =~ s/$stringR//) {
             my $startD = $1;
             my $str;
             ($text, $str) = $self->parseStr($text, $startD, $depth);
             debug $indent. "string: $str";
-            push @$tree, $str;
+            my @handled = $self->handler('string', $str);
+            push @$tree, @handled;
         } elsif ($text =~ s/$symbolR//) {
             my $symName = $1;
             debug $indent."symbol: $symName";
@@ -288,7 +296,8 @@ sub parseCommand
                 debug $indent."--with args.";
             }
             my $expr = $self->newExpr(varname => $symName, args => $args);
-            push @$tree, $expr;
+            my @handled = $self->handler('expr', $expr);
+            push @$tree, @handled;
         } elsif ($text =~ s/$parenEndR//) {
             debug $indent."leaving level: $depth";
             return ($text) if ($depth <= 0);

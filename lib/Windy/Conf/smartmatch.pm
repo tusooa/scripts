@@ -21,7 +21,7 @@ use utf8;
 use Encode qw/_utf8_on _utf8_off/;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/$match sm smS sms sr $sl1 $sl2 $sl3 @sl @ml $subs %reply sizeOfMatch
-reloadReplacements addReplacement getReplacement nicknameById loadConfGroup/;
+reloadReplacements addReplacement getReplacement nicknameById loadConfGroup windyMsgArgs/;
 
 loadNicknames;
 loadSense;
@@ -200,7 +200,7 @@ $subs = {
         _utf8_on($text); # 别忘。
         isAt($windy, $msg) or $text =~ $caller;
     },
-    stop => sub { msgStopping($_[1], $_[2]) = $_[3] || 1; '' },
+    stopMsg => sub { msgStopping($_[1], $_[2]) = $_[3] || 1; '' },
     privMsg => sub { my ($self, $windy, $msg) = @_; isPrivateMsg($windy, $msg); },
     partOfDay => sub {
         my ($min, $hour) = (localtime)[1,2];
@@ -296,7 +296,7 @@ my @aliases = (
     [qr/^讯息$/, sub { my ($self, $windy, $msg) = @_; isMsg($windy, $msg); }],
     [qr/^群讯开启$/, $subs->{fromGroup}],
     [qr/^私讯$/, $subs->{privMsg}],
-    [qr/^截止(?:[：:](.+))?$/, $subs->{stop} ],
+    [qr/^截止(?:[：:](.+))?$/, $subs->{stopMsg} ],
     [qr/^(?:来讯者(?:名|的名字))$/, \&senderNickname],
     [qr/^我名$/, sub { shift; receiverName(@_) },],
     [qr/^来讯者(?:的|之)?(?:[Ii][Dd]|[Qq][Qq])$/, sub {
@@ -399,7 +399,8 @@ topScope->var('posi', quoteExpr sub {
     my ($env) = @_;
     my (undef, undef, $posi, @rest) = windyMsgArgs(@_);
     if (ta->getValue($posi) >= rand) {
-        map { ta->getValue($_); } @rest;
+        my @ret = map { ta->getValue($_); } @rest;
+        wantarray ? @ret : $ret[-1];
     }
               });
 topScope->var('sender-name', sub { senderNickname($match, windyMsgArgs(@_)); });
@@ -414,7 +415,7 @@ topScope->var('cap', sub {
     $env->scope->var($msgMatchVN)->[$num-1];
               });
 topScope->var('to-me', sub { $subs->{toMe}($match, windyMsgArgs(@_)); });
-topScope->var('stop', sub { $subs->{stop}($match, windyMsgArgs(@_)); });
+topScope->var('stop', sub { $subs->{stopMsg}($match, windyMsgArgs(@_)); });
 topScope->var('priv-msg', sub { $subs->{privMsg}($match, windyMsgArgs(@_)); });
 topScope->var('from-group', sub { $subs->{fromGroup}($match, windyMsgArgs(@_)); });
 topScope->var('group-name', sub { msgGroupName(windyMsgArgs(@_)); });

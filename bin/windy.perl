@@ -12,7 +12,7 @@ use Time::HiRes qw/time/;
 use Scripts::Windy::Util;
 no warnings 'experimental';
 use Scripts::Windy::Startup;
-
+use utf8;
 my $mainGroup = undef;
 my $t = Mojo::Webqq->new(
     qq => $uid,
@@ -20,6 +20,7 @@ my $t = Mojo::Webqq->new(
     tmpdir => $configDir.'windy-cache/',
     qrcode_path => $Scripts::scriptFunctions::home.'/OneDrive/windy.png',
     );
+$windy->{_client} = $t;
 # last channel
 my $lastChannelFile = $configDir."windy-conf/last-channel";
 my $lastChannel = [];
@@ -74,20 +75,22 @@ sub onReceive
     my $text = parseRichText($windy, $m);
     #my $text = $m->content;
     my ($context) = $m->type =~ /^(group|discuss)_message$/;
-    my $inGroup = ($context ? " 在 ".($context eq 'group' ? $m->group->gname.'('.$m->group->gnumber.')' : $m->discuss->dname) : '');
-    $windy->logger("收到 `".$text."` 从 ".$m->sender->displayname.$inGroup);
+    my $inGroup = ($context ? " 在 ".($context eq 'group' ? msgGroupName($windy, $m) .'('.$m->group->gnumber.')' : msgDiscussName($windy, $m)) : '');
+    $windy->logger("收到 `".$text."` 从 ".uName(msgSender($windy, $m)).$inGroup);
     #$windy->logger($m->dump);
     my $time = time;
-    my $resp = $windy->parse($m);
-    if ($resp) {
-        $windy->logger("送出 `".$resp."`, 在 ".( time - $time )." 秒内");
+    my $r = $windy->parse($m);
+    my $resp = $r->{Text};
+    if (length $resp) {
+        my $num = $r->{Num};
+        $windy->logger("送出第 ${num} 条 `".$resp."`, 在 ".( time - $time )." 秒内");
         my $to = recordLast($m, $context);
         sendTo($to, $resp);
     }
 }
 $t->interval(60, \&saveLast);
 #$SIG{INT} = sub { saveLast;$t->stop(['auto']); };
-$t->timer(2400, sub { saveLast; exit 1; });
+$t->timer(2400, sub { saveLast; $t->clean_qrcode; $t->clean_pid; exit 1; });
 #$t->load("PostQRcode",data => $mailAccount ) if %$mailAccount;
 $t->on(receive_message => \&onReceive);
 $t->on(receive_pic => sub {
@@ -144,3 +147,4 @@ if ($ARGV[0] eq 'scancode') {
     $t->login;
 }
 $t->run;
+exit 1;

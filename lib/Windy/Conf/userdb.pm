@@ -7,6 +7,8 @@ use Scripts::Windy::Util;
 use Scripts::Windy::Userdb;
 use Scripts::Windy::Conf::smartmatch;
 use Scripts::TextAlias::Parser;
+use Scripts::TextAlias qw/isVar/;
+use Scripts::TextAlias::Expr;
 use Scripts::Windy::SmartMatch::TextAlias;
 use Scripts::Windy::SmartMatch::MPQStyle;
 use Exporter;
@@ -25,7 +27,8 @@ our $commands = {};
 my @baseDB;
 my $cfg = $windyConf;
 loadCommands;
-#sub debug { print @_; }
+#debugOn;
+
 my @adminList;
 if (open my $f, '<', $configDir.'windy-conf/admin') {
     while (<$f>) {
@@ -99,6 +102,7 @@ sub runCommand
     my $data = shift;
     my $status;
     my @ret;
+    debug "command: $cmd";
     if (getPriv($windy, $msg, $cmd)) {
         @ret = $data->{run}->();
         if ($ret[0]) {
@@ -111,6 +115,7 @@ sub runCommand
     } else {
         $status = 'denied';
     }
+    debug "status=$status";
     my @args;
     if (ref $data->{$status} eq 'ARRAY') {
         @args = @{$data->{$status}};
@@ -332,7 +337,7 @@ sub quit
     my $stat = pop;
     runCommand(
         $windy, $msg,
-        { run => sub { if (BACKEND eq 'mojo') { exit $stat; } else { $stat; } }, },
+        { run => sub { if (BACKEND eq 'mojo') { $windy->{_client}->clean_qrcode;$windy->{_client}->clean_pid; exit $stat; } else { $stat; } }, },
         @_);
 }
 reloadDB;
@@ -747,54 +752,52 @@ sub reloadConfig
         loadConfGroup($windy, $type);
     }
 }
+my %cmds;
+{
+    no strict 'refs';
+    for (qw/autoTeach start stop startG stopG blackList teach callerName sizeOfDB newNickname assignNickname repeat addR getR reloadAll quit inviteMG getSandbook addSandbook findDB deleteDB queryDB moveDB queryConf changeConf queryConfGroup evalTA changeCard/) {
+        $cmds{$_} = \&{"$_"};
+    }
+}
+topScope->var('cmd', quoteExpr sub {
+    debug "执行了cmd.";
+    my ($env) = @_;
+    my ($windy, $msg, $command, @args) = windyMsgArgs(@_);
+    #use Data::Dumper;
+    debug "windy: $windy";
+    debug "msg: $msg";
+    debug "args: @args";
+    my $word = $env->scope->var($wordVN);
+    if ($word) {
+        my $teacher = $word->[0]->{teacher};
+        if (not isAdmin($windy, $msg, $teacher)) {
+            $windy->logger("不是管理不给用cmd哦");
+            return;
+        }
+    }
+    if (isVar($command)) {
+        $command = $command->{varname};
+    }
+    if (not $command) {
+        $windy->logger("没指明是啥命令啊0 0");
+        return;
+    }
+    my $func = $cmds{$command};
+    if (not $func) {
+        $windy->logger("触发了没有的命令: `${command}'。停止。");
+        return;
+    }
+    my $match = $env->scope->var($msgMatchVN);
+    @args = map { ta->getValue($_, $env); } @args;
+    debug "command: $command";
+    debug "match: ",@$match;
+    debug "args: ",@args;
+    $func->($windy, $msg, @$match, @args);
+});
 
 sub reloadDB
 {
-    @baseDB = (
-        [sm('【不是讯息】'), sr('【截止:不是讯息】')],
-        [smS(qr/【对我】出来/), \&start],
-        [sm("【不是私讯而且不是群讯开启】"), sr("【截止:没开启】")],
-        [smS(qr/【对我或者私讯】<不要>理睬?(\d+)/), sub { blackList(@_, 1); }],
-        [smS(qr/【对我或者私讯】<不要>不理睬?(\d+)/), sub { blackList(@_, 0); }],
-        [sm("【被屏蔽】"), sr("【截止:被屏蔽】")],
-        [smS(qr/【对我】回去/), \&stop],
-        [smS(qr/<_风妹_><中>当问(.+?)则答(.+)$/), sub { teach(@_, 'S'); }],
-        [smS(qr/<_风妹_><中>被问到(.+?)时回答(.+)$/), \&autoTeach],
-        [smS(qr/<_风妹_><中>对问(.+?)则答(.+)$/), sub { teach(@_, 's'); }],
-        [smS(qr/【对我】<怎么>出来/), \&callerName],
-        [smS(qr/【对我或者私讯】<知道><多少>/), \&sizeOfDB],
-        [smS(qr/<_我名_><中>若问(.+?)即答(.+)$/s), \&teach],
-        [smS(qr/<_我名_><中>问(.+?)答(.+)$/s), sub { $_[2] = '^'.$_[2].'$'; teach(@_); }],
-        [smS(qr/<_我名_><中>(?:<以后>)?<称呼><我>(?:作|为|叫)?(.+?)(?:<就好>)?$/), \&newNickname],
-        [smS(qr/<_我名_><中>(?:<以后>)?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$/), \&assignNickname],
-#        [smS(qr/<_风妹_><中>(?:<以后>)?一直都?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$/), sub { assignNickname @_, 1; }],
-        [sm(qr/^喵 复述(.+)$/), \&repeat],
-        [smS(qr/<_我名_><中>(?:<以后>)?<记得>(.+?)(也|亦)是(.+)$/),
-         sub {
-             my ($windy, $msg, $rep, $mode, $name) = @_;
-             addR($windy, $msg, $rep, $name, $mode eq '也' ? 0 : 1);
-         }],
-#        [smS(qr/<_风妹_><中>(?:<以后>)?<记得>(.+?)亦是(.+)$/), sub { addR(@_, 1); }],
-        [smS(qr/<_我名_><中><什么><是>(.+)$/), \&getR],
-        [smS(qr/【对我或者私讯】重生/), \&reloadAll],
-        [smS(qr/【对我或者私讯】天降于?(?:欢迎加入.+?，群号码：)?(\d+)/), \&startG],
-        [smS(qr/【对我或者私讯】消失于?(?:欢迎加入.+?，群号码：)?(\d+)/), \&stopG],
-        [smS(qr/【对我或者私讯】以神之名义命令<中>重生/), sub { quit(@_, 1); }],
-        [smS(qr/【对我或者私讯】主群拉<一下>/), \&inviteMG],
-        [sm(qr/^沙书\s*(.*?)\s*$/), \&getSandbook],
-        [smS(qr/<_我名_><中>加一?句(.+?)「(.+)」$/s), \&addSandbook],
-        [smS(qr/【对我或者私讯】来扫个码/), sub { quit(@_, 0); }],
-        [smS(qr/<_我名_><中>(?:在(问|答)里)?(?:从(\d+))?找(?:一下|(\d+)个)(.+)$/), \&findDB],
-        [smS(qr/【对我或者私讯】<删><中>第(\d+)/), \&deleteDB],
-        [smS(qr/【对我或者私讯】第(-?\d+)条?<是><什么>/), \&queryDB],
-        [smS(qr/【对我或者私讯】把第?(\d+)条?放[到在去]第?(\d+)/), \&moveDB],
-        [sm(qr/^wconf\s+g\s+(.+)$/), \&queryConf],
-        [sm(qr/^wconf\s+s\s+([^=]+=.*)$/), \&changeConf],
-        [sm(qr/^wconf\s+l\s+(.*)$/), \&queryConfGroup],
-        [smS(qr/<_我名_><中>把(?:(\d+)|<所有人>)(?:(从)(?|「([^」]*)」|(.*?)))?改(?:成|作)(.*)$/), \&changeCard],
-        #[sm(qr/^eval\s*(.+)$/s), \&evalTA],
-        );
-    $database->set(@baseDB);
+    $database->set;#(@baseDB);
     $database->{_match} = $match;
     if (open my $f, '<', $databaseFile) {
         my ($ask, $ans, $style, $id);

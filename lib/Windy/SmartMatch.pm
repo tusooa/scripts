@@ -45,8 +45,10 @@ sub new
     $self->{d8} //= '〕';
     $self->{aliases} //= [];
     $self->{replacements} //= {};
-    $self->{re_rep} = $RE{balanced}{-begin => $self->{d5}}{-end => $self->{d6}};
-    $self->{re_arg} = $RE{balanced}{-begin => $self->{d7}}{-end => $self->{d8}};
+    my $re_rep = $RE{balanced}{-begin => $self->{d5}}{-end => $self->{d6}};
+    $self->{re_rep} = qr/$re_rep/;
+    my $re_arg = $RE{balanced}{-begin => $self->{d7}}{-end => $self->{d8}};
+    $self->{re_arg} = qr/$re_arg/;
     bless $self, $class;
 }
 

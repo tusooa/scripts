@@ -63,9 +63,10 @@ sub parse
     my $self = shift;
     my $windy = shift;
     my $msg = shift;
-    my $reply = { Next => 0, Text => undef };
+    my $reply = { Next => 0, Text => undef, Num => undef, };
     debug 'userdb parsing';
-    $reply->{Text} = $self->match($windy, $msg);
+    my $r = $self->match($windy, $msg);
+    ($reply->{Text}, $reply->{Num}) = @$r if $r;
     $reply;
 }
 
@@ -83,22 +84,34 @@ sub match
     $msgScope->var('msg', $msg);
     $msgScope->makeRO;
     my @ret = ();
-    for (@{$self->{words}}) {
-        debug 'ask: '.$_->[0];
-        debug 'ans: '.$_->[1];
+    my $num = 0;
+    for my $this (@{$self->{words}}) {
+        $num++;
+        my ($ask, $ans) = @$this;
+        debug 'ask: '.$ask->{raw};
+        debug 'ans: '.$ans->{raw};
         my $scope = ta->newScope($msgScope);
+        $scope->makeVar($wordVN);
+        $scope->var($wordVN, $this);
         my $env = ta->newEnv($scope);
         msgTAEnv($windy, $msg) = $env;
-        if ((my @a = $_->[0]->run($windy, $msg))) {
+        debug $env->scope->var($wordVN);
+        if ((my @a = $ask->run($windy, $msg))) {
+            #$windy->logger("第 $num 条匹配通过了。");
             debug "cond passed-";
             $scope->makeVar($msgMatchVN);
             $scope->var($msgMatchVN, [@a]);
-            my $ret = ref $_->[1] eq 'CODE' ?
-                $_->[1]->($windy, $msg, @a) :
-                $_->[1]->run($windy, $msg, @a);
-            push @ret, $ret if $ret; # 若有返回值，则添加到回复列表。
+            my $ret = ref $ans eq 'CODE' ?
+                $ans->($windy, $msg, @a) :
+                $ans->run($windy, $msg, @a);
+            if (length $ret) {
+                #$windy->logger("然后返回了一个 $ret");
+                push @ret, [$ret, $num]; # 若有返回值，则添加到回复列表。
+            } else {
+                #$windy->logger("然而并没有返回什么");
+            }
             if (my $reason = msgStopping($windy, $msg)) {
-                @ret = $ret ? ($ret) : ();
+                @ret = length $ret ? ([$ret, $num]) : ();
                 $windy->logger("这条信息".($reason eq 1 ? '' : '因为'.$reason)."到此为止了。");
                 last;
             }

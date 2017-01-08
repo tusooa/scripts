@@ -1,0 +1,82 @@
+	Ask【不是讯息】
+3519431603	Ans``stop({不是讯息})''
+S	Ask【对我】<出来>
+3519431603	Ans``cmd(start)''
+	Ask【不是私讯而且不是群讯开启】
+3519431603	Ans【截止:没开启】
+S	Ask【对我或者私讯】<不要><理>(\d+)
+3519431603	Ans``cmd(blackList 1)''
+S	Ask【对我或者私讯】<不要><不><理>(\d+)
+3519431603	Ans``cmd(blackList 0)''
+	Ask【被屏蔽】
+3519431603	Ans``stop({被屏蔽})''
+S	Ask【对我】回去
+3519431603	Ans``cmd(stop)''
+S	Ask<_风妹_><中>当问(.+?)则答(.+)$
+3519431603	Ans``cmd(teach {S})''
+S	Ask<_风妹_><中>被问到(.+?)时回答(.+)$
+3519431603	Ans``cmd(autoTeach)''
+S	Ask<_风妹_><中>对问(.+?)则答(.+)$
+3519431603	Ans``cmd(teach {s})''
+S	Ask【对我】<怎么><出来>
+3519431603	Ans``cmd(callerName)''
+S	Ask【对我或者私讯】<知道><多少>
+3519431603	Ans``cmd(sizeOfDB)''
+S	Ask<_我名_><中>若问(.+?)即答(.+)$
+3519431603	Ans``cmd(teach)''
+S	Ask<_我名_><中>问(.+?)答(.+)$
+3519431603	Ans``progn(def(ask ans) set(ask .({^} cap(1) {$}) ans cap(2)) set(msg-match list(ask ans)) cmd(teach))''
+S	Ask<_我名_><中>(?:<以后>)?<称呼><我>(?:作|为|叫)?(.+?)(?:<就好>)?$
+3519431603	Ans``cmd(newNickname)''
+S	Ask<_我名_><中>(?:<以后>)?<称呼>(\d+)(?:作|为|叫)?(.+?)(?:<就好>)?$
+3519431603	Ans``cmd(assignNickname)''
+	Ask^喵 复述(.+)$
+3519431603	Ans``cmd(repeat)''
+S	Ask<_我名_><中>(?:<以后>)?<记得>(.+?)(也|亦)是(.+)$
+3519431603	Ans``progn(def(rep mode name) set(rep cap(1) mode cap(2) name cap(3)) set(msg-match list(rep name if(eq(mode {也}) 0 1))) cmd(addR))''
+S	Ask<_我名_><中><什么><是>(.+)$
+3519431603	Ans``cmd(getR)''
+S	Ask【对我或者私讯】重生
+3519431603	Ans``cmd(reloadAll)''
+S	Ask【对我或者私讯】天降于?(?:欢迎加入.+?，群号码：)?(\d+)
+3519431603	Ans``cmd(startG)''
+S	Ask【对我或者私讯】消失于?(?:欢迎加入.+?，群号码：)?(\d+)
+3519431603	Ans``cmd(stopG)''
+S	Ask【对我或者私讯】以神之名义命令<中>重生
+3519431603	Ans``cmd(quit 1)''
+S	Ask【对我或者私讯】主群拉<一下>
+3519431603	Ans``cmd(inviteMG)''
+	Ask^沙书\s*(.*?)\s*$
+3519431603	Ans``cmd(getSandbook)''
+S	Ask<_我名_><中>加一?句(.+?)「(.+)」$
+3519431603	Ans``cmd(addSandbook)''
+S	Ask【对我或者私讯】来扫个码
+3519431603	Ans``cmd(quit 0)''
+S	Ask<_我名_><中>(?:在(问|答)里)?(?:从(\d+))?找(?:一下|(\d+)个)(.+)$
+3519431603	Ans``cmd(findDB)''
+S	Ask【对我或者私讯】<删><中>第(\d+)
+3519431603	Ans``cmd(deleteDB)''
+S	Ask【对我或者私讯】第(-?\d+)条?<是><什么>
+3519431603	Ans``cmd(queryDB)''
+S	Ask【对我或者私讯】把第?(\d+)条?放[到在去]第?(\d+)
+3519431603	Ans``cmd(moveDB)''
+	Ask^wconf\s+g\s+(.+)$
+3519431603	Ans``cmd(queryConf)''
+	Ask^wconf\s+s\s+([^=]+=.*)$
+3519431603	Ans``cmd(changeConf)''
+	Ask^wconf\s+l\s+(.*)$
+3519431603	Ans``cmd(queryConfGroup)''
+S	Ask<_我名_><中>把(?:(\d+)|<所有人>)(?:(从)(?|「([^」]*)」|(.*?)))?改(?:成|作)(.*)$
+3519431603	Ans``cmd(changeCard)''
+S	Ask风掀
+3519431603	Ans【截止:风掀】【$(help)】
+	Ask^你说句(.+)$
+3519431603	Ans【好感判：,,捕获1,0 0？】【截止:你说句】
+S	Ask【对我或者私讯】<打招呼>
+3519431603	Ans【好感判：来讯者名+早哦www+概率0.33（扑,来讯者名+早呢w,嗯早- -,早。】【签到】
+S	Ask喝了个蜜汁【私讯或者对我】
+3519431603	Ans蜜汁好啊【签到】【截止:喝蜜汁】
+S	Ask【对我或者私讯】<疑问〔(?:喜欢|爱),<我>,喜〕>
+3519431603	Ans【$(sense)】【截止:查好感】
+S	Ask喵呼
+3519431603	Ans喵呼喵呼ww

@@ -12,6 +12,8 @@ use IO::Handle;
 use Data::Dumper;
 use Scripts::Windy::Util;
 use Encode qw/_utf8_on _utf8_off/;
+use utf8;
+#debugOn;
 # param: logToFile - default to false
 sub new
 {
@@ -52,8 +54,9 @@ sub parse
 {
     my $self = shift;
     my $msg = shift;
+    debug "windy.parse";
     my $ret = $database->parse($self, $msg); # From Scripts::Conf::Windy::userdb
-    $ret->{Text};
+    $ret;
 }
 
 sub checkReopenLogFile

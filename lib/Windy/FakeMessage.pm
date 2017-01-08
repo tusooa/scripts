@@ -1,7 +1,7 @@
 package Scripts::Windy::FakeMessage;
 use 5.012;
 no warnings 'experimental';
-my %types = qw/D discuss_message P message/, '', 'group_message';
+my %types = qw/D discuss_message P friend_message/, '', 'group_message';
 sub loginMsg
 {
     my $class = shift;
@@ -13,10 +13,11 @@ sub loginMsg
         $self->{sender} = $lastChannel->[0] when 'P';
         $self->{group} = $lastChannel->[0] when '';
     }
-    $self->{type} = $types{$lastChannel->[0]};
-    if (not $self->{sender}) {
-        $self->{sender} = Scripts::Windy::FakeSender->null;
-    }
+    $self->{type} = $types{$lastChannel->[1]};
+    my $oldSender = $self->{sender};
+    
+    $self->{sender} = Scripts::Windy::FakeSender->null;
+    if ($oldSender) {$self->{sender}->{qq} = $oldSender;}
     $self;
 }
 

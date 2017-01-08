@@ -86,12 +86,13 @@ sub run
     } elsif ($object->{type} eq 'ta') {
         debug 'type is ta';
         my $env = msgTAEnv($windy, $msg);
+#        debugOn;use Data::Dumper;debug Dumper($object->{pattern});debugOff;
         @res = map { ta->getValue($_, $env) } @{$object->{pattern}};
     } else {
         debug 'type unknown';
     }
     my $ret = join '', @res;
-    _utf8_off($ret) if BACKEND eq 'mojo' and not $object->{part};
+#    _utf8_off($ret) if BACKEND eq 'mojo' and not $object->{part};
     $ret;
 }
 
