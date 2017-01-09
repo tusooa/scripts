@@ -4,7 +4,7 @@ use Exporter;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/isMpqLike mpq2sm mpq2sr/;
 
-my $mpqLikeP = qr/\[(?:name|nick|昵称|gname|群名|myname|QQ|时间段|next|r)\]|r\[\d+,\d+\]|\\(?:n|r|x0D)/;
+my $mpqLikeP = qr/\[(?:(?:msg)?name|nick|昵称|gname|群名|myname|QQ|时间段|next|r)\]|r\[\d+,\d+\]|\\(?:n|r|x0D)/;
 sub isMpqLike
 {
     my $text = shift;
@@ -35,7 +35,7 @@ sub mpq2sr
 {
     my $text = mpq2s shift;
     for ($text) {
-        s/\[(?:name|nick|昵称|cknick)\]/【来讯者名】/g;
+        s/\[(?:(?:msg)?name|nick|昵称|cknick)\]/【来讯者名】/g;
         s/\[myname\]/【我名】/g;
         s/\[(?:gname|群名)\]/【群名】/g;
         s/\[时间段\]/【时间段】/g;

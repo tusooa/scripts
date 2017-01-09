@@ -398,8 +398,8 @@ topScope->var('p', sub {
 topScope->var('posi', quoteExpr sub {
     my ($env) = @_;
     my (undef, undef, $posi, @rest) = windyMsgArgs(@_);
-    if (ta->getValue($posi) >= rand) {
-        my @ret = map { ta->getValue($_); } @rest;
+    if (ta->getValue($posi, $env) >= rand) {
+        my @ret = map { ta->getValue($_, $env); } @rest;
         wantarray ? @ret : $ret[-1];
     }
               });

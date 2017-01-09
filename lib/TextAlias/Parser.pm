@@ -160,7 +160,7 @@ $func{'list'} = sub {
 };
 $func{'qw'} = sub {
     my ($env, $args) = @_;
-    [split /\s+/, $args->[0]];
+    [map { split /(?<!\\) / } @$args];
 };
 sub qwLiteral
 {
@@ -168,13 +168,23 @@ sub qwLiteral
     for (@args) {
         if (isVar($_) and $_->{varname} eq 'qw'
             and all { not isVar($_) } @{$_->{args}}) { # are all literals
-            my @arr = split /\s+/, @{$_->{args}};
+            my @arr = map { split /(?<!\\) / } @{$_->{args}};
             $_ = [@arr];
         }
     }
     @args;
 }
 ta->addHandler('expr', \&qwLiteral);
+$func{'join'} = sub {
+    my ($env, $args) = @_;
+    my ($c, @list) = @$args;
+    join $c, @list;
+};
+$func{'pick'} = sub {
+    my ($env, $args) = @_;
+    my @list = @$args;
+    $list[int rand @list];
+};
 $func{'xth'} = sub {
     my ($env, $args) = @_;
     my ($list, $num) = @$args;
@@ -207,6 +217,21 @@ $func{'|'} = sub { # flatten
     UNIVERSAL::isa($list, 'ARRAY') or return;
     @$list;
 };
+sub flattenLiteral
+{
+    my @args = ();
+    for (@_) {
+        if (isVar($_) and $_->{varname} eq '|'
+            and all { not isVar($_) } @{$_->{args}}) { # are all literals
+            my @arr = map { @$_ } @{$_->{args}};
+            push @args, @arr;
+        } else {
+            push @args, $_;
+        }
+    }
+    @args;
+}
+ta->addHandler('expr', \&flattenLiteral);
 #conditions
 $func{'nil'} = sub { undef };
 $func{'progn'} = sub {
