@@ -120,6 +120,10 @@ $func{'*'} = sub {
     $result *= $_ for @$args;
     $result;
 };
+$func{'**'} = sub {
+    my ($env, $args) = @_;
+    $args->[0] ** $args->[1];
+};
 $func{'/'} = sub {
     my ($env, $args) = @_;
     my @list = @$args;
@@ -134,6 +138,15 @@ $func{'.'} = sub { # str concat
     my $str;
     $str .= $_ for @$args;
     $str;
+};
+$func{'x'} = sub {
+    my ($env, $args) = @_;
+    my ($str, $times) = @$args;
+    $str x $times;
+};
+$func{'int'} = sub {
+    my ($env, $args) = @_;
+    int($args->[0]);
 };
 $func{'lambda'} = quoteExpr sub {
     my ($env, $args) = @_;
@@ -200,6 +213,18 @@ $func{'xth'} = sub {
     my ($list, $num) = @$args;
     UNIVERSAL::isa($list, 'ARRAY') or return;
     $list->[$num];
+};
+$func{'list-at'} = sub {
+    my ($env, $args) = @_;
+    my ($list, $num) = @$args;
+    UNIVERSAL::isa($list, 'ARRAY') or return;
+    $list->[$num];    
+};
+$func{'hash-at'} = sub {
+    my ($env, $args) = @_;
+    my ($hash, $k) = @$args;
+    UNIVERSAL::isa($hash, 'HASH') or return;
+    $hash->{$k};    
 };
 $func{'push'} = sub {
     my ($env, $args) = @_;

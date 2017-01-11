@@ -110,7 +110,7 @@ $subs = {
         my ($self, $windy, $msg, $m1) = @_;
         my ($mood, $added) = addMood($m1, uid(msgSender($windy, $msg)));
         my $s = msgTAEnv($windy, $msg)->scope;
-        $s->defVar($moodAddedVN);
+        $s->makeVar($moodAddedVN);
         $s->var($moodAddedVN, $added);
         $reply{'addMood'}->run($windy, $msg, $added);
     },
@@ -127,7 +127,7 @@ $subs = {
         my ($self, $windy, $msg, $m1) = @_;
         my (undef, $added) = addSense(uid(msgSender($windy, $msg)), $m1);
         my $s = msgTAEnv($windy, $msg)->scope;
-        $s->defVar($senseAddedVN);
+        $s->makeVar($senseAddedVN);
         $s->var($moodAddedVN, $added);
         $reply{'addSense'}->run($windy, $msg, $added);
     },
@@ -508,7 +508,7 @@ sub loadReply
 sub loadLevels
 {
     @sl = ();
-    for (qw/favourite like normal/) {
+    for (qw/1 2 3/) {
         push @sl, $windyConf->get('levels', 'sense', $_);
     }
     ($sl1, $sl2, $sl3) = @sl;

@@ -18,11 +18,13 @@ use Encode qw/_utf8_on _utf8_off/;
 sub reloadDB;
 sub loadCommands;
 sub reloadConfig;
+sub reloadTA;
 sub msgSenderIsAdmin;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/$database/;
 our $database = Scripts::Windy::Userdb->new();
 my $databaseFile = $configDir.'windy-conf/userdb.db';
+my $taConfFile = $configDir.'windy-conf/conf.ta';
 our $commands = {};
 my @baseDB;
 my $cfg = $windyConf;
@@ -326,7 +328,8 @@ sub reloadAll
         $windy, $msg,
         { run => sub { reloadConfig($windy, 'ALL');
                        reloadReplacements;
-                       reloadDB; }, },
+                       reloadDB;
+                       reloadTA; }, },
         @_);
 }
 
@@ -635,6 +638,7 @@ sub queryConfGroup
 
 ## text-alias config
 ta->{maxdepth} = 100;
+reloadTA;
 #my $taPrint = ta->newScope();
 #$taPrint->makeVar('PRINT-RESULT');
 #topScope->var('print', sub {
@@ -819,6 +823,19 @@ sub reloadDB
         1;
     } else {
         debug 'cannot open';
+    }
+}
+sub reloadTA
+{
+    if (open my $fh, '<', $taConfFile) {
+        my $code = join '', <$fh>;
+        close $fh;
+        _utf8_on($code);
+        my $byte = ta->parse($code);
+        $byte->evalOutOfBox(topEnv);
+        1;
+    } else {
+        undef;
     }
 }
 loadConfGroup(undef, 'ALL');

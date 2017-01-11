@@ -23,6 +23,13 @@ sub ta
     shift->{parser};
 }
 
+sub evalOutOfBox
+{
+    my ($self, $env) = @_;
+    my $ta = $self->ta;
+    map { $ta->getValue($_, $env) } @{$self->{list}};
+}
+
 sub valueWithScope
 {
     my $self = shift;
