@@ -99,8 +99,8 @@ sub match
         if ((my @a = $ask->run($windy, $msg))) {
             #$windy->logger("第 $num 条匹配通过了。");
             debug "cond passed-";
-            $scope->makeVar($msgMatchVN);
-            $scope->var($msgMatchVN, [@a]);
+            #$scope->makeVar($msgMatchVN);
+            #$scope->var($msgMatchVN, [@a]);
             my $ret = ref $ans eq 'CODE' ?
                 $ans->($windy, $msg, @a) :
                 $ans->run($windy, $msg, @a);

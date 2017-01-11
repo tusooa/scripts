@@ -242,7 +242,7 @@ sub flattenLiteral
     @args;
 }
 #conditions
-$func{'nil'} = sub { undef };
+$func{'nil'} = sub { () };
 $func{'progn'} = sub {
     my ($env, $args) = @_;
     $args->[-1];
@@ -475,7 +475,6 @@ sub rxLiteral
     }
     @args;
 }
-ta->addHandler('expr', \&rxLiteral);
 $func{'m'} = sub {
     my ($env, $args) = @_;
     my ($regex, $string) = @$args;
@@ -498,6 +497,7 @@ $func{'dd'} = quoteExpr sub {
 for (keys %func) {
     $parser->var($_, $func{$_});
 }
+ta->addHandler('expr', \&rxLiteral);
 ta->addHandler('expr', \&listLiteral);
 ta->addHandler('expr', \&qwLiteral);
 ta->addHandler('expr', \&flattenLiteral);

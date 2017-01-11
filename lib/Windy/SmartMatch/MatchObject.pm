@@ -146,6 +146,9 @@ sub run
         debug "conditions: ";
         debug Dumper(@pattern);
         my $r = 0;
+        my $env = msgTAEnv($windy, $msg);
+        $env->scope->makeVar($msgMatchVN);
+        $env->scope->var($msgMatchVN, [@ret]);
         if ($object->{type} eq 'sm') {
             debug "type is sm";
             $r = @pattern ? (all { $self->runExpr($windy, $msg, $_, @ret); } @pattern) : 1;
@@ -153,8 +156,6 @@ sub run
             debug "r is $r";
         } elsif ($object->{type} eq 'ta') {
             debug "type is ta";
-            my $env = msgTAEnv($windy, $msg);
-            $env->scope->var($msgMatchVN);
             $r = @pattern ? (all { ta->valueTrue(ta->getValue($_, $env)) } @pattern) : 1;
         } else {
             debug "type is unknown";
