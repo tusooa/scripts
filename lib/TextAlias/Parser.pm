@@ -158,9 +158,20 @@ $func{'list'} = sub {
     my ($env, $args) = @_;
     $args;
 };
+sub listLiteral
+{
+    my @args = @_;
+    for (@args) {
+        if (isVar($_) and $_->{varname} eq 'list'
+            and all { not isVar($_) } @{$_->{args}}) { # are all literals
+            $_ = [@{$_->{args}}];
+        }
+    }
+    @args;
+}
 $func{'qw'} = sub {
     my ($env, $args) = @_;
-    [map { split /(?<!\\) / } @$args];
+    [map s/\\ / /gr, map { split /(?<!\\) / } @$args];
 };
 sub qwLiteral
 {
@@ -168,13 +179,12 @@ sub qwLiteral
     for (@args) {
         if (isVar($_) and $_->{varname} eq 'qw'
             and all { not isVar($_) } @{$_->{args}}) { # are all literals
-            my @arr = map { split /(?<!\\) / } @{$_->{args}};
+            my @arr = map s/\\ / /gr, map { split /(?<!\\) / } @{$_->{args}};
             $_ = [@arr];
         }
     }
     @args;
 }
-ta->addHandler('expr', \&qwLiteral);
 $func{'join'} = sub {
     my ($env, $args) = @_;
     my ($c, @list) = @$args;
@@ -231,7 +241,6 @@ sub flattenLiteral
     }
     @args;
 }
-ta->addHandler('expr', \&flattenLiteral);
 #conditions
 $func{'nil'} = sub { undef };
 $func{'progn'} = sub {
@@ -482,8 +491,15 @@ $func{'s'} = sub {
     my ($regex, $replacement, $string) = @$args;
     # 喵喵喵?要怎么替换?
 };
+$func{'dd'} = quoteExpr sub {
+    my ($env, $args) = @_;
+    map { $env->ta->dd($env->var($_)) } @$args;
+};
 for (keys %func) {
     $parser->var($_, $func{$_});
 }
+ta->addHandler('expr', \&listLiteral);
+ta->addHandler('expr', \&qwLiteral);
+ta->addHandler('expr', \&flattenLiteral);
 
 1;

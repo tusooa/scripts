@@ -822,4 +822,10 @@ sub reloadDB
     }
 }
 loadConfGroup(undef, 'ALL');
+loadNicknames;
+loadSense;
+loadSign;
+loadBlackList;
+loadMood;
+loadGroups;
 1;

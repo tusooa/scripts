@@ -54,7 +54,7 @@ sub loadMood
     if (open my $f, '<', $file) {
         while (<$f>) {
             chomp;
-            if (/^(\d+)\t(\d+-\d+-\d+)\t(\d*)$/) {
+            if (/^(-?\d+)\t(\d+-\d+-\d+)\t(\d*)$/) {
                 @mood = ($1, $2, $3);
             }
         }

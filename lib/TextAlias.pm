@@ -22,8 +22,11 @@ sub new
                    paren => [[qw/( )/]],
                    ws => qr/[\s\n]+/,
                    wsornot => qr/[\s\n]*/,
-                   purenum => qr/-?(?:\d+(?:\.\d*)?|\.\d+)/,
-                   notspecial => qr/[^\s\n(){}`'\\]+/,
+                   purenum =>
+                       qr/-?(?: (?: \d+ [,_\d]* )
+                          (?: \.[,_\d]* )? |
+                          \.(?: \d+[,_\d]* ))(?=\s|\)|'')/x,
+                   notspecial => qr/[^\s\n(){}`'\\_]+/,
                  },
                      esc => {t => "\t", n => "\n", "\\" => "\\",},
                      regex => {},
@@ -274,7 +277,7 @@ sub parseCommand
             $endDelim = $r->{command}{end};
             $literalER = qr/^$r->{wsornot}$endDelim/s;
         } elsif ($text =~ s/$numR//) {
-            my $number = $1;
+            my $number = $1 =~ s/[,_]//gr;
             debug $indent."number: $number";
             my @handled = $self->handler('number', $number);
             push @$tree, @handled;
@@ -355,6 +358,32 @@ sub parseStr
         }
     }
     ($text, $str);
+}
+
+sub dd # 是坏的。
+{
+    my ($self, $object) = @_;
+    if (isVar($object)) {
+        if (@{$object->{args}}) {
+            $object->{varname}.
+                '('.
+                (join "\n", map $self->dd($_), @{$object->{args}}).
+                ')';
+        } else {
+            $object->{varname};
+        }
+    } elsif (isLambda($object)) {
+        'lambda'.'('."\n".
+            (join "\n", map $self->dd($_), @{$object->{list}}).
+            ')';
+    } #elsif (exprIsFunc($object)) {
+#        '#FUNC#';
+#    } else {
+    elsif (ref $object) {
+        $object;
+    } else {
+        "''".$object."``";
+    }
 }
 
 1;

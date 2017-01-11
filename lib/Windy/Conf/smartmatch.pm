@@ -21,14 +21,9 @@ use utf8;
 use Encode qw/_utf8_on _utf8_off/;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/$match sm smS sms sr $sl1 $sl2 $sl3 @sl @ml $subs %reply sizeOfMatch
-reloadReplacements addReplacement getReplacement nicknameById loadConfGroup windyMsgArgs/;
+reloadReplacements addReplacement getReplacement nicknameById loadConfGroup windyMsgArgs
+loadNicknames loadSense loadSign loadBlackList loadMood loadGroups/;
 
-loadNicknames;
-loadSense;
-loadSign;
-loadBlackList;
-loadMood;
-loadGroups;
 our $match;
 
 my $If = qr/(?:(?:如)?若|如果)/;
@@ -114,6 +109,9 @@ $subs = {
     addMood => sub {
         my ($self, $windy, $msg, $m1) = @_;
         my ($mood, $added) = addMood($m1, uid(msgSender($windy, $msg)));
+        my $s = msgTAEnv($windy, $msg)->scope;
+        $s->defVar($moodAddedVN);
+        $s->var($moodAddedVN, $added);
         $reply{'addMood'}->run($windy, $msg, $added);
     },
     sense => sub {
@@ -128,6 +126,9 @@ $subs = {
     addSense => sub {
         my ($self, $windy, $msg, $m1) = @_;
         my (undef, $added) = addSense(uid(msgSender($windy, $msg)), $m1);
+        my $s = msgTAEnv($windy, $msg)->scope;
+        $s->defVar($senseAddedVN);
+        $s->var($moodAddedVN, $added);
         $reply{'addSense'}->run($windy, $msg, $added);
     },
     sign => sub {
