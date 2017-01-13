@@ -18,8 +18,6 @@
          set(level-minval int(+(if(>(level 1)
                           *(sense-graph-min **(sense-graph-level-factor -(level 2))) 0))))
          set(len-used int(*(sense-graph-length /( -(d level-minval) -(level-maxval level-minval) ))))
-         say({sense: }d{ min: }level-minval{ max: }level-maxval{ used: }len-used)
-
          list(level-maxval len-used level-minval)
       )
       )

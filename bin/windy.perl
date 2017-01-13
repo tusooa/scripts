@@ -99,17 +99,18 @@ $t->on(receive_pic => sub {
     say "receive image: ", $filepath;
     say "sender is: ", $sender->displayname;
        });
-
-use Scripts::Windy::FakeMessage;
-my $loginMsg = Scripts::Windy::FakeMessage->loginMsg(_client => $t, receiver => $t->user, _context => $lastChannel);
+if ($windyConf->get('initMsg', 'on') == 1) {
 $t->on(login => sub {
     my $scancode = $_[1];
     if (loadLast) {
+        use Scripts::Windy::FakeMessage;
+        my $loginMsg = Scripts::Windy::FakeMessage->loginMsg(_client => $t, receiver => $t->user, _context => $lastChannel);
         $windy->logger("正发送初始讯息。");
         $scancode and sendTo($lastChannel->[0], $replyScan->run($windy, $loginMsg));
         sendTo($lastChannel->[0], $reply[int rand @reply]->run($windy, $loginMsg));
     }
        });
+}
 # 管理权限和主群联通
 sub loadMainGroup
 {
