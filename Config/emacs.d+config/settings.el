@@ -105,6 +105,7 @@
         ("\\.zsh\\'" . shell-script-mode)
         ("\\..*rc\\'" . conf-space-mode)
         ("COMMIT_EDITMSG\\'" . git-commit-mode)
+        ("\\.ta\'" . prog-mode) ;先这样吧
       )
 ) ;/mapc
 ;(fset 'perl-mode 'cperl-mode)
@@ -112,7 +113,8 @@
 ;(add-to-list 'interpreter-mode-alist '("perl5" . cperl-mode))
 ;(add-to-list 'interpreter-mode-alist '("miniperl" . cperl-mode))
 ; 强制使用Unix 行尾
-(defun no-junk-please-were-unixish ()
+(defun unixize ()
+  (interactive)
   (let ((coding-str (symbol-name buffer-file-coding-system)))
     (when (string-match "-\\(?:dos\\|mac\\)$" coding-str)
       (setq coding-str
@@ -120,4 +122,4 @@
       (message "CODING: %s" coding-str)
       (set-buffer-file-coding-system (intern coding-str)) )))
 
-(add-hook 'find-file-hooks 'no-junk-please-were-unixish)
+;(add-hook 'find-file-hooks 'no-junk-please-were-unixish)

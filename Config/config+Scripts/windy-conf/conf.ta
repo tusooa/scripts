@@ -1,3 +1,4 @@
+好感进度条
 ``set(sense-graph-length 10
    sense-graph-min 40
    sense-graph-level-factor 1.6
@@ -39,3 +40,25 @@
              len-used xth(level-args 1))
          .({[} x({=} -(len-used 1)) if(>(len-used 0){>}) x({_} -(sense-graph-length len-used)) {] \n} d { / } +(level-maxval zero-point) { Lv.} level))
          )))''
+Storage
+``
+set(storage-set-hook list storage-get-hook list) #({clear})
+#(
+set(startstop-default-status orelse(conf({startstop::default}) -1))
+set(storage-get:startstop-default lambda(
+arguments(section id orig &rest(arr))
+list(section id if(eq(section {startstop}) orelse(orig startstop-default-status) orig) |(arr))
+))
+check-add-to-list(storage-get-hook qs(storage-get:startstop-default))
+set(nickname-removal rx(''<标点>``)
+storage-set:nickname-forbidden lambda(
+arguments(section id orig changed-by &rest(arr))
+list(if(and(eq(section {nickname})
+            not(changed-by)
+            progn(def(newname)
+                  set(newname subst-g(nickname-removal {} orig))
+                  m(hash-at(smart-match {nickForbidden}) newname))) {} section)
+     id orig changed-by |(arr))))
+check-add-to-list(storage-set-hook qs(storage-set:nickname-forbidden))
+)
+''

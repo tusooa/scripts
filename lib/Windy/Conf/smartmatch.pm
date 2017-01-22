@@ -574,6 +574,7 @@ sub reloadReplacements
     $caller = qr/$caller/;
     $nickForbidden = getReplacement("称呼里不能用的");
     $nickForbidden = qr/$nickForbidden/;
+    $match->{nickForbidden} = $nickForbidden;
     my $notShownInAt = getReplacement("艾特里显不出的");
     $match->{notShownInAt} = qr/$notShownInAt/;
     my $pre = getReplacement("前");

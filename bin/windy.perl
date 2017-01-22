@@ -91,14 +91,9 @@ sub onReceive
 $t->interval(60, \&saveLast);
 #$SIG{INT} = sub { saveLast;$t->stop(['auto']); };
 $t->timer(2400, sub { saveLast; $t->clean_qrcode; $t->clean_pid; exit 1; });
-#$t->load("PostQRcode",data => $mailAccount ) if %$mailAccount;
+
 $t->on(receive_message => \&onReceive);
-$t->on(receive_pic => sub {
-    ### 反正这个没成功过。。。
-    my ($client,$filepath,$sender)=@_;
-    say "receive image: ", $filepath;
-    say "sender is: ", $sender->displayname;
-       });
+
 if ($windyConf->get('initMsg', 'on') == 1) {
 $t->on(login => sub {
     my $scancode = $_[1];

@@ -4,6 +4,7 @@ use Scripts::TextAlias;
 use Scripts::TextAlias::Scope qw/$argListVN/;
 use Scripts::TextAlias::Expr;
 use Scripts::TextAlias::SpecialVars;
+use Scripts::TextAlias::Symbol;
 use List::Util qw/all/;
 use Exporter;
 our @ISA = qw/Exporter/;
@@ -93,7 +94,7 @@ $func{print} = sub {
     my ($env, $args) = @_;
     print @$args;
 };
-$func{say} = sub {
+$func{'say'} = sub {
     my ($env, $args) = @_;
     say @$args;
 };
@@ -163,9 +164,37 @@ $func{'q'} = quoteExpr sub { # quote
         my ($env, $args) = @_;
         ta->newExpr(expr => $func, args => [@a, @$args])->value($env);
     };
-    exprQuoted($func) ? quoteExpr($ret) : $ret ;    
+    exprQuoted($func) ? quoteExpr($ret) : $ret ;
+};
+$func{'qs'} = quoteExpr sub {
+    my ($env, $args) = @_;
+    my $ta = $env->ta;
+    my ($var) = @$args;
+    $ta->newSymbol($var->{varname});
+};
+$func{'symbol-call'} = quoteExpr sub {
+    my ($env, $args) = @_;
+    my $ta = $env->ta;
+    my ($sym, @list) = @$args;
+    $sym = $ta->getValue($sym, $env);
+    isSymbol($sym) or return;
+    my $func = $env->var($sym->{name});
+    my $expr = $ta->newExpr(expr => $func,
+                            args => [@list]);
+    my $ret = $expr->value($env);
+    $ret;
 };
 $func{'#'} = quoteExpr sub {}; # do nothing
+sub commentRemoval
+{
+    my @args;
+    for (@_) {
+        unless (isVar($_) and $_->{varname} eq '#') {
+            push @args, $_;
+        }
+    }
+    @args;
+}
 #list func
 $func{'list'} = sub {
     my ($env, $args) = @_;
@@ -214,17 +243,16 @@ $func{'xth'} = sub {
     UNIVERSAL::isa($list, 'ARRAY') or return;
     $list->[$num];
 };
-$func{'list-at'} = sub {
+$func{'list-at'} = $func{'xth'};
+$func{'hash'} = sub {
     my ($env, $args) = @_;
-    my ($list, $num) = @$args;
-    UNIVERSAL::isa($list, 'ARRAY') or return;
-    $list->[$num];    
+    { @$args };
 };
 $func{'hash-at'} = sub {
     my ($env, $args) = @_;
     my ($hash, $k) = @$args;
     UNIVERSAL::isa($hash, 'HASH') or return;
-    $hash->{$k};    
+    $hash->{$k};
 };
 $func{'push'} = sub {
     my ($env, $args) = @_;
@@ -246,10 +274,29 @@ $func{'unshift'} = sub {
     my ($list, @rest) = @$args;
     unshift @$list, @rest;
 };
+$func{'check-add-to-list'} = quoteExpr sub {
+    my ($env, $args) = @_;
+    my $ta = $env->ta;
+    my ($list, @rest) = map { $ta->getValue($_, $env) } @$args;
+    if (not UNIVERSAL::isa($list, 'ARRAY')) {
+        defined $list and return;
+        isVar($args->[0]) or return;
+        my $vn = $args->[0]->{varname};
+        $list = [];
+        $env->var($vn, $list);
+    }
+    for my $item (@rest) {
+        my $exists = eval { $item ~~ @$list };
+        $exists = grep { $_ eq $item } @$list if $@;
+        if (not $exists) {
+            push @$list, $item;
+        }
+    }
+};
 $func{'|'} = sub { # flatten
     my ($env, $args) = @_;
     my ($list) = @$args;
-    UNIVERSAL::isa($list, 'ARRAY') or return;
+    UNIVERSAL::isa($list, 'ARRAY') or return $list;
     @$list;
 };
 sub flattenLiteral
@@ -266,6 +313,26 @@ sub flattenLiteral
     }
     @args;
 }
+$func{'map'} = sub {
+    my ($env, $args) = @_;
+    my ($func, $list) = @$args;
+    [map { $env->ta->newExpr(expr => $func, args => [$_])->value($env) } @$list];
+};
+$func{'maplast'} = sub {
+    my ($env, $args) = @_;
+    my ($func, $list) = @$args;
+    (map { $env->ta->newExpr(expr => $func, args => [$_])->value($env) } @$list)[-1];
+};
+# s for symbol.
+$func{'maps'} = ta->parse(<<'EOF');
+``arguments(func array)
+map(lambda(arguments(item) symbol-call(func item)) array)
+EOF
+$func{'mapslast'} = ta->parse(<<'EOF');
+``arguments(func array)
+maplast(lambda(arguments(item)symbol-call(func item)) array)
+EOF
+
 #conditions
 $func{'nil'} = sub { () };
 $func{'progn'} = sub {
@@ -293,6 +360,17 @@ $func{'and'} = quoteExpr sub {
     }
     $result;
 };
+$func{'andthen'} = quoteExpr sub {
+    my ($env, $args) = @_;
+    my $ta = $env->ta;
+    my $result;
+    for (@$args) {
+        if (not defined($result = $ta->getValue($_, $env))) {
+            last;
+        }
+    }
+    $result;
+};
 $func{'or'} = quoteExpr sub {
     my ($env, $args) = @_;
     my $ta = $env->ta;
@@ -304,9 +382,24 @@ $func{'or'} = quoteExpr sub {
     }
     $result;
 };
+$func{'orelse'} = quoteExpr sub {
+    my ($env, $args) = @_;
+    my $ta = $env->ta;
+    my $result;
+    for (@$args) {
+        if (defined($result = $ta->getValue($_, $env))) {
+            last;
+        }
+    }
+    $result;
+};
 $func{'not'} = sub {
     my ($env, $args) = @_;
     not $env->valueTrue($args->[0]);
+};
+$func{'defined'} = sub {
+    my ($env, $args) = @_;
+    defined($args->[0]);
 };
 # comparisons
 $func{'>'} = sub {
@@ -510,10 +603,15 @@ $func{'m'} = sub {
     }
     @match;
 };
-$func{'s'} = sub {
+$func{'subst'} = sub {
     my ($env, $args) = @_;
     my ($regex, $replacement, $string) = @$args;
-    # 喵喵喵?要怎么替换?
+    $string =~ s/$regex/$replacement/r;
+};
+$func{'subst-g'} = sub {
+    my ($env, $args) = @_;
+    my ($regex, $replacement, $string) = @$args;
+    $string =~ s/$regex/$replacement/gr;
 };
 $func{'dd'} = quoteExpr sub {
     my ($env, $args) = @_;
@@ -522,9 +620,11 @@ $func{'dd'} = quoteExpr sub {
 for (keys %func) {
     $parser->var($_, $func{$_});
 }
+ta->addHandler('expr', \&commentRemoval);
 ta->addHandler('expr', \&rxLiteral);
 ta->addHandler('expr', \&listLiteral);
 ta->addHandler('expr', \&qwLiteral);
 ta->addHandler('expr', \&flattenLiteral);
+
 
 1;

@@ -8,6 +8,7 @@ use Scripts::TextAlias::Expr;
 use Scripts::TextAlias::Scope;
 use Scripts::TextAlias::Env;
 use Scripts::TextAlias::Lambda;
+use Scripts::TextAlias::Symbol;
 #debugOn;
 
 my @delims = qw/command string escape paren/;  
@@ -62,6 +63,22 @@ sub newLambda
 {
     my $self = shift;
     Scripts::TextAlias::Lambda->new(parser => $self, @_);
+}
+
+sub newSymbol
+{
+    my ($self, $name) = @_;
+    if ($self->{symbols}{$name}) {
+        $self->{symbols}{$name};
+    } else {
+        Scripts::TextAlias::Symbol->new($self, $name);
+    }
+}
+
+sub addSymbol
+{
+    my ($self, $name, $object) = @_;
+    $self->{symbols}{$name} = $object;
 }
 
 sub regenRegex
@@ -242,7 +259,7 @@ sub parseCommand
     my $tree = [];
     my $literalSR = qr/^(\n+?|.*?)($r->{command}{start}|$)/s;
     debug $literalSR;
-    my $literalER = qr/^$r->{wsornot}$endDelim/s;
+    my $literalER = qr/^$r->{wsornot}($endDelim|$)/s;
     my $numR = qr/^$r->{wsornot}($r->{purenum})/s;
     my $symbolR = qr/^$r->{wsornot}($r->{notspecial})/s;
     my $parenR = qr/^$r->{wsornot}($r->{paren}{start})/s;
@@ -263,7 +280,7 @@ sub parseCommand
                     debug $indent."entering command: $delim";
                     $state = 'command';
                     $endDelim = $r->{'command'}{'pair'}{$delim};
-                    $literalER = qr/^$r->{wsornot}$endDelim/s;
+                    $literalER = qr/^$r->{wsornot}($endDelim|$)/s;
                 }
                 debug $indent."remaining: `$text'";
             } else {
@@ -271,44 +288,44 @@ sub parseCommand
                 return ($text);
             }
         } elsif ($state eq 'command') {
-        if ($text =~ s/$literalER//) {
-            debug $indent."returning to literal";
-            $state = 'literal';
-            $endDelim = $r->{command}{end};
-            $literalER = qr/^$r->{wsornot}$endDelim/s;
-        } elsif ($text =~ s/$numR//) {
-            my $number = $1 =~ s/[,_]//gr;
-            debug $indent."number: $number";
-            my @handled = $self->handler('number', $number);
-            push @$tree, @handled;
-        } elsif ($text =~ s/$stringR//) {
-            my $startD = $1;
-            my $str;
-            ($text, $str) = $self->parseStr($text, $startD, $depth);
-            debug $indent. "string: $str";
-            my @handled = $self->handler('string', $str);
-            push @$tree, @handled;
-        } elsif ($text =~ s/$symbolR//) {
-            my $symName = $1;
-            debug $indent."symbol: $symName";
-            my $args = [];
-            if ($text =~ s/$parenR//) {
-                my $thisParen = $1;
-                debug $indent."paren: $thisParen";
-                ($text, $args) = $self->parseCommand($text, $delim, $depth + 1, $thisParen, $state);
-                debug $indent."--with args.";
+            if ($text =~ s/$literalER//) {
+                debug $indent."returning to literal";
+                $state = 'literal';
+                $endDelim = $r->{command}{end};
+                $literalER = qr/^$r->{wsornot}($endDelim|$)/s;
+            } elsif ($text =~ s/$numR//) {
+                my $number = $1 =~ s/[,_]//gr;
+                debug $indent."number: $number";
+                my @handled = $self->handler('number', $number);
+                push @$tree, @handled;
+            } elsif ($text =~ s/$stringR//) {
+                my $startD = $1;
+                my $str;
+                ($text, $str) = $self->parseStr($text, $startD, $depth);
+                debug $indent. "string: $str";
+                my @handled = $self->handler('string', $str);
+                push @$tree, @handled;
+            } elsif ($text =~ s/$symbolR//) {
+                my $symName = $1;
+                debug $indent."symbol: $symName";
+                my $args = [];
+                if ($text =~ s/$parenR//) {
+                    my $thisParen = $1;
+                    debug $indent."paren: $thisParen";
+                    ($text, $args) = $self->parseCommand($text, $delim, $depth + 1, $thisParen, $state);
+                    debug $indent."--with args.";
+                }
+                my $expr = $self->newExpr(varname => $symName, args => $args);
+                my @handled = $self->handler('expr', $expr);
+                push @$tree, @handled;
+            } elsif ($text =~ s/$parenEndR//) {
+                debug $indent."leaving level: $depth";
+                return ($text) if ($depth <= 0);
+                return ($text, $tree);
+            } else {
+                debug $indent."dont know what to do with $text";
+                return ($text);
             }
-            my $expr = $self->newExpr(varname => $symName, args => $args);
-            my @handled = $self->handler('expr', $expr);
-            push @$tree, @handled;
-        } elsif ($text =~ s/$parenEndR//) {
-            debug $indent."leaving level: $depth";
-            return ($text) if ($depth <= 0);
-            return ($text, $tree);
-        } else {
-            debug $indent."dont know what to do with $text";
-            return ($text);
-        }
         } else {
             debug $indent. "dont know what to do with `$text'";
             return ($text);

@@ -17,7 +17,7 @@
 
 ; linum
 (global-linum-mode t)
-;这TM是干什么的啊
+;这是干什么的啊
 (defun no-linum (&rest ignore)
   (when linum-mode (linum-mode 0)))
 
