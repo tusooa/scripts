@@ -47,11 +47,8 @@ $func{arguments} = quoteExpr sub {
                 return;
             }
             my $name = $a[0]->{varname};
-            my $value = $ta->getValue($a[1], $env);
             $env->scope->makeVar($name);
-            if (@arg) {
-                $value = shift @arg;
-            }
+            my $value = @arg ? shift @arg : $ta->getValue($a[1], $env);
             $env->scope->var($name, $value);
         } elsif (restP($v)) {
             my @rest = @vars[($_+1) .. $#vars];

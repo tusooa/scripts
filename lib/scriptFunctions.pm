@@ -156,20 +156,6 @@ sub formatTime
     $ret =~ s/\(0\)/(7)/;
     $ret;
 }
-#$pathConf = conf 'scriptpath'; #不加这，cairo-w就会出错。
-#原因是之前没有指明默认配置在哪里
-
-#sub main
-#{
-#    require Getopt::Long qw/:config gnu_getopt/;
-#    my ($action, $conf);
-#    GetOptions (
-#        'c|test-conf=s' => sub { $conf});
-#}
-
-#if ($0 eq 'scriptFunctions.pm') {
-#    main;
-#}
 
 sub randFromTo
 {

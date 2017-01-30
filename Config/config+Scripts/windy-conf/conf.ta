@@ -23,9 +23,10 @@
       )
       )
    sense-graph
-      lambda(def(d cur-sense zero-point len-used level level-maxval level-minval level-args)
+      lambda(
+      arguments(&opt(d sense))
+      def(cur-sense zero-point len-used level level-maxval level-minval level-args)
       set(zero-point conf({levels::sense::3}))
-      set(d sense)
       set(cur-sense -(d zero-point))
       set(level sense-graph-determine-level(cur-sense))
       if(<(level 0) progn(
@@ -46,19 +47,19 @@ set(storage-set-hook list storage-get-hook list) #({clear})
 #(
 set(startstop-default-status orelse(conf({startstop::default}) -1))
 set(storage-get:startstop-default lambda(
-arguments(section id orig &rest(arr))
-list(section id if(eq(section {startstop}) orelse(orig startstop-default-status) orig) |(arr))
-))
+    if(and(eq(section {startstop})
+           not(defined(value)))
+       set(value startstop-default-status))))
+
 check-add-to-list(storage-get-hook qs(storage-get:startstop-default))
 set(nickname-removal rx(''<标点>``)
-storage-set:nickname-forbidden lambda(
-arguments(section id orig changed-by &rest(arr))
-list(if(and(eq(section {nickname})
-            not(changed-by)
-            progn(def(newname)
-                  set(newname subst-g(nickname-removal {} orig))
-                  m(hash-at(smart-match {nickForbidden}) newname))) {} section)
-     id orig changed-by |(arr))))
+    storage-set:nickname-forbidden lambda(
+    if(and(eq(section {nickname})
+           not(list-at(rest-info 0))
+           progn(def(newname)
+                 set(newname subst-g(nickname-removal {} orig))
+                 m(hash-at(smart-match {nickForbidden}) newname))) set(section {}))))
+
 check-add-to-list(storage-set-hook qs(storage-set:nickname-forbidden))
 )
 ''

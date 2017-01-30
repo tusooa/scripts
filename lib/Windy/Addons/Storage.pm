@@ -134,10 +134,18 @@ sub runHooks
     my ($self, $name, @args) = @_;
     my $hookList = topScope->var($name);
     UNIVERSAL::isa($hookList, 'ARRAY') or return @args;
+    my ($section, $id, $value, @rest) = @args;
+    my $scope = ta->newScope(topScope);
+    my $env = ta->newEnv($scope);
+    $scope->makeVar(qw/section id value rest-info/);
+    $scope->var('section', $section);
+    $scope->var('id', $id);
+    $scope->var('value', $value);
+    $scope->var('rest-info', \@rest);
     for (@$hookList) {
-        @args = @{ ta->newExpr(varname => 'symbol-call', args => [$_, @args])->value(topEnv) };
+        ta->newExpr(varname => 'symbol-call')->value($env);
     }
-    @args;
+    ($section, $id, $value, @rest);
 }
 
 $storage = __PACKAGE__->new;

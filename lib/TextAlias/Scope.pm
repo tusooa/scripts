@@ -116,7 +116,7 @@ sub varScopeRW
             $self;
         }
     } elsif ($self->parent) {
-        $self->parent->varScope($var);
+        $self->parent->varScopeRW($var);
     } else {
         undef;
     }
