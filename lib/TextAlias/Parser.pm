@@ -610,6 +610,29 @@ $func{'subst-g'} = sub {
     my ($regex, $replacement, $string) = @$args;
     $string =~ s/$regex/$replacement/gr;
 };
+$func{'replace-on-string'} = sub {
+    my ($env, $args) = @_;
+    my ($str, $regex, $to, $global) = @$args;
+    if (ref $regex ne 'Regexp') {
+        $regex = qr/$regex/;
+    }
+    while ($str =~ /$regex/g) {
+        my $start = $-[0];
+        my $end = $+[0];
+        my $regexLength = $end - $start;
+        #say "START = $start END = $end RLEN = $regexLength";
+        my $replacement = ta->getValue(ta->newExpr(expr => $to, args => [map { substr $str, $-[$_], $+[$_]-$-[$_] } 0..$#-]), $env);
+        my $length = length $replacement;
+        substr $str, $start, $regexLength, $replacement;
+        my $newPos = $start + $length + ($regexLength ? 0 : 1);
+        $newPos > length $str and last;
+        pos($str) = $newPos;
+        #say "LENGTH = $length POS = ". pos($str). "NEWPOS = $newPos";
+        #print "STR = $str ";<STDIN>;
+        $global or last;
+    }
+    $str;
+};
 $func{'dd'} = quoteExpr sub {
     my ($env, $args) = @_;
     map { $env->ta->dd($env->var($_)) } @$args;

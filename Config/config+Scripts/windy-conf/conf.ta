@@ -63,3 +63,10 @@ set(nickname-removal rx(''<标点>``)
 check-add-to-list(storage-set-hook qs(storage-set:nickname-forbidden))
 )
 ''
+``
+set(windize lambda(
+arguments(answer-str)
+set(answer-str replace-on-string(answer-str rx(''=(.=)+``)
+                                 lambda(arguments(full-str)subst-g({=} {-} full-str)) {GLOBAL}))
+answer-str))
+''

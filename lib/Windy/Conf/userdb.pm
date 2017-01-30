@@ -243,6 +243,9 @@ sub autoTeach
     $ask = mpq2sm($ask);
     $ans = mpq2sr($ans);
     my $tail = isTALike($ans) ? q/``reply({tail})''/ : '【$(tail)】';
+    my $windizedAns = ta->getValue(ta->newExpr(varname => 'windize', args => [$ans]),
+                                   msgTAEnv($windy, $msg));
+    $ans = $windizedAns if defined $windizedAns;
     if ($ans !~ $match->{tailing}) {
         $ans = $ans.$tail;
     }

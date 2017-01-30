@@ -2,16 +2,10 @@
 
 use 5.012;
 use File::Basename qw/basename/;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Cwd;
 
 my $cwd = cwd;
-my $home;
-if ($^O eq 'MSWin32' and not $ENV{HOME}) {
-    $home = 'C:\\Users\\tusoo';
-} else {
-    $home = $ENV{HOME};
-}
 while (<*>) {
     next if /~$/;
     next if $_ eq basename $0;
