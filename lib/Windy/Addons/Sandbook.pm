@@ -64,11 +64,13 @@ sub read
     my ($self, $db) = @_;
     if ($db) {
         my @a = grep $_->[1] eq $db, @{$self->{sentences}};
-        @a ? @{$a[int rand @a]} : ();
-    } else { # 每句平等概率，并给出出处。
-        my @all = @{$self->{sentences}};
-        @{$all[int rand @all]};
+        if (@a) {
+            return @{$a[int rand @a]};
+        }
     }
+    # 每句平等概率，并给出出处。
+    my @all = @{$self->{sentences}};
+    @{$all[int rand @all]};    
 }
 
 sub readByRegex
@@ -79,11 +81,13 @@ sub readByRegex
     $rPattern = qr/\Q$pattern\E/ if $@;
     if ($rPattern) {
         my @a = grep $_->[0] =~ $rPattern, @{$self->{sentences}};
-        @a ? @{$a[int rand @a]} : ();
-    } else { # 每句平等概率，并给出出处。
-        my @all = @{$self->{sentences}};
-        @{$all[int rand @all]};
+        if (@a) {
+            return @{$a[int rand @a]};
+        }
     }
+    # 每句平等概率，并给出出处。
+    my @all = @{$self->{sentences}};
+    @{$all[int rand @all]};
 }
 
 1;

@@ -15,7 +15,7 @@ use Scripts::Windy::Startup;
 use utf8;
 my $mainGroup = undef;
 my $t = Mojo::Webqq->new(
-    qq => $uid,
+    account => $uid,
     login_type => 'qrlogin',
     tmpdir => $configDir.'windy-cache/',
     qrcode_path => $Scripts::scriptFunctions::home.'/OneDrive/windy.png',
