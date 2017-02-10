@@ -210,7 +210,7 @@ sub teach
             debug 'teaching:';
             debug 'ques:'.$ask;
             debug 'answ:'.$ans;
-            return if !$ask or !$ans;
+            return if ! length $ask or ! length $ans;
             my $teacher = uid(msgSender($windy, $msg));
             debug "adding";
             $windy->logger("添加「${ask}」 => 「${ans}」");
@@ -241,10 +241,14 @@ sub autoTeach
 {
     my ($windy, $msg, $ask, $ans) = @_;
     $ask = mpq2sm($ask);
+    my $windizedAsk = ta->getValue(ta->newExpr(varname => 'windize-ask', args => [$ask]),
+                                   msgTAEnv($windy, $msg));
     $ans = mpq2sr($ans);
     my $tail = isTALike($ans) ? q/``reply({tail})''/ : '【$(tail)】';
     my $windizedAns = ta->getValue(ta->newExpr(varname => 'windize', args => [$ans]),
                                    msgTAEnv($windy, $msg));
+
+    $ask = $windizedAsk if defined $windizedAsk;
     $ans = $windizedAns if defined $windizedAns;
     if ($ans !~ $match->{tailing}) {
         $ans = $ans.$tail;

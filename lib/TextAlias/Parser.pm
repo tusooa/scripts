@@ -392,7 +392,7 @@ $func{'orelse'} = quoteExpr sub {
 };
 $func{'not'} = sub {
     my ($env, $args) = @_;
-    not $env->valueTrue($args->[0]);
+    not $env->ta->valueTrue($args->[0]);
 };
 $func{'defined'} = sub {
     my ($env, $args) = @_;
@@ -567,6 +567,11 @@ $func{'call'} = quoteExpr sub {
     my $expr = $ta->newExpr(expr => $ta->getValue($var, $env),
                             args => [map { $ta->getValue($_, $env) } @list]);
     $expr->value($env);
+};
+# string
+$func{'length'} = sub {
+    my ($env, $args) = @_;
+    length $args->[0];
 };
 # regexp func
 $func{'rx'} = sub {

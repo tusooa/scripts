@@ -64,6 +64,15 @@ check-add-to-list(storage-set-hook qs(storage-set:nickname-forbidden))
 )
 ''
 ``
+set(
+windize-ask-removal rx(''^(?:<标点>|<表情>)+|(?:<标点>|<表情>)+$``)
+windize-ask lambda(
+arguments(ask-str)
+def(windized-str)
+set(windized-str subst-g(windize-ask-removal {} ask-str))
+if(not(length(windized-str)) set(windized-str ask-str))
+windized-str
+))
 set(windize lambda(
 arguments(answer-str)
 set(answer-str replace-on-string(answer-str rx(''=(.=)+``)
