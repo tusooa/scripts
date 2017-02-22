@@ -405,6 +405,7 @@ topScope->var('posi', quoteExpr sub {
     }
               });
 topScope->var('sender-name', sub { senderNickname($match, windyMsgArgs(@_)); });
+topScope->var('sender-id', sub { uid(msgSender(windyMsgArgs(@_))); });
 topScope->var('my-name', sub { receiverName(windyMsgArgs(@_)); });
 topScope->var('sense', sub { $subs->{senseWithMood}($match, windyMsgArgs(@_)); });
 topScope->var('mood', sub { $subs->{mood}($match, windyMsgArgs(@_)); });

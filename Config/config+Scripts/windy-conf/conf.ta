@@ -69,8 +69,11 @@ windize-ask-removal rx(''^(?:<标点>|<表情>)+|(?:<标点>|<表情>)+$``)
 windize-ask lambda(
 arguments(ask-str)
 def(windized-str)
+set(windized-str ask-str)
+#(
 set(windized-str subst-g(windize-ask-removal {} ask-str))
 if(not(length(windized-str)) set(windized-str ask-str))
+)
 windized-str
 ))
 set(windize lambda(
