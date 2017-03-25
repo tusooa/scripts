@@ -251,6 +251,19 @@ $func{'hash-at'} = sub {
     UNIVERSAL::isa($hash, 'HASH') or return;
     $hash->{$k};
 };
+$func{'hash-keys'} = sub {
+    my ($env, $args) = @_;
+    my ($hash, $k) = @$args;
+    UNIVERSAL::isa($hash, 'HASH') or return;
+    keys %$hash;
+};
+
+$func{'hash-length'} = sub {
+    my ($env, $args) = @_;
+    my ($hash, $k) = @$args;
+    UNIVERSAL::isa($hash, 'HASH') or return;
+    scalar keys %$hash;
+};
 $func{'push'} = sub {
     my ($env, $args) = @_;
     my ($list, @rest) = @$args;
