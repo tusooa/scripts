@@ -12,13 +12,17 @@ use Time::HiRes qw/time/;
 use Scripts::Windy::Util;
 no warnings 'experimental';
 use Scripts::Windy::Startup;
+use Getopt::Long;
 use utf8;
+my $debug = 0;
+GetOptions('d' => \$debug);
 my $mainGroup = undef;
 my $t = Mojo::Webqq->new(
     account => $uid,
     login_type => 'qrlogin',
     tmpdir => $configDir.'windy-cache/',
     qrcode_path => $Scripts::scriptFunctions::home.'/OneDrive/windy.png',
+    log_level => $debug ? 'debug' : 'info',
     );
 $windy->{_client} = $t;
 # last channel
@@ -76,7 +80,7 @@ sub onReceive
     #my $text = $m->content;
     my ($context) = $m->type =~ /^(group|discuss)_message$/;
     my $inGroup = ($context ? " 在 ".($context eq 'group' ? msgGroupName($windy, $m) .'('.$m->group->gnumber.')' : msgDiscussName($windy, $m)) : '');
-    $windy->logger("收到 `".$text."` 从 ".uName(msgSender($windy, $m)).$inGroup);
+    $windy->logger("收到 `".$text."` 从 ".uName(msgSender($windy, $m)).'('.uid(msgSender($windy, $m)).')'.$inGroup);
     #$windy->logger($m->dump);
     my $time = time;
     my $r = $windy->parse($m);

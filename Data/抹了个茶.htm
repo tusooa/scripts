@@ -1,0 +1,64 @@
+<html>
+  <head>
+    <title>抹了个茶</title>
+  </head>
+  <body>
+    <script type="text/javascript">
+      
+      function inList(arg, arr) {
+      var item, num;
+      num = 0;
+      while (num < arr.length) {
+         if (arr[num] == arg) { return 1; }
+         num ++;
+      }
+      return 0;
+      }
+      function chooseLucky() {
+      var fromTA, fromText, numInput, numOfSsr, toTA, fromList, numList, toList, count;
+      fromTA = document.getElementById('from');
+                   fromText = fromTA.value.replace(/^\n/mg, "");
+
+      fromList = fromText.split("\n");
+      numInput = document.getElementById('num');
+      numOfSsr = Math.round(Number(numInput.value));
+      toTA = document.getElementById('to');
+      numList = new Array();
+      count = 0;
+      while (count < numOfSsr) {
+      newNum = Math.floor(Math.random()*fromList.length);
+      while (inList(newNum, numList)) {      newNum = Math.floor(Math.random()*fromList.length); }
+      numList.push(newNum);
+      count++;
+                     }
+                     var item;
+                     count = 0;
+                     toTA.value = numList.join(",")+"\n";
+                     while (count < numList.length) {
+                                    item = numList[count];
+                                    toTA.value += item+":"+fromList[item] +"\n";
+                                    count ++;
+                     }
+
+      }
+      
+    </script>
+    <div id="main">
+      <div>
+      <div style="float:left;width: 40%;">
+      <p>大约要从那些人里面抽(换行分割)</p>
+      <textarea id="from" style="width: 100%;height: 200px;"></textarea>
+      </div>
+      <div style="float:right;width: 40%;">
+        <p>大约抽中的是这些</p>
+      <textarea id="to" style="width:100%; height: 200px;"></textarea>
+      </div>
+      </div>
+      <div>      <div>抽多少个
+        <input type="text" id="num" />
+      </div>
+      <a href="javascript:chooseLucky();">喵喵喵</a>
+ </div>
+    </div>
+  </body>
+</html>

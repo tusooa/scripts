@@ -135,7 +135,7 @@ sub isAdmin
     my $windy = shift;
     my $msg = shift;
     my $id = shift;
-    my @a = (@adminList, @{$windy->{Admin}}); 
+    my @a = (@adminList, @{$windy->{Admin}});# say "ID=$id isAdmin?=". ($id ~~ @a);
     $id ~~ @a;
 }
 

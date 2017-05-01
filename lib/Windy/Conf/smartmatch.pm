@@ -128,14 +128,17 @@ $subs = {
         my (undef, $added) = addSense(uid(msgSender($windy, $msg)), $m1);
         my $s = msgTAEnv($windy, $msg)->scope;
         $s->makeVar($senseAddedVN);
-        $s->var($moodAddedVN, $added);
+        $s->var($senseAddedVN, $added);
         $reply{'addSense'}->run($windy, $msg, $added);
     },
     sign => sub {
         my ($self, $windy, $msg) = @_;
-        my $s = sign($self, $windy, $msg);
-        if (defined $s) {
-            my (undef, $added) = addSense(uid(msgSender($windy, $msg)), $s);
+        my $success = sign($self, $windy, $msg);
+        if (defined $success) {
+            my (undef, $added) = addSense(uid(msgSender($windy, $msg)), $success);
+            my $s = msgTAEnv($windy, $msg)->scope;
+            $s->makeVar($senseAddedVN);
+            $s->var($senseAddedVN, $added);
             $reply{'sign'}->run($windy, $msg, $added);
         } else {
             debug "not sensing.";
