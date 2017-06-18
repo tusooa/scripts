@@ -423,6 +423,7 @@ topScope->var('to-me', sub { $subs->{toMe}($match, windyMsgArgs(@_)); });
 topScope->var('stop', sub { $subs->{stopMsg}($match, windyMsgArgs(@_)); });
 topScope->var('priv-msg', sub { $subs->{privMsg}($match, windyMsgArgs(@_)); });
 topScope->var('from-group', sub { $subs->{fromGroup}($match, windyMsgArgs(@_)); });
+topScope->var('sign', sub { $subs->{sign}($match, windyMsgArgs(@_)); });
 topScope->var('group-name', sub { msgGroupName(windyMsgArgs(@_)); });
 topScope->var('group-id', sub { msgGroupId(windyMsgArgs(@_)) });
 topScope->var('nl', "\n");
