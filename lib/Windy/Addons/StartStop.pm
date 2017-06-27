@@ -75,7 +75,7 @@ sub stopOn
 sub isStartOn
 {
     my $groupId = shift;
-    $startGroup{$groupId} //= $default;
+    $startGroup{$groupId} // $default;
 }
 
 1;

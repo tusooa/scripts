@@ -123,3 +123,4 @@
       (set-buffer-file-coding-system (intern coding-str)) )))
 
 ;(add-hook 'find-file-hooks 'no-junk-please-were-unixish)
+(prefer-coding-system 'utf-8)
