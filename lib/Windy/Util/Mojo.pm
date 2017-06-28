@@ -8,13 +8,15 @@ use utf8;
 use Encode qw/_utf8_on _utf8_off/;
 #use Data::Dumper;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/isGroupMsg msgText msgGroup msgGroupId msgGroupName msgDiscussName
+our @EXPORT = qw/isGroupMsg msgText msgGroup msgGroupId msgGroupName
+isDiscussMsg msgDiscuss msgDiscussName msgDiscussId
 msgGroupHas msgSenderIsGroupAdmin msgStopping msgSender
 uid uName isAt isAtId findUserInGroup isPrivateMsg
 group invite friend $atPrefix $atSuffix
 parseRichText msgPosStart msgPosEnd
 msgReceiver receiverName outputLog isMsg sendTo
-msgGroupMembers setGroupCard msgTextNoAt/;
+msgGroupMembers setGroupCard msgTextNoAt
+msgSource/;
 our @EXPORT_OK = qw//;
 
 our $atPrefix = "\tat";
@@ -114,10 +116,22 @@ sub msgGroup
     isGroupMsg(@_) and $msg->group;
 }
 
+sub msgDiscuss
+{
+    my ($windy, $msg) = @_;
+    isDiscussMsg(@_) and $msg->discuss;
+}
+
 sub msgGroupId
 {
     my ($windy, $msg) = @_;
     isGroupMsg(@_) and $msg->group->gnumber;
+}
+
+sub msgDiscussId
+{
+    my ($windy, $msg) = @_;
+    isDiscussMsg(@_) and $msg->discuss->did;
 }
 
 sub msgGroupName
@@ -182,7 +196,13 @@ sub msgReceiver
 sub msgSenderIsGroupAdmin
 {
     my ($windy, $msg) = @_;
-    isGroupMsg($windy, $msg) and $msg->sender->role eq 'owner' or $msg->sender->role eq 'admin';
+    if (isGroupMsg($windy, $msg)) {
+        $msg->sender->role eq 'owner' or $msg->sender->role eq 'admin';
+    } elsif (isPrivateMsg($windy, $msg)) {
+        1;
+    } else {
+        0;
+    }
 }
 
 sub uid
@@ -258,6 +278,18 @@ sub setGroupCard
     _utf8_off($card);
     $member or return;
     $member->set_card($card);
+}
+
+sub msgSource
+{
+    my ($windy, $msg) = @_;
+    if (isGroupMsg($windy, $msg)) {
+        msgGroupId($windy, $msg);
+    } elsif (isDiscussMsg($windy, $msg)) {
+        msgDiscussId($windy, $msg).'D';
+    } elsif (isPrivateMsg($windy, $msg)) {
+        uid(msgSender($windy, $msg)).'P';
+    }
 }
 
 1;

@@ -168,13 +168,13 @@ $subs = {
     },
     start => sub {
         my ($self, $windy, $msg, $group) = @_;
-        $group = msgGroupId($windy, $msg) if $windy and $msg and not $group;
+        $group = msgSource($windy, $msg) if $windy and $msg and not $group;
         $group or return;
         startOn($group, $windy, $msg);
     },
     stop => sub {
         my ($self, $windy, $msg, $group) = @_;
-        $group = msgGroupId($windy, $msg) if $windy and $msg and not $group;
+        $group = msgSource($windy, $msg) if $windy and $msg and not $group;
         $group or return;
         stopOn($group);
     },
@@ -183,11 +183,14 @@ $subs = {
         isGroupMsg($windy, $msg)
             and isStartOn(msgGroupId($windy, $msg));
     },
+    isStart => sub {
+        my ($self, $windy, $msg) = @_;
+        isStartOn(msgSource($windy, $msg));
+    },
     callerName => sub {
         my $self = shift;
         my ($windy, $msg) = @_;
-        if (isGroupMsg($windy, $msg)
-            and my $uid = isStartOn(msgGroupId($windy, $msg))) {
+        if (my $uid = isStartOn(msgSource($windy, $msg))) {
             if ($uid != -1) {
                 userNickname($self,
                              findUserInGroup($windy, $uid, msgGroup($windy, $msg)));
@@ -299,6 +302,7 @@ my @aliases = (
     # Functions
     [qr/^讯息$/, sub { my ($self, $windy, $msg) = @_; isMsg($windy, $msg); }],
     [qr/^群讯开启$/, $subs->{fromGroup}],
+    [qr/^已启用$/, $subs->{isStart}],
     [qr/^私讯$/, $subs->{privMsg}],
     [qr/^截止(?:[：:](.+))?$/, $subs->{stopMsg} ],
     [qr/^(?:来讯者(?:名|的名字))$/, \&senderNickname],
@@ -423,6 +427,7 @@ topScope->var('to-me', sub { $subs->{toMe}($match, windyMsgArgs(@_)); });
 topScope->var('stop', sub { $subs->{stopMsg}($match, windyMsgArgs(@_)); });
 topScope->var('priv-msg', sub { $subs->{privMsg}($match, windyMsgArgs(@_)); });
 topScope->var('from-group', sub { $subs->{fromGroup}($match, windyMsgArgs(@_)); });
+topScope->var('is-start', sub { $subs->{isStart}($match, windyMsgArgs(@_)); });
 topScope->var('sign', sub { $subs->{sign}($match, windyMsgArgs(@_)); });
 topScope->var('group-name', sub { msgGroupName(windyMsgArgs(@_)); });
 topScope->var('group-id', sub { msgGroupId(windyMsgArgs(@_)) });
@@ -618,7 +623,13 @@ sub addReplacement
             return undef;
         }
     }
-    $rep = quotemeta $rep if $quotemeta;
+    if ($quotemeta) {
+        $rep = quotemeta $rep;
+        my $d5 = quotemeta $match->{d5};
+        my $d6 = quotemeta $match->{d6};
+        $rep =~ s/\Q$d5\E/$match->{d5}d5$match->{d6}/g;
+        $rep =~ s/\Q$d6\E/$match->{d5}d6$match->{d6}/g;
+    }
     eval { qr/$rep/ };
     return 0 if $@;
     if (ref $match->{replacements}{$name} eq 'ARRAY') {

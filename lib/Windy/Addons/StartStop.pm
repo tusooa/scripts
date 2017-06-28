@@ -22,7 +22,7 @@ sub loadGroups
     if (open my $f, '<', $file) {
         while (<$f>) {
             chomp;
-            if (/^(\d+)(?:\t(-?\d+))?$/) {
+            if (/^(\d+[DP]?)(?:\t(-?\d+))?$/) {
                 my ($group, $start) = ($1, $2);
                 $startGroup{$group} = $start;
             }
