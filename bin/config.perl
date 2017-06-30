@@ -75,7 +75,7 @@ if (not defined $set) {
                 close $f;
                 final;
             } else {
-                die term "无法打开配置文件 $configDir.${file}： $!\n";
+                die term "无法打开配置文件 $configDir${file}： $!\n";
             }
         }
     }
