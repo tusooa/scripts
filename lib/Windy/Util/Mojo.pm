@@ -44,10 +44,10 @@ sub isPrivateMsg
 sub shortenDName
 {
     my $name = shift;
-    _utf8_on($name);
-    my $subset = substr $name, 0, 7;
-    _utf8_off($subset);
-    $subset;
+#    _utf8_on($name);
+#    my $subset = substr $name, 0, 7;
+#    _utf8_off($subset);
+#    $subset;
 }
 
 sub parseRichText

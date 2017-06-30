@@ -24,6 +24,7 @@ my $t = Mojo::Webqq->new(
     qrcode_path => $Scripts::scriptFunctions::home.'/OneDrive/windy.png',
     log_level => $debug ? 'debug' : 'info',
     );
+
 $windy->{_client} = $t;
 # last channel
 my $lastChannelFile = $configDir."windy-conf/last-channel";
