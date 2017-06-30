@@ -17,7 +17,7 @@ $verbose verbose debug
 conf $pathConf $defg $scriptName
 multiArgs time2date final ln term
 formatTime utf8 randFromTo debugOn debugOff
-/;
+isWindows/;
 use Scripts::WindowsSupport;
 sub time2date;
 sub multiArgs;

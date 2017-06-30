@@ -1,18 +1,15 @@
-# -*- conf-unix -*-
-font = DejaVu Sans YuanTi
-max = 6
-#color-today = 20,20,20,255
-#color-rest = 20,20,20,255
-#color-other = 20,20,20,255
-back-today = 20,20,20,180
-back-rest = 20,20,20,130
+[main]
 back-other = 20,20,20,100
-color-today = 224,217,22,255
-color-rest = 224,217,22,255
+back-rest = 20,20,20,130
+back-today = 20,20,20,180
 color-other = 224,217,22,255
-#color-rest = 198,22,38,255
-#color-other = 198,22,38,255
-size = 80
+color-rest = 224,217,22,255
+color-today = 224,217,22,255
+font = DejaVu Sans YuanTi
 font-size = 12
+max = 6
 picture-size = 64
 show-shadow = 1
+size = 80
+weather-uri = http://qq.ip138.com/weather/jiangsu/NanJing.wml
+
