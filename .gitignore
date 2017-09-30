@@ -36,3 +36,4 @@ bin/g.perl
 lib/Windy/Conf-/*
 # Gentoo etc-update
 GentooConfig/conf.d/._cfg*
+debug*.txt

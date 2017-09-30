@@ -2,6 +2,7 @@
 
 use 5.012;
 use Scripts::scriptFunctions;
+no warnings 'experimental';
 use POSIX qw/strftime/;
 #use utf8;
 use File::Temp qw/tempfile/;
@@ -10,15 +11,85 @@ use Getopt::Long qw/:config gnu_getopt/;
 my $addAll = 0;
 my $realGit = 0;
 my @args;
+
+my @gitCommands = qw/  add                 grep                relink
+  add--interactive    gui                 remote
+  am                  gui--askpass        remote-ext
+  annotate            gui--askyesno       remote-fd
+  apply               gui.tcl             remote-ftp
+  archive             hash-object         remote-ftps
+  bisect              help                remote-http
+  bisect--helper      http-backend        remote-https
+  blame               http-fetch          remote-testsvn
+  branch              imap-send           repack
+  bundle              index-pack          replace
+  cat-file            init                repo-config
+  check-attr          init-db             request-pull
+  check-ignore        log                 rerere
+  check-mailmap       ls-files            reset
+  check-ref-format    ls-remote           rev-list
+  checkout            ls-tree             rev-parse
+  checkout-index      mailinfo            revert
+  cherry              mailsplit           rm
+  cherry-pick         merge               send-email
+  citool              merge-base          send-pack
+  clean               merge-file          sh-i18n--envsubst
+  clone               merge-index         shortlog
+  column              merge-octopus       show
+  commit              merge-one-file      show-branch
+  commit-tree         merge-ours          show-index
+  config              merge-recursive     show-ref
+  count-objects       merge-resolve       stage
+  credential          merge-subtree       stash
+  credential-store    merge-tree          status
+  credential-wincred  mergetool           stripspace
+  daemon              mktag               submodule
+  describe            mktree              subtree
+  diff                mv                  svn
+  diff-files          name-rev            symbolic-ref
+  diff-index          notes               tag
+  diff-tree           p4                  tar-tree
+  difftool            pack-objects        unpack-file
+  difftool--helper    pack-redundant      unpack-objects
+  fast-export         pack-refs           update-index
+  fast-import         patch-id            update-ref
+  fetch               peek-remote         update-server-info
+  fetch-pack          prune               upload-archive
+  filter-branch       prune-packed        upload-pack
+  fmt-merge-msg       pull                var
+  for-each-ref        push                verify-pack
+  format-patch        quiltimport         verify-tag
+  fsck                read-tree           web--browse
+  fsck-objects        rebase              whatchanged
+  gc                  receive-pack        write-tree
+  get-tar-commit-id   reflog/;
+
+
+my $conf = conf 'git.perl';
+
+my $git = $conf->get('git-exec');
+
+$git or $git = isWindows ? 'C:\\Home\\usr\\Git\\bin\\git.exe' : 'git';
+
+for (split /\n/, `$git config -l`) {
+    m/^alias\.(.+)=/ or next;
+    push @gitCommands, $1;
+}
+sub setRealGit
+{
+    $realGit = 1;
+    @args = @ARGV;
+    @ARGV = ();
+}
+
+setRealGit if isWindows and $ARGV[0] ~~ @gitCommands;
+
 GetOptions ('a|add-all' => \$addAll,
     'd|debug' => sub { debugOn; },
-    'o' => sub { $realGit = 1; @args = @ARGV; @ARGV = (); }
+    'o' => \&setRealGit,
     );
 @args or @args = @ARGV;
 
-my $conf = conf 'git.perl';
-my $git = $conf->get('git-exec');
-$git or $git = ($^O eq 'MSWin32' ? 'C:\\Home\\usr\\Git\\bin\\git.exe' : 'git');
 if ($realGit) {
     system $git, @args;
     exit;
