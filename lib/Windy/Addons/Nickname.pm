@@ -6,18 +6,34 @@ use Exporter;
 use 5.012;
 use utf8;
 use Encode qw/_utf8_on _utf8_off/;
+use Scripts::TextAlias::Parser;
+
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/userNickname nicknameById senderNickname newNick loadNicknames/;
 our @EXPORT_OK = qw//;
 
 my %nick;
 
+sub nickProcessor
+{
+    my $name = shift;
+    my $func = ta->newLambda(scope => ta->newScope(topScope),
+                             list => [ta->newExpr(varname => 'nickname-processor',
+                                                  args => [$name])]);
+    my $newName = $func->value(topEnv);
+    if (length $newName) {
+        $newName;
+    } else {
+        $name;
+    }
+}
+
 sub userNickname
 {
     my ($self, $user) = @_;
     $user or return;
     my $id = uid($user);
-    $nick{$id}->[0] or do { my $name = uName($user); _utf8_on($name); $name; };
+    $nick{$id}->[0] or do { my $name = uName($user); _utf8_on($name); nickProcessor($name); };
 }
 
 sub nicknameById

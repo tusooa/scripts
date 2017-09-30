@@ -1,3 +1,4 @@
+# -*- prog-mode -*-
 好感进度条
 ``set(sense-graph-length 10
    sense-graph-min 40
@@ -81,4 +82,14 @@ arguments(answer-str)
 set(answer-str replace-on-string(answer-str rx(''=(.=)+``)
                                  lambda(arguments(full-str)subst-g({=} {-} full-str)) {GLOBAL}))
 answer-str))
+''
+nickname simplifier
+``
+set(nickname-processor lambda(
+arguments(&opt(name xth(-args- 0)))
+set(new-name
+subst-g(rx(''<名后>$``) {}
+subst-g(rx(''^<名前>``) {}
+name)))
+if(length(new-name) new-name name)))
 ''

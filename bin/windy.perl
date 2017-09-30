@@ -23,6 +23,7 @@ my $t = Mojo::Webqq->new(
     tmpdir => $configDir.'windy-cache/',
     qrcode_path => $Scripts::scriptFunctions::home.'/OneDrive/windy.png',
     log_level => $debug ? 'debug' : 'info',
+    group_member_use_fullcard => 1,
     );
 
 $windy->{_client} = $t;
