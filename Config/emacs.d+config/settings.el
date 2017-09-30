@@ -116,11 +116,12 @@
 (defun unixize ()
   (interactive)
   (let ((coding-str (symbol-name buffer-file-coding-system)))
-    (when (string-match "-\\(?:dos\\|mac\\)$" coding-str)
+    (when ;(and ;(not (string-match "\\(\\.\\(?:cmd\\|bat\\)\\|\\\\hosts\\)$" buffer-file-name))
+               (string-match "-\\(?:dos\\|mac\\)$" coding-str);)
       (setq coding-str
             (concat (substring coding-str 0 (match-beginning 0)) "-unix"))
       (message "CODING: %s" coding-str)
       (set-buffer-file-coding-system (intern coding-str)) )))
 
-;(add-hook 'find-file-hooks 'no-junk-please-were-unixish)
-(prefer-coding-system 'utf-8)
+;(add-hook 'find-file-hooks 'unixize)
+(prefer-coding-system 'utf-8-unix)
