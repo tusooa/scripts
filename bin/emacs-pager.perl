@@ -3,7 +3,7 @@
 #use 5.012;
 use File::Temp qw/tempfile/;
 
-my $emacsclient = 'C:\Home\usr\emacs-24.3\bin\emacsclientw.exe';
+my $emacsclient = 'C:\Home\usr\emacs\bin\emacsclientw.exe';
 my $file = shift;
 if (not $file) {
     my $fh;

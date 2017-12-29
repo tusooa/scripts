@@ -84,7 +84,7 @@
  default-buffer-file-coding-system 'utf-8-unix
 )
 (if (eq system-type 'windows-nt)
-    (setq browse-url-generic-program "C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe"))
+    (setq browse-url-generic-program "C:\\Home\\Programs\\Mozilla-Firefox\\firefox.exe"))
 (mapc #'(lambda (x) (add-to-list 'auto-mode-alist x))
       '(
         ("~/.fvwm/\\(config\\|f\\..+\\)" . fvwm-mode)
