@@ -112,7 +112,7 @@ for (@_)
 #    s/小雪/13.png/g; s/中雪/14.png/g; s/大雪/15.png/g;
 #    s/多云/26.png/;s/晴/32.png/;s/阴/31.png/;s/转/-/;
 #    s/雷阵雨/17.png/;s/阵雨/09.png/;
-        my $_ = $weather;
+        local $_ = $weather;
         s/小到//;s/中到//;s/大到//;
         s/小雨/09.png/g; s/中雨/10.png/g; s/大雨/11.png/g;s/暴雨/12.png/g;
         s/雨夹雪/07.png/g; s/小雪/13.png/g; s/中雪/14.png/g; s/大雪/15.png/g;
