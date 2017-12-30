@@ -4,7 +4,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(ansi-color-names-vector ["black" "firebrick1" "lime green" "gold1" "RoyalBlue3" "HotPink1" "dark turquoise" "white"])
+ '(ansi-color-names-vector
+   ["black" "firebrick1" "lime green" "gold1" "RoyalBlue3" "HotPink1" "dark turquoise" "white"])
  '(canlock-password "64af8575f06472636c3a0709394ee6a2eae4520d")
  '(cperl-highlight-variables-indiscriminately t)
  '(cperl-indent-level 4)
@@ -17,6 +18,7 @@
  '(max-specpdl-size 3000)
  '(org-agenda-files (quote ("~/Private/todo.org")))
  '(org-startup-truncated nil)
+ '(package-selected-packages (quote (zlc flycheck-perl6 flycheck perl6-mode)))
  '(pop3-connection-type (quote ssl))
  '(rainbow-identifiers-face-count 10))
 (custom-set-faces

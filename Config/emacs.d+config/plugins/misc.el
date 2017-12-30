@@ -12,8 +12,15 @@
         rainbow-identifiers
         rainbow-delimiters
         text-alias-mode
-        git-commit-mode
-        perl6-mode))
+        git-commit-mode))
+(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
+                    (not (gnutls-available-p))))
+       (url (concat (if no-ssl "http" "https") "://melpa.org/packages/")))
+  (add-to-list 'package-archives (cons "melpa" url) t))
+(when (< emacs-major-version 24)
+  ;; For important compatibility libraries like cl-lib
+  (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/")))
+(package-initialize)
 
 ; linum
 (global-linum-mode t)
@@ -78,3 +85,37 @@
   (if (eq system-type 'windows-nt)
       (set-buffer-file-coding-system 'utf-8-unix)))
 (add-hook 'git-commit-mode-hook 'thistusooa-git-commit-mode-hook)
+
+;(require 'use-package)
+(let ((p6-lib (if (eq system-type 'windows-nt) "c:/Home/Code/scripts/libp6" "/home/tusooa/Apps/libp6")))
+  (setenv "PERL6LIB" (if (getenv "PERL6LIB")
+                         (concat (getenv "PERL6LIB") ";" p6-lib)
+                       p6-lib)))
+
+(require 'perl6-mode)
+
+(require 'flycheck)
+(defun enable-flycheck-in-prog ()
+  (flycheck-mode t))
+(add-hook 'prog-mode-hook 'enable-flycheck-in-prog)
+
+(require 'flycheck-perl6)
+
+(require 'zlc)
+(zlc-mode t)
+
+(let ((map minibuffer-local-map))
+  ;;; like menu select
+  (define-key map (kbd "<down>")  'zlc-select-next-vertical)
+  (define-key map (kbd "<up>")    'zlc-select-previous-vertical)
+  (define-key map (kbd "<right>") 'zlc-select-next)
+  (define-key map (kbd "<left>")  'zlc-select-previous)
+  (define-key map (kbd "C-n")  'zlc-select-next-vertical)
+  (define-key map (kbd "C-p")    'zlc-select-previous-vertical)
+  (define-key map (kbd "M-f") 'zlc-select-next)
+  (define-key map (kbd "M-b")  'zlc-select-previous)
+  ;;; reset selection
+  (define-key map (kbd "C-c") 'zlc-reset)
+  )
+
+

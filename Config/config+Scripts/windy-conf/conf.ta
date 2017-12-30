@@ -1,4 +1,4 @@
-# -*- prog-mode -*-
+# -*- prog -*-
 好感进度条
 ``set(sense-graph-length 10
    sense-graph-min 40
