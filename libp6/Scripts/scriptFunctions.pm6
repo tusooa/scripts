@@ -1,4 +1,4 @@
-module Scripts::scriptFunctions;
+unit module Scripts::scriptFunctions;
 #use Exporter;
 use v6;
 use Scripts::Configure;

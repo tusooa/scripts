@@ -1,4 +1,4 @@
-class Scripts::Configure;
+unit class Scripts::Configure;
 use v6;
 
 our $defg is export = 'main'; # default group

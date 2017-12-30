@@ -19,3 +19,12 @@
 [submodule "src/windy/Simple-Web-Server"]
 	path = src/windy/Simple-Web-Server
 	url = https://github.com/eidheim/Simple-Web-Server.git
+[submodule "Config/emacs.d+lisp-others/flycheck"]
+	path = Config/emacs.d+lisp-others/flycheck
+	url = https://github.com/flycheck/flycheck.git
+[submodule "Config/emacs.d+lisp-others/flycheck-perl6"]
+	path = Config/emacs.d+lisp-others/flycheck-perl6
+	url = https://github.com/hinrik/flycheck-perl6.git
+[submodule "Config/emacs.d+lisp-others/emacs-zlc"]
+	path = Config/emacs.d+lisp-others/emacs-zlc
+	url = https://github.com/mooz/emacs-zlc.git
