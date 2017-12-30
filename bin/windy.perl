@@ -24,6 +24,7 @@ my $t = Mojo::Webqq->new(
     qrcode_path => $Scripts::scriptFunctions::home.'/OneDrive/windy.png',
     log_level => $debug ? 'debug' : 'info',
     group_member_use_fullcard => 1,
+    model_ext => 1,
     );
 
 $windy->{_client} = $t;

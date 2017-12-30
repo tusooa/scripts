@@ -19,6 +19,9 @@ string callApi(string func, vector<string> args) {
               (char *)(args[4].c_str()),
               (char *)(args[5].c_str())));
   }
+  if (func == "OutPut") {
+    return to_string(Api_OutPut((char *)(args[0].c_str())));
+  }
   return string("");
 }
 

@@ -1,7 +1,7 @@
 # -*- conf-unix -*-
 [user]
-    name = ThisTusooa
-    email = tusooa@vista.aero
+	name = ThisTusooa
+	email = tusooa@vista.aero
     signingkey = tusooa@gmail.com
 [color]
     ui = always
@@ -27,3 +27,8 @@
     autocrlf = false
     safecrlf = false
     quotepath = false
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true

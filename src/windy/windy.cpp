@@ -36,7 +36,7 @@ HttpClient client(SEND_ADDR);
 static __attribute__((constructor)) void startServer()
 {
   loadLibs();
-  
+  #if 0
   server.resource["^/api/call$"]["POST"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
       ptree input;
@@ -87,7 +87,7 @@ static __attribute__((constructor)) void startServer()
     cout << r3->content.rdbuf() << endl;
     */
     server_thread.detach();
-    
+    #endif
     return;
 }
 #define EXTERN extern "C"
@@ -118,10 +118,13 @@ EventFun(char *tencent, int type, int subtype, char *source, char *subject, char
     stringstream jsonStream;
     write_json(jsonStream, send);
     string ss = jsonStream.str();
-    auto ret = client.request("POST", "/recv", ss);
-    ptree retval;
-    read_json(ret->content, retval);
-    retvalue = stoi(retval.get<string>("ret"));
+    vector<string> args(1, ss);
+    callApi("OutPut", args);
+    //auto ret = client.request("POST", "/recv", ss);
+    //ptree retval;
+    //read_json(ret->content, retval);
+    //retvalue = stoi(retval.get<string>("ret"));
+    retvalue = RET_PASS;
   } catch(const exception &e) {
     retvalue = RET_PASS;
   }

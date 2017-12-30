@@ -54,8 +54,9 @@ post '/recv' => sub {
     my $hash = from_json($orig); # it is not utf8
   use Data::Dumper;
   print Dumper($hash);
-  my $event = Scripts::Windy::Event->new(map $hash->{$_}, qw/tencent type subtype source subject object msg rawmsg/);
-  my $ret = { ret => - -parseEvent($event)};
+  #my $event = Scripts::Windy::Event->new(map $hash->{$_}, qw/tencent type subtype source subject object msg rawmsg/);
+  my $ret = { ret => 0#- -parseEvent($event)
+  };
   $c->render(json => $ret);
 };
 
