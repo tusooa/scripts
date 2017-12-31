@@ -17,20 +17,21 @@ use Scripts::Configure;
 #our $scriptName= basename $0;
 #our $verbose   = 0;
 #our $debug     = 0;
-my $xdgConf   = %*ENV<XDG_CONFIG_HOME> ?? "%*ENV<XDG_CONFIG_HOME>/" !! "%*ENV<HOME>/.config/";
+sub isWindows () { $*DISTRO.is-win; }
+our $home = isWindows() ?? %*ENV<HOMEDRIVE>~%*ENV<HOMEPATH> !! %*ENV<HOME>;
+my $xdgConf   = %*ENV<XDG_CONFIG_HOME>:exists ?? "%*ENV<XDG_CONFIG_HOME>/" !! "$home/.config/";
 our $configDir is export = "{$xdgConf}Scripts/";
-my $xdgCache  = %*ENV<XDG_CACHE_HOME> ?? "%*ENV<XDG_CACHE_HOME>/" !! "%*ENV<HOME>/.cache/";
+my $xdgCache  = %*ENV<XDG_CACHE_HOME>:exists ?? "%*ENV<XDG_CACHE_HOME>/" !! "$home/.cache/";
 our $cacheDir is export  = "{$xdgCache}Scripts/";
+our $defConfDir is export = $configDir ~ 'Default/';
 
-our $pathConf is export = Scripts::Configure.new;
-$pathConf.parseConf(fn => $configDir~'scriptpath', defc => '/dev/null');
+our $pathConf is export = conf 'scriptFunctions' // conf 'scriptpath';
 
-our $appsDir is export  = $pathConf.get('appsDir') // "%*ENV<HOME>/Apps/";
+our $appsDir is export  = $pathConf.get('appsDir') // "$home/Apps/";
 our $dataDir is export  = $pathConf.get('dataDir') // "{$appsDir}Data/";
-our $accountDir is export= $pathConf.get('accountDir')// "%*ENV<HOME>/Accounts/";
+our $accountDir is export= $pathConf.get('accountDir')// "$home/Accounts/";
 our $scriptsDir is export= $pathConf.get('scriptsDir') // "{$appsDir}bin/";
 our $libDir    is export = $pathConf.get('libDir') // "{$appsDir}lib/";
-our $defConfDir is export= $pathConf.get('defConfDir') // "{$appsDir}default-cfg/";
 
 sub time2date ($date = DateTime.now) is export
 {
@@ -56,14 +57,8 @@ sub multiArgs is export
 
 sub conf ($file) is export
 {
-    my $conf = Scripts::Configure.new;
-    $conf.parseConf(fn => $configDir~$file, defc => $defConfDir~$file);
-    $conf;
+    Scripts::Configure.new(fn => $configDir~$file, defc => $defConfDir~$file);
 }
-
-$pathConf = conf('scriptpath');
-#不加这，cairo-w就会出错。
-#原因是之前没有指明默认配置在哪里
 
 #sub main
 #{

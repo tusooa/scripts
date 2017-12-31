@@ -2,98 +2,128 @@ unit class Scripts::Configure;
 use v6;
 
 our $defg is export = 'main'; # default group
-has $.confhash is rw;
-#method new($fn, $defc)
-#{
-    #$.confhash = .parseConf($fn,$defc);
-#}
-method parseConf(:$fn, :$defc, :$fh, :$str, :$arr)
+has $!confhash;
+submethod BUILD(:$fn, :$defc)
 {
-    my @conf;
-    if $fn {
-        my (@defconf, @userconf);
-        given open $defc {
-            @defconf = $_.lines;
-        }
-        given open $fn {
-            @userconf = $_.lines;
-        }
-        @conf = (@defconf, "[$defg]", @userconf); #默认分组。防止默认配置里原有分组，算到用户配置里去。
-    } elsif $fh {
-        @conf = $fh.lines;
-    } elsif $str {
-        @conf = split "\n", $str;
-    } elsif $arr {
-        @conf = @($arr);
+    self.parseConf(:$fn, :$defc);
+    self;
+}
+my Bool $DEBUG = False;
+sub debug
+{
+    say "D:", |@_ if $DEBUG;
+}
+grammar Config
+{
+    token TOP { ^ <no-header> \n*
+                { debug "no-header end. `{$/.postmatch}'" }
+                [ <section> <.comments> ]* $ }
+    rule no-header { [ <kv> ]* }
+    rule section {
+        { debug "section start, `{$/.postmatch}'" }
+        <header>
+        <.comments>
+        { debug "got header: `$<header>'" }
+        <kv>*
+        { debug "section ENDS." }
+        <.comments>
     }
-    #my $l = -1;
-    my $group = $defg;
-    my $subg;
-    # 这样,在遍历每个group的时候,如果没有main,不会加进去.
-    #$ret->{$group} = {};
-    my $cfg;# = $ret->{$group};
-    #use Data::Dumper;print Dumper ($cfg), ref($cfg);
-    #say $#conf;
-    for @conf {
-        #$l++;
-        #my $_ = @conf[$l];!!!-qiru8q3u4riqeowjuq
-        #say $l;
-        #say $_;
-        s:P5/^\s+//;s:P5/\s+$//;
-        s:P5/^#.+$//;
-        #    jasfop!!!!
-        next if /^$/;
-        if m:P5/^\[(.+?)\]:(.+)/ { # config group
-            #say 'config group'~$0~','~$1;
-            $group = $0.Str; # in Perl 6, match group starts with $0, instead of $1.
-            $subg = $1.Str;
-            $.confhash{$group} = {} if !$.confhash{$group};
-            $.confhash{$group}{$subg} = {} if !$.confhash{$group}{$subg};
-            $cfg = $.confhash{$group}{$subg};
-        } elsif m:P5/^\[(.+?)\]/ { # simple group
-            #say 'simple group: '~$0;
-            $group = $0.Str;
-            $.confhash{$group} = {} if !$.confhash{$group};
-            $cfg = $.confhash{$group};
-        } elsif m:P5/^(.+?)\s*=\s*(.+)/ { # config
-            #say "config:$0 = $1";
-            #print Dumper ($.confhash), ref($cfg);
-            unless $cfg {
-                $.confhash{$group} = {} if !$.confhash{$group};
-                $cfg = $.confhash{$group};
+    proto rule header { * }
+    rule header:sym<subg> { '[' <symbol> ']:' <symbol> }
+    rule header:sym<simple> { '[' <symbol> ']' }
+    token symbol { <-[:\[\]\s\n]>+ }
+    token string { <-[\n]>+ }
+    token ws { \s* }
+    rule kv { ^^
+              <.comments>
+              { debug "kv start" }
+              <symbol> '=' <string>
+              { debug "symbol: $<symbol>, string: $<string>, rest: `{$/.postmatch}'" }
+              <.comments>
             }
-            $cfg{$0.Str} = $1.Str;
+    token comments {
+        [ ^^ '#' <.string> ]*
+        { debug "comment:", ~$/ if $/ }
+    }
+}
+
+class ConfigParser
+{
+    method TOP ($/)
+    {
+        my @r = ($<no-header>.made, |$<section>>>.made);
+        my %h;
+        for (@r) {
+            .value or next; # 如果组是空的，就不生成它
+            if (.key.elems == 1) { # 一层分组
+                %h{.key} = hash .value;
+            } else { # 二层分组
+                %h{.key[0]}{.key[1]} = hash .value;
+            }
+        }
+        make %h;
+    }
+    method no-header ($/) { make $defg => $<kv>>>.made; }
+    method section ($/)
+    {
+        debug "HEAD: ", $<header>.made;
+        make $<header>.made => $<kv>>>.made;
+    }
+    method header:sym<simple> ($/) { make ~$<symbol>; }
+    method header:sym<subg> ($/) { make (~$<symbol>[0], ~$<symbol>[1]); }
+    method kv ($/) { make ~$<symbol> => ~$<string>; }
+}
+
+method parseConf(Str :$fn!, Str :$defc!)
+{
+    my Str $conf;
+    debug $fn, $defc;
+    my Str @files = $*DISTRO.is-win ??
+    # 处理 windows 专门配置
+        ($defc, $defc ~ '.windows', $fn, $fn ~ '.windows') !!
+        ($defc, $fn);
+    # 首次标志
+    my Bool $first = True;
+    for @files {
+        with open $_ -> $fh {
+            if $first {
+                $conf = $fh.slurp;
+                $first = False;
+            } else {
+                $conf ~= "\n[$defg]\n" ~ $fh.slurp; #默认分组。防止默认配置里原有分组，算到用户配置里去。
+            }
         }
     }
-    #use Data::Dumper;
-    #print Dumper ($.confhash);
-    #say "here";
-    #$.confhash = $.confhash;
+    debug $conf.perl;
+    $!confhash = Config.parse($conf,
+                              actions => ConfigParser.new).made;
+    debug "Config hash = " ~ $!confhash.perl;
+    $!confhash;
 }
 
-method hash
+method hash (--> Hash)
 {
-    %($.confhash);
+    %($!confhash);
 }
 
-method hashref
+method hashref (--> Hash)
 {
-    $.confhash;
+    $!confhash;
 }
 
-multi method get ($entry) { $.confhash{$defg}{$entry}; }
-multi method get ($group, $entry) { $.confhash{$group}{$entry}; }
-multi method get ($group, $subg, $entry) { $.confhash{$group}{$subg}{$entry}; }
+multi method get ($entry --> Str) { $!confhash{$defg}{$entry}; }
+multi method get ($group, $entry --> Str) { $!confhash{$group}{$entry}; }
+multi method get ($group, $subg, $entry --> Str) { $!confhash{$group}{$subg}{$entry}; }
 
 
 method runHooks ($hookName)
 {
-    $.confhash<Hooks> ~~ Hash or fail;
-    $.confhash<Hooks>{$hookName} ~~ Hash or fail;
-    for (keys $.confhash<Hooks>{$hookName})
+    $!confhash<Hooks> ~~ Hash or fail;
+    $!confhash<Hooks>{$hookName} ~~ Hash or fail;
+    for (keys $!confhash<Hooks>{$hookName})
     {
-        say "$hookName hook => $_";
-        shell $.confhash<Hooks>{$hookName}{$_};
+        debug "$hookName hook => $_";
+        shell $!confhash<Hooks>{$hookName}{$_};
     }
 }
 

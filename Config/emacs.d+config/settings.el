@@ -85,16 +85,18 @@
 )
 (if (eq system-type 'windows-nt)
     (setq browse-url-generic-program "C:\\Home\\Programs\\Mozilla-Firefox\\firefox.exe"))
+(setq appsDir (if (eq system-type 'windows-nt)
+                  "~/Apps/" "C:/Home/Code/scripts/"))
 (mapc #'(lambda (x) (add-to-list 'auto-mode-alist x))
-      '(
+      `(
         ("~/.fvwm/\\(config\\|f\\..+\\)" . fvwm-mode)
         ("\\.fvwm\\'" . fvwm-mode)
 ;        ("/home/tusooa/\\(应用\\|Apps\\)/\\(源码\\|Source-Code\\)/GitHub/tusooa/Apps/Config/\\.fvwm\\+c.+" . fvwm-mode)
         ("\\.\\(perl\\)\\'" . perl-mode)
         ("\\.\\(p6\\|pm6\\)\\'" . perl6-mode)
         ("~/\\.config/Scripts/" . conf-unix-mode)
-        ("/home/tusooa/GitHub/Apps/Config/Scripts/" . conf-unix-mode)
-        ("/home/tusooa/GitHub/Apps/DefaultConfig/" . conf-unix-mode)
+        (,(concat appsDir "Config/Scripts/") . conf-unix-mode)
+        (,(concat appsDir "default-cfg/") . conf-unix-mode)
         ("\\.Xresource" . conf-xdefaults-mode)
         ("PKGBUILD" . shell-script-mode)
         ("CMakeLists\\.txt\\'" . cmake-mode)
@@ -106,7 +108,7 @@
         ("\\.zsh\\'" . shell-script-mode)
         ("\\..*rc\\'" . conf-space-mode)
         ("COMMIT_EDITMSG\\'" . git-commit-mode)
-        ("\\.ta\'" . prog-mode) ;先这样吧
+        ("\\.ta\\'" . prog-mode) ;先这样吧
       )
 ) ;/mapc
 ;(fset 'perl-mode 'cperl-mode)
