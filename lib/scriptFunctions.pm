@@ -105,7 +105,7 @@ our $cacheDir  = "${xdgCache}Scripts/";
 一个好的做法是将 Default 链接到源码树下。
 =cut
 our $defConfDir = $configDir . 'Default/';# 硬性编码
-=head2 $pathConf, $appsDir, $dataDir, $accountDir, $scriptsDir, $libDir
+=head2 $pathConf, $appsDir(未导出), $dataDir, $accountDir, $scriptsDir, $libDir
 
 $pathConf 是存储配置信息的 Scripts::Configure 对象。
 
@@ -227,6 +227,8 @@ sub gbk
 =head2 term LIST
 
 在 Windows 下，返回 gbk(LIST)。否则，将 LIST 原样拼接后返回。
+
+在 Windows 下，当涉及终端输出和访问文件，且输出内容或文件名是 UTF-8 编码时，应该总是使用 term 函数。
 =cut
 sub term
 {
