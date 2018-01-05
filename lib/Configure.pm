@@ -217,32 +217,44 @@ sub runHooks
     }
 }
 
+sub putEntries
+{
+    my ($self, $group, $ent) = @_;
+    my $h = $self->hashref;
+    my $ret;
+    if (my @entries = @{$ent}) {
+        $ret .= "[${group}]\n" if $group ne $defg; # 不是默认组才加 group 名
+        for (@entries) {
+            $ret .= $_.' = '.$h->{$group}{$_}."\n";
+        }
+        $ret .= "\n";
+    }
+    $ret;
+}
+
 sub outputFile
 {
     my ($self) = @_;
     my $h = $self->hashref;
     my $order = sub { $a cmp $b };
-    my $ret;
+    my $ret = '';
+    # 先输出 $defg。
+    my @entries = grep { not ref $h->{$defg}{$_} } $self->childList($defg);
+    $ret .= $self->putEntries($defg, \@entries);
+
+    # 顺序输出 Groups。
     for my $group ($self->childList) {
         my @all = $self->childList($group);
         my $flags = $self->getSortFlags($group);
         my $entriesFirst = 0;
-        if ($flags->{groupOrder} eq 'G_LAST') {
+        if ($flags->{groupOrder} eq 'G_LAST') { # 看一下有没有指定 G_LAST。如果有，先输出entries。
             $entriesFirst = 1;
         }
-        $entriesFirst = !$entriesFirst if $flags->{'reverse'};
-        my @subgroups = grep { ref $h->{$group}{$_} eq 'HASH' } @all;
+        $entriesFirst = !$entriesFirst if $flags->{'reverse'}; # reverse 最大。
+        my @subgroups = grep { ref $h->{$group}{$_} eq 'HASH' } @all; # Hash 都是子组。
         my @entries = grep { not ref $h->{$group}{$_} } @all;
-        my $e = sub {
-            if (@entries) {
-                $ret .= "[${group}]\n";
-                for (@entries) {
-                    $ret .= $_.' = '.$h->{$group}{$_}."\n";
-                }
-                $ret .= "\n";
-            }
-        };
-        $e->() if $entriesFirst;
+        $ret .= $self->putEntries($group, \@entries) if $group ne $defg and $entriesFirst;
+        # 输出子组。
         for my $subg (@subgroups) {
             $ret .= "[${group}]:$subg\n";
             for my $entry ($self->childList($group, $subg)) {
@@ -250,7 +262,7 @@ sub outputFile
             }
             $ret .= "\n";
         }
-        $e->() if ! $entriesFirst;
+        $ret .= $self->putEntries($group, \@entries) if $group ne $defg and ! $entriesFirst;
     }
     $ret;
 }
@@ -330,6 +342,7 @@ sub getSortFunc
     $func or $func = sub { $_[1] cmp $_[2] };
     $func;
 }
+# 默认 sort flags
 my $defaultSortFlags = { defOrder => 'DEF_FIRST', groupOrder => 'G_NORMAL', 'reverse' => 0, };
 sub getSortFlags
 {
@@ -361,6 +374,9 @@ sub groupLast
     ref $self->getGroup(@path, $first) cmp ref $self->getGroup(@path, $second); # '' cmp 'HASH'
 }
 # DEF_FIRST:DEF_LAST:NUM:CHAR:G_FIRST:G_LAST:G_NORMAL:REVERSE:a,b,c,d,e
+# DEF_FIRST 代表在 words 中定义了的在前面。
+# REVERSE 最大。如果定义了 REVERSE，那么 words 和所有其它的顺序都要翻转过来。
+# 例如，如果同时定义 DEF_FIRST，那么在 words 中定义了的，会排在后面。
 # sortFunc ($a, $b, @path);
 sub parseSort
 {
@@ -395,11 +411,14 @@ sub parseSort
     } elsif ($groupOrder eq 'G_LAST') {
         $gFunc = \&groupLast;
     }
-    
+
+    # 未出现在 words 里的，顺序值是 0。顺序值小的排在前面。
+    # 如果定义在 words 里的在前，那么它们的顺序值应该是小于 0 的。
     my $this = $defOrder eq 'DEF_FIRST' ? -1 : 1;
     my $add = $defOrder eq 'DEF_FIRST' ? -1 : 1;
     my $w = $self->sortWords(@_);
-    for ($defOrder eq 'DEF_FIRST' ? reverse @words : @words) {
+    for ($defOrder eq 'DEF_FIRST' ? # 排在后面的，顺序值高。
+         reverse @words : @words) {
         $w->{$_} = $this;
         $this += $add;
     }
@@ -411,7 +430,7 @@ sub parseSort
             $w->{$first} <=> $w->{$second} ||
             $comp->($first, $second);
         #ay $ret;
-        $reverse ? -$ret : $ret;
+        $reverse ? -$ret : $ret; # REVERSE 最大
     };
 }
 

@@ -27,6 +27,8 @@ use File::Basename qw/basename dirname/;
 no if $] >= 5.018, warnings => "experimental";
 use Encode qw/encode decode _utf8_on _utf8_off/;
 use POSIX qw/strftime/;
+use Pod::Text;
+
 our $VERSION = 0.1;
 our @ISA = qw/Exporter/;
 our @EXPORT_OK = qw/$appsDir/;
@@ -37,7 +39,7 @@ $verbose verbose debug
 conf $pathConf $defg $scriptName
 multiArgs time2date final ln term
 formatTime utf8 randFromTo debugOn debugOff
-isWindows/;
+isWindows printHelp/;
 use Scripts::WindowsSupport;
 sub time2date;
 sub multiArgs;
@@ -47,6 +49,7 @@ sub term;
 sub final;
 sub debug;
 sub formatTime;
+sub printHelp;
 =head1 变量
 
 本节中的变量，如果没有额外说明，都是 our 声明的，被导出的变量。
@@ -314,6 +317,19 @@ sub randFromTo
 
 这个函数是从 Scripts::WindowsSupport 里导入的。
 =cut
+=head2 printHelp
+
+显示帮助。利用了 Pod::Text。
+=cut
+sub printHelp
+{
+    my $parser = Pod::Text->new;
+    my $ret;
+    $parser->output_string(\$ret);
+    $parser->parse_file($0);
+    print term $ret;
+    1;
+}
 =head1 配置文件
 
 配置文件都存放于 $configDir 下。
