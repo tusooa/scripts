@@ -93,8 +93,9 @@
 
 (require 'flycheck-perl6)
 
-(require 'zlc)
-(zlc-mode t)
+; is buggy.
+;(require 'zlc)
+;(zlc-mode t)
 
 (let ((map minibuffer-local-map))
   ;;; like menu select
