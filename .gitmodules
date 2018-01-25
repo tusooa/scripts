@@ -32,5 +32,5 @@
 	path = Config/emacs.d+lisp-others/dash.el
 	url = https://github.com/magnars/dash.el.git
 [submodule "Config/emacs.d+lisp-others/editorconfig-emacs"]
-        path = Config/emacs.d+lisp-others/editorconfig-emacs
-        url = https://github.com/editorconfig/editorconfig-emacs.git
+	path = Config/emacs.d+lisp-others/editorconfig-emacs
+	url = https://github.com/editorconfig/editorconfig-emacs.git
