@@ -1,13 +1,11 @@
 #include "server_http.hpp"
 #include "client_http.hpp"
 
-//Added for the json-example
 #define BOOST_SPIRIT_THREADSAFE
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include "call-api.hpp"
 #include <windows.h>
-//Added for the default_resource example
 #include <fstream>
 #include <vector>
 #include <algorithm>
@@ -21,22 +19,15 @@ using namespace boost::property_tree;
 
 typedef SimpleWeb::Server<SimpleWeb::HTTP> HttpServer;
 typedef SimpleWeb::Client<SimpleWeb::HTTP> HttpClient;
-
-//Added for the default_resource example
-//void default_resource_send(const HttpServer &server, shared_ptr<HttpServer::Response> response,
-//                           shared_ptr<ifstream> ifs, shared_ptr<vector<char> > buffer);
-
-//int main() {}
-static __attribute__((destructor)) void final()
+/*static __attribute__((destructor))*/ void final()
 {
   //freeLibs();
 }
-HttpServer server(RECV_PORT, 1);
+HttpServer server;
 HttpClient client(SEND_ADDR);
-static __attribute__((constructor)) void startServer()
+/*static __attribute__((constructor))*/ void startServer()
 {
-  loadLibs();
-  #if 0
+  server.config.port = RECV_PORT;
   server.resource["^/api/call$"]["POST"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
       ptree input;
@@ -66,12 +57,12 @@ static __attribute__((constructor)) void startServer()
         }
     };
   
-    server.default_resource["GET"]=[&server](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+    server.default_resource["GET"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
       string content="Could not open path "+request->path;
       *response << "HTTP/1.1 400 Bad Request\r\nContent-Length: " << content.length() << "\r\n\r\n" << content;
     };
     
-    thread server_thread([&server](){
+    thread server_thread([](){
         //Start server
         server.start();
     });
@@ -87,15 +78,28 @@ static __attribute__((constructor)) void startServer()
     cout << r3->content.rdbuf() << endl;
     */
     server_thread.detach();
-    #endif
+
     return;
 }
+
 #define EXTERN extern "C"
 #define RET_DONE 1
 #define RET_PASS 0
 #define RET_STOP 2
 
-EXTERN __declspec(dllexport) char * info() { return "Mew~~~"; }
+static int initDone = 0;
+// 这里把 info() 作为一个入口，避免了 DllMain 和 constructor 的使用。
+// 于是避免了卡死。
+// 真棒。
+EXTERN __declspec(dllexport) char * info()
+{
+  if (!initDone) {
+    loadLibs();
+    startServer();
+    initDone = 1;
+  }
+  return "Mew~~~";
+}
 EXTERN __declspec(dllexport) void about() {}
 EXTERN __declspec(dllexport) int end() { return 1; }
 EXTERN __declspec(dllexport) int
@@ -105,6 +109,28 @@ extern __declspec(dllexport) int
 EventFun(char *tencent, int type, int subtype, char *source, char *subject, char *object, char *msg, char *rawmsg, char *backptr)
 {
   int retvalue;
+  // 原来 MPQ 会把空指针传进去。。。
+  // C++ 的 try-catch 抓不到 Access Violation....
+  // https://stackoverflow.com/questions/5951987/prevent-c-dll-exception-using-try-catch-internally
+  char t[1] = {0};
+  if (!tencent) {
+    tencent = t;
+  }
+  if (!source) {
+    source = t;
+  }
+  if (!subject) {
+    subject = t;
+  }
+  if (!object) {
+    object = t;
+  }
+  if (!msg) {
+    msg = t;
+  }
+  if (!rawmsg) {
+    rawmsg = t;
+  }
   try {
     ptree send;
     send.add("tencent", string(tencent));

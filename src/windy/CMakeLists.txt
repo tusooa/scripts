@@ -25,7 +25,7 @@ set(Boost_USE_STATIC_LIBS 1)
 find_package(Boost 1.53.0 COMPONENTS regex system thread filesystem date_time REQUIRED)
 include_directories(SYSTEM ${Boost_INCLUDE_DIR})
 
-add_library(windy.xx windy.cpp)
+add_library(windy.xx SHARED windy.cpp)
 target_link_libraries(windy.xx ${Boost_LIBRARIES})
 target_link_libraries(windy.xx ${CMAKE_THREAD_LIBS_INIT})
 
