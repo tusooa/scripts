@@ -34,3 +34,9 @@
 [submodule "Config/emacs.d+lisp-others/editorconfig-emacs"]
 	path = Config/emacs.d+lisp-others/editorconfig-emacs
 	url = https://github.com/editorconfig/editorconfig-emacs.git
+[submodule "src/windy/json"]
+	path = src/windy/json
+	url = https://github.com/nlohmann/json.git
+[submodule "src/windy/base64"]
+	path = src/windy/base64
+	url = https://github.com/tkislan/base64.git

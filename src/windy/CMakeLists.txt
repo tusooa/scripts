@@ -1,27 +1,24 @@
 cmake_minimum_required (VERSION 2.8.8)
-project (Simple-Web-Server)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
-
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
-        message(FATAL_ERROR "GCC version >=4.8 required.")
-    endif()
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.3)
-        message(FATAL_ERROR "Clang version >=3.3 required.")
-    endif()
-elseif (MSVC14) #TODO: What about other MSVC versions?
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX
+  ${CMAKE_CURRENT_SOURCE_DIR}/cxx_flags_override.cmake)
+project (windy)
+if(MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -utf-8")
 else()
-    message(WARNING "Your compiler (${CMAKE_CXX_COMPILER_ID}) has not been tested on this project. Only Clang and GCC has been tested. Please report any problems at the project page on GitHub.")
+  message(STATUS "Compilers other than MSVC are not tested and therefore not gauranteed to work.")
 endif()
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-
-include_directories(. Simple-Web-Server port)
+include_directories(.
+  Simple-Web-Server
+  port
+  json/single_include/nlohmann
+  base64)
 
 find_package(Threads REQUIRED)
 
 set(Boost_USE_STATIC_LIBS 1)
-#set(Boost_USE_STATIC_RUNTIME 1)
+set(Boost_USE_STATIC_RUNTIME 1)
 find_package(Boost 1.53.0 COMPONENTS regex system thread filesystem date_time REQUIRED)
 include_directories(SYSTEM ${Boost_INCLUDE_DIR})
 

@@ -287,10 +287,10 @@ if (! (Api_Login = (Api_Login_ptr)GetProcAddress(dll, "Api_Login"))) {
 if (! (Api_Logout = (Api_Logout_ptr)GetProcAddress(dll, "Api_Logout"))) {
   croak("cannot load Api_Logout");
 }
-if (! (Api_TeaEncrypt = (Api_TeaEncrypt_ptr)GetProcAddress(dll, "Api_Tea¼ÓÃÜ"))) {
+ if (! (Api_TeaEncrypt = (Api_TeaEncrypt_ptr)GetProcAddress(dll, "Api_Tea\xbc\xd3\xc3\xdc"))) { // åŠ å¯†
   croak("cannot load Api_TeaEncrypt");
 }
-if (! (Api_TeaDecrypt = (Api_TeaDecrypt_ptr)GetProcAddress(dll, "Api_Tea½âÃÜ"))) {
+ if (! (Api_TeaDecrypt = (Api_TeaDecrypt_ptr)GetProcAddress(dll, "Api_Tea\xbd\xe2\xc3\xdc"))) { // è§£å¯†
   croak("cannot load Api_TeaDecrypt");
 }
 if (! (Api_GetNick = (Api_GetNick_ptr)GetProcAddress(dll, "Api_GetNick"))) {
