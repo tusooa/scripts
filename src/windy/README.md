@@ -1,5 +1,7 @@
 == 一个 MPQ 的转发接口 ==
+
 === 安装 ===
+
 仅在 Visual Studio 2017 下测试过。
 
 ```
@@ -11,6 +13,7 @@ copy Release\windy.xx.dll path\to\mypcqq\Plugin\
 ```
 
 === 配置 ===
+
 配置文件位于 `path\to\mypcqq\windy.xx.conf`，格式为 `INI`。
 
 默认配置如下:
@@ -26,10 +29,15 @@ testSleepTime = 5
 ```
 
 `recvPort`: MPQ 方面的监听端口，用于接收 API 调用。
+
 `apiCallAddr`: API 调用的地址。
+
 `sendServer`: 消息发送到哪个服务器。
+
 `testAddr`: 用于测试服务器是否可用，相对于 `sendServer` 的地址。
+
 `sendAddr`: 用于转发消息，相对于 `sendServer` 的地址。
+
 `testSleepTime`: 测试间隔。
 
 尽管格式不完全一样，可以用 `config.perl` 修改配置。
@@ -40,7 +48,9 @@ config.perl -a windy.xx.conf windy recvPort -s 3000
 ```
 
 === 用法 ===
+
 ==== 调用 API ====
+
 本机的 `recvPort` 端口在 `apiCallAddr` 处接受 `POST` 请求。内容为 JSON 格式。示例如下:
 
 ```
@@ -62,6 +72,7 @@ config.perl -a windy.xx.conf windy recvPort -s 3000
 如果返回值是字符串，它会被 `base64` 化。如果不是字符串，不会被 `base64` 化。
 
 ==== 消息转发 ====
+
 收到新消息时，用 `POST` 方法提交到 `sendServer/sendAddr` 处。
 
 提交内容是一个 JSON。
