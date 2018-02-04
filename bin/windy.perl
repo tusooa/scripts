@@ -13,13 +13,15 @@ use Scripts::Windy::Util;
 no warnings 'experimental';
 use Scripts::Windy::Startup;
 use Getopt::Long;
+use Digest::MD5;
 use utf8;
 my $debug = 0;
 GetOptions('d' => \$debug);
 my $mainGroup = undef;
 my $t = Mojo::Webqq->new(
     account => $uid,
-    login_type => 'qrlogin',
+    pwd => Digest::MD5::md5_hex($password),
+    login_type => 'login',
     tmpdir => $configDir.'windy-cache/',
     qrcode_path => $Scripts::scriptFunctions::home.'/OneDrive/windy.png',
     log_level => $debug ? 'debug' : 'info',
@@ -84,6 +86,7 @@ sub onReceive
     my ($context) = $m->type =~ /^(group|discuss)_message$/;
     my $inGroup = ($context ? " 在 ".($context eq 'group' ? msgGroupName($windy, $m) .'('.$m->group->gnumber.')' : msgDiscussName($windy, $m)) : '');
     $windy->logger("收到 `".$text."` 从 ".uName(msgSender($windy, $m)).'('.uid(msgSender($windy, $m)).')'.$inGroup);
+    say term msgSender($windy, $m)->dump;
     #$windy->logger($m->dump);
     my $time = time;
     my $r = $windy->parse($m);

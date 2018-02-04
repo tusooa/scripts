@@ -5,12 +5,14 @@ use Scripts::scriptFunctions;
 use Scripts::Windy;
 use Scripts::Windy::Util;
 our @ISA =  qw/Exporter/;
-our @EXPORT = qw/$uid $mainGroupId $windy $replyScan @reply/;
+our @EXPORT = qw/$uid $password $mainGroupId $windy $replyScan @reply/;
 
 my $file = $accountDir.'windy';
 our $uid;
+our $password;
 if (open my $w, '<', $file) {
     chomp ($uid = <$w>);
+    chomp ($password = <$w>);
     close $w;
 } else {
     die term "打不开文件 $file: $!\n";

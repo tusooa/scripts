@@ -1,7 +1,7 @@
 #ifndef CONF_HPP
 #define CONF_HPP
 
-#ifndef BOOST_SPIRIR_THREADSAFE
+#ifndef BOOST_SPIRIT_THREADSAFE
 #define BOOST_SPIRIT_THREADSAFE
 #endif
 #include <boost/property_tree/ptree.hpp>

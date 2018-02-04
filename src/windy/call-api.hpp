@@ -39,20 +39,9 @@ string encodeBase64(string s)
 }
 
 string callApi(string func, vector<string> args) {
-  if (func == "SendMsg") {
-    return
-      to_string(Api_SendMsg
-                (dec_s(args[0]),
-                 stoi(args[1]),
-                 stoi(args[2]),
-                 dec_s(args[3]),
-                 dec_s(args[4]),
-                 dec_s(args[5])));
-  }
-  if (func == "OutPut") {
-    return to_string(Api_OutPut(dec_s(args[0])));
-  }
-  return string("");
+#include "call-api.hpp.part"
+  return string();
 }
 
 #endif
+

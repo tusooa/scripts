@@ -1,0 +1,223 @@
+if (func == "GetGtk_Bkn") {
+return encodeBase64(Api_GetGtk_Bkn(dec_s(args[0])));
+}
+if (func == "GetBkn32") {
+return encodeBase64(Api_GetBkn32(dec_s(args[0])));
+}
+if (func == "GetLdw") {
+return encodeBase64(Api_GetLdw(dec_s(args[0])));
+}
+if (func == "GetRunPath") {
+return encodeBase64(Api_GetRunPath());
+}
+if (func == "GetOnlineQQlist") {
+return encodeBase64(Api_GetOnlineQQlist());
+}
+if (func == "GetQQlist") {
+return encodeBase64(Api_GetQQlist());
+}
+if (func == "GetSessionkey") {
+return encodeBase64(Api_GetSessionkey(dec_s(args[0])));
+}
+if (func == "GetClientkey") {
+return encodeBase64(Api_GetClientkey(dec_s(args[0])));
+}
+if (func == "GetLongClientkey") {
+return encodeBase64(Api_GetLongClientkey(dec_s(args[0])));
+}
+if (func == "GetCookies") {
+return encodeBase64(Api_GetCookies(dec_s(args[0])));
+}
+if (func == "GetPrefix") {
+return encodeBase64(Api_GetPrefix());
+}
+if (func == "Cache_NameCard") {
+Api_Cache_NameCard(dec_s(args[0]), dec_s(args[1]), dec_s(args[2]));
+return string();
+}
+if (func == "DBan") {
+Api_DBan(dec_s(args[0]), dec_s(args[1]));
+return string();
+}
+if (func == "Ban") {
+Api_Ban(dec_s(args[0]), dec_s(args[1]));
+return string();
+}
+if (func == "Shutup") {
+return to_string(Api_Shutup(dec_s(args[0]), dec_s(args[1]), dec_s(args[2]), stoi(args[3])));
+}
+if (func == "SetNotice") {
+Api_SetNotice(dec_s(args[0]), dec_s(args[1]), dec_s(args[2]), dec_s(args[3]));
+return string();
+}
+if (func == "GetNotice") {
+return encodeBase64(Api_GetNotice(dec_s(args[0]), dec_s(args[1])));
+}
+if (func == "GetNameCard") {
+return encodeBase64(Api_GetNameCard(dec_s(args[0]), dec_s(args[1]), dec_s(args[2])));
+}
+if (func == "SetNameCard") {
+Api_SetNameCard(dec_s(args[0]), dec_s(args[1]), dec_s(args[2]), dec_s(args[3]));
+return string();
+}
+if (func == "QuitDG") {
+Api_QuitDG(dec_s(args[0]), dec_s(args[1]));
+return string();
+}
+if (func == "DelFriend") {
+Api_DelFriend(dec_s(args[0]), dec_s(args[1]));
+return string();
+}
+if (func == "Kick") {
+return to_string(Api_Kick(dec_s(args[0]), dec_s(args[1]), dec_s(args[2])));
+}
+if (func == "JoinGroup") {
+Api_JoinGroup(dec_s(args[0]), dec_s(args[1]), dec_s(args[2]));
+return string();
+}
+if (func == "QuitGroup") {
+Api_QuitGroup(dec_s(args[0]), dec_s(args[1]));
+return string();
+}
+if (func == "Upload") {
+return encodeBase64(Api_Upload(dec_s(args[0]), dec_s(args[1]), stoi(args[2])));
+}
+if (func == "GuidGetPicLink") {
+return encodeBase64(Api_GuidGetPicLink(dec_s(args[0])));
+}
+if (func == "Reply") {
+return to_string(Api_Reply(dec_s(args[0]), stoi(args[1]), dec_s(args[2]), dec_s(args[3])));
+}
+if (func == "SendMsg") {
+return to_string(Api_SendMsg(dec_s(args[0]), stoi(args[1]), stoi(args[2]), dec_s(args[3]), dec_s(args[4]), dec_s(args[5])));
+}
+if (func == "Send") {
+return to_string(Api_Send(dec_s(args[0])));
+}
+if (func == "OutPut") {
+return to_string(Api_OutPut(dec_s(args[0])));
+}
+if (func == "IsEnable") {
+return to_string(Api_IsEnable());
+}
+if (func == "Login") {
+return to_string(Api_Login(dec_s(args[0])));
+}
+if (func == "Logout") {
+Api_Logout(dec_s(args[0]));
+return string();
+}
+if (func == "TeaEncrypt") {
+return encodeBase64(Api_TeaEncrypt(dec_s(args[0]), dec_s(args[1])));
+}
+if (func == "TeaDecrypt") {
+return encodeBase64(Api_TeaDecrypt(dec_s(args[0]), dec_s(args[1])));
+}
+if (func == "GetNick") {
+return encodeBase64(Api_GetNick(dec_s(args[0])));
+}
+if (func == "GetQQLevel") {
+return encodeBase64(Api_GetQQLevel(dec_s(args[0])));
+}
+if (func == "GNGetGid") {
+return encodeBase64(Api_GNGetGid(dec_s(args[0])));
+}
+if (func == "GidGetGN") {
+return encodeBase64(Api_GidGetGN(dec_s(args[0])));
+}
+if (func == "GetVersion") {
+return to_string(Api_GetVersion());
+}
+if (func == "GetVersionName") {
+return encodeBase64(Api_GetVersionName());
+}
+if (func == "GetTimeStamp") {
+return to_string(Api_GetTimeStamp());
+}
+if (func == "GetLog") {
+return encodeBase64(Api_GetLog());
+}
+if (func == "IfBlock") {
+return to_string(Api_IfBlock(dec_s(args[0])));
+}
+if (func == "GetAdminList") {
+return encodeBase64(Api_GetAdminList(dec_s(args[0]), dec_s(args[1])));
+}
+if (func == "AddTaotao") {
+return encodeBase64(Api_AddTaotao(dec_s(args[0]), dec_s(args[1])));
+}
+if (func == "GetSign") {
+return encodeBase64(Api_GetSign(dec_s(args[0]), dec_s(args[1])));
+}
+if (func == "SetSign") {
+return encodeBase64(Api_SetSign(dec_s(args[0]), dec_s(args[1])));
+}
+if (func == "GetGroupListA") {
+return encodeBase64(Api_GetGroupListA(dec_s(args[0])));
+}
+if (func == "GetGroupListB") {
+return encodeBase64(Api_GetGroupListB(dec_s(args[0])));
+}
+if (func == "GetGroupMemberA") {
+return encodeBase64(Api_GetGroupMemberA(dec_s(args[0]), dec_s(args[1])));
+}
+if (func == "GetGroupMemberB") {
+return encodeBase64(Api_GetGroupMemberB(dec_s(args[0]), dec_s(args[1])));
+}
+if (func == "GetFriendList") {
+return encodeBase64(Api_GetFriendList(dec_s(args[0])));
+}
+if (func == "GetQQAge") {
+return to_string(Api_GetQQAge(dec_s(args[0]), dec_s(args[1])));
+}
+if (func == "GetAge") {
+return to_string(Api_GetAge(dec_s(args[0]), dec_s(args[1])));
+}
+if (func == "GetEmail") {
+return encodeBase64(Api_GetEmail(dec_s(args[0]), dec_s(args[1])));
+}
+if (func == "GetGender") {
+return to_string(Api_GetGender(dec_s(args[0]), dec_s(args[1])));
+}
+if (func == "SendTyping") {
+return to_string(Api_SendTyping(dec_s(args[0]), dec_s(args[1])));
+}
+if (func == "SendShake") {
+return to_string(Api_SendShake(dec_s(args[0]), dec_s(args[1])));
+}
+if (func == "GetRadomOnlineQQ") {
+return encodeBase64(Api_GetRadomOnlineQQ());
+}
+if (func == "AddQQ") {
+return to_string(Api_AddQQ(dec_s(args[0]), dec_s(args[1]), stoi(args[2])));
+}
+if (func == "SetOLStatus") {
+return to_string(Api_SetOLStatus(dec_s(args[0]), stoi(args[1]), dec_s(args[2])));
+}
+if (func == "GetMC") {
+return encodeBase64(Api_GetMC());
+}
+if (func == "GroupInvitation") {
+return encodeBase64(Api_GroupInvitation(dec_s(args[0]), dec_s(args[1]), dec_s(args[2])));
+}
+if (func == "CreateDG") {
+return encodeBase64(Api_CreateDG(dec_s(args[0])));
+}
+if (func == "KickDG") {
+return encodeBase64(Api_KickDG(dec_s(args[0]), dec_s(args[1]), dec_s(args[2])));
+}
+if (func == "DGInvitation") {
+return encodeBase64(Api_DGInvitation(dec_s(args[0]), dec_s(args[1]), dec_s(args[2])));
+}
+if (func == "GetDGList") {
+return encodeBase64(Api_GetDGList(dec_s(args[0])));
+}
+if (func == "UploadVoice") {
+return encodeBase64(Api_UploadVoice(dec_s(args[0]), stoi(args[1])));
+}
+if (func == "GuidGetVoiceLink") {
+return encodeBase64(Api_GuidGetVoiceLink(dec_s(args[0]), dec_s(args[1])));
+}
+if (func == "Like") {
+return encodeBase64(Api_Like(dec_s(args[0]), dec_s(args[1])));
+}

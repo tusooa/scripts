@@ -150,9 +150,7 @@ EventFun(char *tencent, int type, int subtype, char *source, char *subject, char
     };
     stringstream jsonStream;
     jsonStream << send;
-    string ss = encodeBase64(jsonStream.str());
-    vector<string> args(1, ss);
-    callApi("OutPut", args);
+    string ss = jsonStream.str();
     if (targetAvail) {
       try {
         auto ret = client.request("POST", config.sendAddr, ss);

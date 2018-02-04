@@ -4,6 +4,11 @@ BEGIN
 {
     $ENV{WINDY_BACKEND} = 'mpq';
 }
+use Scripts::Base;
+use Mojolicious::Commands;
+
+Mojolicious::Commands->start_app('Scripts::Windy::Web');
+__END__
 use 5.012;
 use Scripts::scriptFunctions;
 use Scripts::Windy::Startup;
@@ -13,6 +18,7 @@ no warnings 'experimental';
 use Mojo::JSON qw/decode_json from_json/;
 use Encode qw/encode decode _utf8_on _utf8_off/;
 use utf8;
+use MIME::Base64;
 use Scripts::Windy::Constants;
 use Scripts::Windy::Event;
 use Mojolicious::Lite;
@@ -46,16 +52,21 @@ sub parseEvent
     $ret;
 }
 
-post '/recv' => sub {
-    my $c    = shift;
+get '/client' => sub {
+    
+};
+
+post '/' => sub {
+    my $c = shift;
     my $orig = utf8 $c->req->text;
     say $orig;
     #_utf8_off($orig);
     my $hash = from_json($orig); # it is not utf8
   use Data::Dumper;
-  print Dumper($hash);
+    print term Dumper($hash);
+    say term decode_base64($hash->{Content});
   #my $event = Scripts::Windy::Event->new(map $hash->{$_}, qw/tencent type subtype source subject object msg rawmsg/);
-  my $ret = { ret => 0#- -parseEvent($event)
+  my $ret = { Ret => 0, Msg => '', #- -parseEvent($event)
   };
   $c->render(json => $ret);
 };
