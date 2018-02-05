@@ -4,6 +4,8 @@
 
 仅在 Visual Studio 2017 下测试过。
 
+依赖 Boost。`link=static runtime-link=static`。
+
 ```
 mkdir build
 cd build
