@@ -57,13 +57,21 @@ sub parseConf
     my ($self, $uf, $df) = @_;
     my ($user, $default, $userw, $defaultw);
     if ($^O eq 'MSWin32') {
-        open $userw, '<', "${uf}.windows" or undef $userw;
-        open $user, '<', $uf or undef $user;
-        open $defaultw, '<', "${df}.windows" or undef $defaultw;
-        open $default, '<', $df or undef $default;
+        if (defined $uf) {
+            open $userw, '<', "${uf}.windows" or undef $userw;
+            open $user, '<', $uf or undef $user;
+        }
+        if (defined $df) {
+            open $defaultw, '<', "${df}.windows" or undef $defaultw;
+            open $default, '<', $df or undef $default;
+        }
     } else {
-        open $user, '<', $uf or undef $user;
-        open $default, '<', $df or undef $default;
+        if (defined $uf) {
+            open $user, '<', $uf or undef $user;
+        }
+        if (defined $df) {
+            open $default, '<', $df or undef $default;
+        }
     }
     for my $fh ($default, $defaultw, $user, $userw) {
         $fh or next;

@@ -6,18 +6,32 @@ use Encode qw/encode decode/;
 our $VERSION = 0.1;
 our @ISA = qw/Exporter/;
 our @EXPORT_OK = qw//;
-our @EXPORT = qw/%winFunc isWindows/;
+our @EXPORT = qw/%winFunc isWindows winPath unixPath/;
 
 sub isWindows
 {
     $^O eq 'MSWin32';
 }
 
+sub winPath
+{
+    my $path = shift;
+    $path =~ s{/}{\\}g;
+    $path;
+}
+
+sub unixPath
+{
+    my $path = shift;
+    $path =~ s{\\}{/}g;
+    $path;
+}
+
 our %winFunc = (
             ln => sub {
                 my ($target, $name) = @_; # use windows-style path
-                $target =~ s</><\\>g;
-                $name =~ s</><\\>g;
+                $target = winPath $target;
+                $name = winPath $target;
                 my @args;
                 @args = ('/D') if -d $target;
                 system 'mklink', @args, $name, $target;

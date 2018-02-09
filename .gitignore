@@ -40,3 +40,5 @@ GentooConfig/conf.d/._cfg*
 debug*.txt
 # perl6 generated files
 libp6/.precomp
+# install-specific files
+lib/Scripts/Path/defConf.pm
