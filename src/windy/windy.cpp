@@ -145,8 +145,8 @@ EventFun(char *tencent, int type, int subtype, char *source, char *subject, char
       {"source", string(source)},
       {"subject", string(subject)},
       {"object", string(object)},
-      {"msg", encodeBase64(string(msg))},
-      {"rawmsg", encodeBase64(string(rawmsg))},
+      {"msg", gbk2utf8(string(msg))},
+      {"rawmsg", gbk2utf8(string(rawmsg))},
     };
     stringstream jsonStream;
     jsonStream << send;
@@ -159,7 +159,8 @@ EventFun(char *tencent, int type, int subtype, char *source, char *subject, char
         retvalue = retval["ret"];
         string back = retval["msg"];
         if (back.length() && backptr) {
-          strcpy(backptr, back.c_str());
+          string backGBK = utf82gbk(back);
+          strcpy(backptr, backGBK.c_str());
         }
       } catch (...) {
         targetAvail = false;

@@ -22,44 +22,9 @@ while (<<>>) {
             $type = $types{$2};
             $funcName = $1;
             @cur = ($type, $funcName);
-            #$funcName =~ s/加密/Encrypt/;
-            #$funcName =~ s/解密/Decrypt/;
-=comment
-            if (!$first) {
-                if ($oldType eq 'void') {
-                    say ');';
-                    say 'return string();';
-                } else {
-                    say '));';
-                }
-            }
-            say (($first ? q// : qq/}\n/). qq/if (func == "$funcName") {/);
-            if ($type eq 'void') {
-                #say qq/retval = string()/;
-            } elsif ($type eq 'int') {
-                say q/return to_string(/;
-            } elsif ($type eq 'string') {
-                say q/return encodeBase64(/;
-            }
-            say 'Api_'.$funcName.'(';
-            $first = 0;
-=cut
         } elsif (/^\.参数[^,]+, (.+?型)/) {
             my $argType = $types{$1};
             push @cur, $argType;
-=comment            
-            if ($argc != 0) { # not first arg
-                print ',';
-            }
-            if ($argType eq 'int') {
-                print 'stoi(';
-            } elsif ($argType eq 'string') {
-                print 'dec_s(';
-            } else {
-                die;
-            }
-            say 'args['.($argc++).'])';
-=cut
         } else {
             # pass
         }
@@ -79,7 +44,7 @@ binmode DEF, ':unix';
 binmode LOAD, ':unix';
 
 my %fHead = (
-    'char *' => 'return encodeBase64(',
+    'char *' => 'return gbk2utf8(',
     'int' => 'return to_string(',
     'bool' => 'return to_string(',
     'void' => '',
@@ -90,7 +55,7 @@ my %fTail = (
     'bool' => ');',
     'void' => ";\nreturn string();",
     );
-my %aFunc = ('char *' => 'dec_s', 'int' => 'stoi', 'bool' => 'stoi');
+my %aFunc = ('char *' => 'utf82gbk_c', 'int' => 'stoi', 'bool' => 'stoi');
 for (@funcs) {
     my @d = @$_;
     my $retType = shift @d;
