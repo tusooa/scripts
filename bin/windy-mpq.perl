@@ -7,6 +7,10 @@ BEGIN
 use Scripts::Base;
 use Mojolicious::Commands;
 
+if (!@ARGV) { # provide default args
+    @ARGV = ('daemon', '-l', 'http://*:7457');
+}
+
 Mojolicious::Commands->start_app('Scripts::Windy::Web');
 __END__
 use 5.012;

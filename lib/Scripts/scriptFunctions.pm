@@ -36,7 +36,7 @@ our @EXPORT_OK = qw/$appsDir/;
 our @EXPORT = qw/$home
 $configDir $cacheDir $dataDir
 $accountDir $scriptsDir $libDir
-$verbose verbose debug
+$verbose verbose debug confFound
 conf $pathConf $userPathConf $defg $scriptName
 multiArgs time2date final ln term
 formatTime utf8 utf8df randFromTo debugOn debugOff
@@ -46,6 +46,7 @@ use Scripts::Path::defConf;
 sub time2date;
 sub multiArgs;
 sub conf;
+sub confFound;
 sub ln;
 sub term;
 sub final;
@@ -126,15 +127,23 @@ $pathConf 是存储配置信息的 Scripts::Configure 对象。
 
 C<$--Dir> 变量是从配置文件里读取的。参阅下文 C<配置文件> 一节。
 =cut
-our $pathConf = conf 'syspath' // conf 'scriptFunctions' // conf 'scriptpath';
-our $appsDir = $pathConf->get ('appsDir') // "$home/应用/";
-our $dataDir = $pathConf->get ('dataDir') // "${appsDir}数据/";
-our $userPathConf = conf 'userpath' // conf 'scriptFunctions' // conf 'scriptpath';
-our $accountDir = $userPathConf->get ('accountDir') // "$home/个人/账号/";
-our $scriptsDir = $pathConf->get ('scriptsDir') // "${appsDir}脚本/";
-our $libDir = $pathConf->get ('libDir') // "${appsDir}库/脚本/";
+our $pathConf = (confFound 'syspath')
+    // (confFound 'scriptFunctions')
+    // (confFound 'scriptpath')
+    // die "No pathConf found in your config dir.\n"
+         . "Please run installer.perl\n";
+our $appsDir = $pathConf->get('appsDir') // "$home/应用/";
+our $dataDir = $pathConf->get('dataDir') // "${appsDir}数据/";
+our $userPathConf = (confFound 'userpath')
+    // (confFound 'scriptFunctions')
+    // (confFound 'scriptpath')
+    // die "No userPathConf found in your config dir.\n"
+         . "Please create a file named `userpath' in $configDir\n";
+our $accountDir = $userPathConf->get('accountDir') // "$home/个人/账号/";
+our $scriptsDir = $pathConf->get('scriptsDir') // "${appsDir}脚本/";
+our $libDir = $pathConf->get('libDir') // "${appsDir}库/脚本/";
 
-if (my $p = $pathConf->get ('addPath')) {
+if (my $p = $pathConf->get('addPath')) {
     debug "Adding path: $p";
     if ($^O eq 'MSWin32') {
         $ENV{PATH} = term $p =~ s!/!\\!gr . ';' . $ENV{PATH};
@@ -195,7 +204,17 @@ sub multiArgs
 sub conf
 {
     my $file = shift // $scriptName;
-    Scripts::Configure->new (term $configDir.$file, term $defConfDir.$file);
+    Scripts::Configure->new ((term $configDir.$file),
+                             (term $defConfDir.$file));
+}
+=head2 confFound
+    同上。但是若文件未找到则返回 undef。
+=cut
+sub confFound
+{
+    my $file = shift;
+    my $config = conf($file);
+    $config->found ? $config : undef;
 }
 =head2 ln TARGET, NAME
 
@@ -376,6 +395,6 @@ sub printHelp
 
 不同的组(子组)中的键-值对可以同名而不会产生混淆。
 
-在值中，可以通过 C<${VAR}> 引用环境变量 VAR；通过 C<$[GROUP::SUBGROUP::KEY]>, C<$[KEY]>, C<$[GROUP::KEY]> 引用另一个配置项的值。如果需要一个字面意义上的 C<$>，使用 C<${-}> 或 C<$[-]>。但是如果需要获得的结果是形如 C<${...}> 的，则只能写成 C<${-}{...}>，反之亦然。
+在值中，可以通过 C<${VAR}> 引用环境变量 VAR；通过 C<$[GROUP::SUBGROUP::KEY]>, C<$[KEY]>, C<$[GROUP::KEY]> 引用另一个配置项的值。如果需要一个字面意义上的 C<$>，使用 C<${-}> 或 C<$[-]>。如果需要字面意义上的空格(用于值的首尾)，将空格用 C<${ }> 或 C<$[ ]> 包围起来。
 =cut
 1;

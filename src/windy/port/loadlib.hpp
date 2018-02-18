@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
-#include <exception>
+#include <stdexcept>
 HINSTANCE dll;
 #include "defs.hpp.part"
 
@@ -14,7 +14,7 @@ void croak(const char * string)
   of << string << std::endl;
   of.close();
   std::cout << string << std::endl;
-  throw std::invalid_argument(string);
+  throw std::runtime_error(string);
 }
 
 void loadLibs()
@@ -23,5 +23,10 @@ void loadLibs()
     croak("cannot load dll.");
   }
 #include "load.hpp.part"
+}
+
+void freeLibs()
+{
+  FreeLibrary(dll);
 }
 #endif

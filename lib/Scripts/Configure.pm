@@ -1,3 +1,5 @@
+=encoding utf8
+=cut
 package Scripts::Configure;
 use 5.012;
 use Exporter;
@@ -17,10 +19,16 @@ my $config = Scripts::Configure->new ($file, $default);
 sub new
 {
     my $class = shift;
+    my $config = $class->newEmpty;
+    $config->parseConf(@_);
+    $config;
+}
+
+sub newEmpty
+{
+    my $class = shift;
     my $config = { Conf => {}, Sort => {} };
     bless $config, $class;
-    $config->parseConf (@_);
-    $config;
 }
 
 sub readLine
@@ -73,8 +81,10 @@ sub parseConf
             open $default, '<', $df or undef $default;
         }
     }
+    my $found = 0;
     for my $fh ($default, $defaultw, $user, $userw) {
         $fh or next;
+        $found = 1;
         my @this;
         while (<$fh>) {
             #say $l;
@@ -93,7 +103,14 @@ sub parseConf
             }
         }
     }
+    $self->{'Found'} = $found;
     $self;
+}
+
+sub found
+{
+    my $self = shift;
+    $self->{'Found'};
 }
 
 sub hash
@@ -164,6 +181,27 @@ sub modify
     }
     $self;
 }
+
+sub substConfigItem
+{
+    my ($self, $env, $conf) = @_;
+    my ($var, $funGet);
+    if ($env) {
+        $var = $env;
+        $funGet = sub { $ENV{+shift} };
+    } else {
+        $var = $conf;
+        $funGet = sub { $self->get (split '::', shift) };
+    }
+    given ($var) {
+        return '$' when '-';
+        return $1 when /^(\s+)$/; # spaces returned as-is
+        default {
+            return $funGet->($_);
+        }
+    }
+}
+
 =comment get
 $config->get ($var); # equal to $config->get ($defg, $var);
 $config->get ($group, $var);
@@ -174,8 +212,19 @@ sub get
     my $self = shift;
     my $confhash = $self->hashref;
     my $ret = $self->getOrigValue (@_);
-    do { $ret =~ s/\$\{([^}]+)}/($1 eq '-') ? '$' : $ENV{$1}/ge;
-         $ret =~ s/\$\[([^\]]+)\]/($1 eq '-') ? '$' : $self->get (split '::', $1)/ge; } if $ret;
+    if ($ret) {
+        $ret =~ s/ \$ # a literal dollar
+                   (?: # ${thing} for ENV vars
+                        \{
+                        ( [^\}]+ )
+                        \}
+                   | # or $[thing] for config items
+                        \[
+                        ( [^\]]+ )
+                        \]
+                   )
+                /$self->substConfigItem($1, $2)/gex;
+    }
     $ret;
 }
 
@@ -217,8 +266,8 @@ sub runHooks
 {
     my ($self, $hookName) = @_;
     my $confhash = $self->hashref;
-    ref $confhash->{Hooks} eq 'HASH' or return undef;
-    ref $confhash->hashref->{Hooks}->{$hookName} eq 'HASH' or return undef;
+    ref $confhash->{Hooks} eq 'HASH' or return;
+    ref $confhash->hashref->{Hooks}->{$hookName} eq 'HASH' or return;
     for (keys %{ $confhash->{Hooks}->{$hookName} }) {
         say "$hookName hook => $_";
         system $confhash->{Hooks}->{$hookName}->{$_};

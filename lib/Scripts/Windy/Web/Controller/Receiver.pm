@@ -2,22 +2,24 @@ package Scripts::Windy::Web::Controller::Receiver;
 
 use Scripts::Base;
 use Mojo::Base 'Mojolicious::Controller';
-use Mojo::JSON qw/from_json/;
 
 use Scripts::Windy::Web::Model::Event;
 
-sub index {
+sub index
+{
     my $self = shift;
     my $json = $self->req->json;
+    $self->render_later;
     # 获取消息内容
-    my $event = Scripts::Windy::Web::Model::Event->new($json);
-    
-    # 加入队列
-    # 先 Dump 出来
-    use Data::Dumper;
-    print term Dumper($event);
-    # 先都返回 0
-    $self->render(json => { ret => 0, msg => '' });
+    my $event = Scripts::Windy::Web::Model::Event->new(%$json);
+    # 发出信号
+    $self->client->emit(
+        recvEvent => $event,
+        sub
+        {
+            my $json = shift;
+            $self->render(json => $json);
+        });
 }
 
 1;
