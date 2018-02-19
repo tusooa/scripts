@@ -40,3 +40,6 @@
 [submodule "src/windy/base64"]
 	path = src/windy/base64
 	url = https://github.com/tkislan/base64.git
+[submodule "src/windy/iconvpp"]
+	path = src/windy/iconvpp
+	url = https://github.com/unnonouno/iconvpp.git

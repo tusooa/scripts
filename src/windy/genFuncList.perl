@@ -75,6 +75,6 @@ for (@funcs) {
         . qq/  croak("cannot load Api_${funcName}");\n}/;
     say CALL "if (func == " . qq/"${funcName}"/ .") {\n"
         . $fHead{$retType} . qq/Api_${funcName}(/
-        . (join ', ', map { $aFunc{$d[$_]} . '(args[' . $_ . '])' } 0..$#d)
+        . (join ', ', map { $aFunc{$d[$_]} . '(args.at(' . $_ . '))' } 0..$#d)
         . ')' . $fTail{$retType} . "\n}";
 }

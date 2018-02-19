@@ -1,39 +1,20 @@
 #ifndef CONVERT_HPP
 #define CONVERT_HPP
-#include <iconv.h>
+#include "iconvpp/iconv.hpp"
 #include <string>
 #include <cstring>
 #include <iostream>
 
 using namespace std;
-#define UTF82GBK iconv_open("UTF-8", "GBK");
+const bool ICONVPP_IGNORE_ERROR = true;
 
 string fromTo(const string & s, const char * from, const char * to)
 {
-  iconv_t conv = iconv_open(to, from);
-  // copy to c-style str
-  size_t oldLen = s.length() + 1;
-  // kept for future `delete`
-  char * oldFromStr = new char[oldLen];
-  char * fromStr = oldFromStr;
-  strcpy(fromStr, s.c_str());
-  // allow for enough space
+  // allocate enough space
   size_t newLen = s.length() * 2 + 1;
-  // kept for `delete` and string()
-  char * oldToStr = new char[newLen];
-  char * toStr = oldToStr;
-  // do the conversion
-  iconv(conv, &fromStr, &oldLen,
-        &toStr, &newLen);
-  // convert to std::string
-  // be sure to use old*
-  // because fromStr and toStr are CHANGED by iconv.
-  string newStr(oldToStr);
-  // clean up
-  // ditto.
-  delete []oldFromStr;
-  delete []oldToStr;
-  iconv_close(conv);
+  iconvpp::converter conv(to, from, ICONVPP_IGNORE_ERROR, newLen);
+  string newStr;
+  conv.convert(s, newStr);
   return newStr;
 }
 

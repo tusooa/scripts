@@ -1,6 +1,5 @@
 #include "server_http.hpp"
 #include "client_http.hpp"
-#include "debug.hpp"
 
 #ifndef BOOST_SPIRIT_THREADSAFE
 #define BOOST_SPIRIT_THREADSAFE
@@ -76,6 +75,7 @@ static bool firstLoad = true;
 const int RET_DONE = 1;
 const int RET_PASS = 0;
 const int RET_STOP = 2;
+const int UNKNOWN_EVENT = -1;
 
 static bool initDone = false;
 static bool targetAvail = false;
@@ -130,6 +130,12 @@ extern __declspec(dllexport) int
 EventFun(char *tencent, int type, int subtype, char *source, char *subject, char *object, char *msg, char *rawmsg, char *backptr)
 {
   int retvalue = RET_PASS;
+  // Do not send the event if it is still unknown
+  // to prevent potential errors
+  // MAYBE...
+  if (type == UNKNOWN_EVENT) {
+    return retvalue;
+  }
   // 原来 MPQ 会把空指针传进去。。。
   // C++ 的 try-catch 抓不到 Access Violation....
   // https://stackoverflow.com/questions/5951987/prevent-c-dll-exception-using-try-catch-internally
@@ -152,8 +158,9 @@ EventFun(char *tencent, int type, int subtype, char *source, char *subject, char
   if (!rawmsg) {
     rawmsg = t;
   }
-  debug("Starting proc event");
   try {
+    string smsg(msg);
+    string sraw(rawmsg);
     json send = {
       {"tencent", string(tencent)},
       {"type", type},
@@ -161,13 +168,12 @@ EventFun(char *tencent, int type, int subtype, char *source, char *subject, char
       {"source", string(source)},
       {"subject", string(subject)},
       {"object", string(object)},
-      {"msg", gbk2utf8(string(msg))},
-      {"rawmsg", gbk2utf8(string(rawmsg))},
+      {"msg", gbk2utf8(smsg)},
+      {"rawmsg", gbk2utf8(sraw)},
     };
     stringstream jsonStream;
     jsonStream << send;
     string ss = jsonStream.str();
-    debug("Event JSON: " + ss);
     if (targetAvail) {
       try {
         auto ret = client.request("POST", config.sendAddr, ss);
@@ -181,20 +187,16 @@ EventFun(char *tencent, int type, int subtype, char *source, char *subject, char
             strcpy(backptr, backGBK.c_str());
           }
         } catch (...) { // json decoding error
-          debug("JSON decoding error");
           retvalue = RET_PASS;
         }
       } catch (...) { // post error
-        debug("POST error");
         targetAvail = false;
         retvalue = RET_PASS;
       }
     }
   } catch (...) { // other error
-    debug("other error");
     retvalue = RET_PASS;
   }
-  debug("Here returning " + to_string(retvalue));
   return retvalue;
 }
 

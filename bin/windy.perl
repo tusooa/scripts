@@ -27,6 +27,7 @@ my $t = Mojo::Webqq->new(
     log_level => $debug ? 'debug' : 'info',
     group_member_use_fullcard => 1,
     model_ext => 1,
+    group_member_use_markname => 0,
     );
 
 $windy->{_client} = $t;
@@ -86,7 +87,6 @@ sub onReceive
     my ($context) = $m->type =~ /^(group|discuss)_message$/;
     my $inGroup = ($context ? " 在 ".($context eq 'group' ? msgGroupName($windy, $m) .'('.$m->group->gnumber.')' : msgDiscussName($windy, $m)) : '');
     $windy->logger("收到 `".$text."` 从 ".uName(msgSender($windy, $m)).'('.uid(msgSender($windy, $m)).')'.$inGroup);
-    say term msgSender($windy, $m)->dump;
     #$windy->logger($m->dump);
     my $time = time;
     my $r = $windy->parse($m);
