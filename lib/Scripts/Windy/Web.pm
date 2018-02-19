@@ -55,7 +55,7 @@ sub startup
     my $self = shift;
     # for (TODO) web-based client
     my $renderer = $self->renderer;
-    $renderer->paths([$dataDir."windy"]);
+    $renderer->paths([$dataDir.'windy']);
     # routes
     my $route = $self->routes;
     $route->any('/term' => sub
@@ -77,8 +77,10 @@ EOF
                             (@args, sub
                              {
                                  my $result = shift;
+                                 use Data::Dumper;
                                  $c->render(text => $text
-                                            . "<p>Result: <pre>$result</pre>");
+                                            . "<p>Result: <pre>$result</pre></p>"
+                                     . '<p>Raw:<pre>' . (Dumper $result) . '</pre></p>');
                              });
                     } else {
                         $c->render(text => $text);

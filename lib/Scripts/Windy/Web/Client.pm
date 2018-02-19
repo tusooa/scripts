@@ -1,13 +1,16 @@
 package Scripts::Windy::Web::Client;
 
-use Scripts::Base;
 use Mojo::Base 'Mojo::EventEmitter';
+use Scripts::Base;
 use Scripts::Windy::Web::Model::User;
 use Scripts::Windy::Web::Model::Friend;
+use Scripts::Windy::Web::Model::GroupMember;
+use Scripts::Windy::Web::Util;
 use Mojo::JSON qw/decode_json/;
 
 has [qw/app me isLoggedIn/];
 has friends => sub { []; };
+has groups => sub { []; };
 
 # call arbitary API
 sub AUTOLOAD
@@ -50,6 +53,18 @@ sub callApi
     }
 }
 
+sub findFriend
+{
+    my ($self, $attr, $val) = @_;
+    findIn($self->friends, $attr, $val);
+}
+
+sub findGroup
+{
+    my ($self, $attr, $val) = @_;
+    findIn($self->groups, $attr, $val);
+}
+
 sub procFriendList
 {
     my $self = shift;
@@ -58,21 +73,81 @@ sub procFriendList
     print term 'text='. Dumper $text;
     my $json = decode_json $text;
     return if $json->{ec} != 0; # which means it failed
-    @{$self->friends} = ();
+    my @friends;
     my $res = $json->{result};
     for my $cat (values %$res) { # since we do not care about the cat num.
+        # default group does not have a name, so add it
         my $catName = $cat->{gname} // '我的好友';
         exists $cat->{mems} or next;
         for (@{$cat->{mems}}) {
-            my $friend = Scripts::Windy::Web::Model::Friend->new(
-                category => $catName,
-                tencent => $_->{uin},
-                name => $_->{name},
-                );
-            push @{$self->friends}, $friend;
+            # check if we need to construct a new instance
+            my $friend = $self->findFriend(tencent => $_->{uin})
+                // Scripts::Windy::Web::Model::Friend->new(tencent => $_->{uin});
+            $friend->category($catName);
+            $friend->name($_->{name});
+            push @friends, $friend;
         }
     }
+    # replace old list, discarding deleted members
+    $self->friends(\@friends);
     $self->friends;
+}
+
+sub procGroupList # GetGroupListB
+{
+    my $self = shift;
+    my $text = utf8df shift;
+    my $json = decode_json $text;
+    # check status
+    return if $json->{ec} != 0;
+    delete $json->{ec};
+    # add each group
+    my @groups;
+    for my $type (keys %$json) {
+        for (@{$json->{$type}}) {
+            my $group = $self->findGroup(number => $_->{gn})
+                // Scripts::Windy::Web::Model::Group->new(number => $_->{gn});
+            $group->name($_->{gc});
+            $group->ownerTencent($_->{owner});
+            $group->myRelationship($type);
+            push @groups, $group;
+        }
+    }
+    # replace old list
+    $self->groups(\@groups);
+    $self->groups;
+}
+
+my %groupRole = (0 => "founder", 1 => "admin", 2 => "member");
+my %groupRoleNum = map {; $groupRole{$_} => $_ } keys %groupRole;
+
+sub procGroupInfo # GetGroupMemberA
+{
+    my ($self, $group, $text) = @_;
+    $text = utf8df $text;
+    my $json = decode_json $text;
+    return if $json->{ec} != 0;
+    # count info
+    $group->adminMax($json->{adm_max});
+    $group->memberMax($json->{max_count});
+    $group->levelName($json->{levelname});
+    # add members
+    my @members = ();
+    for (@{$json->{mems}}) {
+        my $member = $group->findMember(tencent => $_->{uin})
+            // Scripts::Windy::Web::Model::GroupMember->new(tencent => $_->{uin});
+        $member->card($_->{card});
+        $member->role($groupRole{ $_->{role} });
+        $member->name($_->{nick});
+        $member->joinTime($_->{join_time});
+        $member->lastSpeakTime($_->{last_speak_time});
+        $member->level($_->{lv}{level});
+        $member->point($_->{lv}{point});
+        push @members, $member;
+    }
+    # replace
+    $group->members(\@members);
+    $group;
 }
 
 sub new
@@ -89,6 +164,8 @@ sub new
              my $r = $self->procFriendList($self->GetFriendList($tencent));
              if ($r) {
                  say "done!";
+                 use Data::Dumper;
+                 print term Dumper($self->friends);
                  for (@{$self->friends}) {
                      say term 'name: '.$_->name."\n"
                          .'uid: '.$_->tencent."\n"
