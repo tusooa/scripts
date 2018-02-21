@@ -10,6 +10,7 @@ use Scripts::Windy::Web::Controller::Sender;
 use Scripts::Windy::Web::ApiCaller;
 use Scripts::Windy::Web::Client;
 use Scripts::Windy::Util;
+use Mojo::Util qw/xml_escape/;
 
 sub onReceive
 {
@@ -58,34 +59,36 @@ sub startup
     $renderer->paths([$dataDir.'windy']);
     # routes
     my $route = $self->routes;
-    $route->any('/term' => sub
-                {
-                    my $c = shift;
-                    my $val = $c->param('list') =~ s/\r\n/\n/gr;
-                    my @args = grep { length $_ } split /\n/, $val;
-                    my $text = <<EOF;
-<form action="/term" method="post">
-    <p>Send API:</p>
-    <textarea name="list">$val</textarea>
-    <br />
-    <input type="submit" value="Call!" />
-</form>
+    $route->any
+        ('/term' => sub
+         {
+             my $c = shift;
+             my $val = $c->param('list') =~ s/\r\n/\n/gr;
+             my @args = grep { length $_ } split /\n/, $val;
+             my $text = <<EOF;
+                        <form action="/term" method="post">
+                        <p>Send API:</p>
+                        <textarea name="list">$val</textarea>
+                        <br />
+                        <input type="submit" value="Call!" />
+                        </form>
 EOF
-                    if (@args) {
-                        $c->render_later;
-                        $c->app->client->callApi
-                            (@args, sub
-                             {
-                                 my $result = shift;
-                                 use Data::Dumper;
-                                 $c->render(text => $text
-                                            . "<p>Result: <pre>$result</pre></p>"
-                                     . '<p>Raw:<pre>' . (Dumper $result) . '</pre></p>');
-                             });
-                    } else {
-                        $c->render(text => $text);
-                    }
-                });
+             if (@args) {
+                 $c->render_later;
+                 $c->app->client->callApi
+                     (@args, sub
+                      {
+                          my $result = shift;
+                          use Data::Dumper;
+                          $c->render
+                              (text => $text
+                               . '<p>Result: <pre>' . (xml_escape $result) . '</pre></p>'
+                               . '<p>Raw:<pre>' . (xml_escape Dumper $result) . '</pre></p>');
+                      });
+             } else {
+                 $c->render(text => $text);
+             }
+         });
     $route->any('/' => sub
                 {
                     my $c = shift;

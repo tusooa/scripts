@@ -4,9 +4,11 @@ use Mojo::Base 'Mojo::EventEmitter';
 use Scripts::Base;
 use Scripts::Windy::Web::Model::User;
 use Scripts::Windy::Web::Model::Friend;
+use Scripts::Windy::Web::Model::Group;
 use Scripts::Windy::Web::Model::GroupMember;
 use Scripts::Windy::Web::Util;
 use Mojo::JSON qw/decode_json/;
+#use Mojo::Util qw/html_unescape/;
 
 has [qw/app me isLoggedIn/];
 has friends => sub { []; };
@@ -19,6 +21,14 @@ sub AUTOLOAD
     our $AUTOLOAD;
     my $method = $AUTOLOAD =~ s/.+:://r;
     $self->callApi($method, @_);
+}
+
+sub procApiResult
+{
+    my ($self, $text) = @_;
+    $text =~ s/\r\n/\n/g;
+    $text = convertUtf8CodePoints $text;
+    $text;
 }
 
 # $client->callApi(FUNC, ARG, ..., [CALLBACK]);
@@ -36,7 +46,7 @@ sub callApi
                  my ($ua, $tx) = @_;
                  if ($tx->success) {
                      my $json = $tx->res->json;
-                     my $status = $json->{seq}[0] =~ s/\r\n/\n/gr;
+                     my $status = $self->procApiResult($json->{seq}[0]);
                      $callback->($status);
                  } else {
                      my $err = $tx->error;
@@ -47,9 +57,16 @@ sub callApi
              });
     } else {
         my $tx = $self->app->apiCaller->callSeq(\@args);
-        my $json = $tx->res->json;
-        my $status = $json->{seq}[0];
-        return $status;
+        if ($tx->success) {
+            my $json = $tx->res->json;
+            my $status = $self->procApiResult($json->{seq}[0]);
+            return $status;
+        } else {
+            my $err = $tx->error;
+            say "$err->{code} response: $err->{message}"
+                if $err->{code};
+            return;
+        }
     }
 }
 
@@ -84,7 +101,7 @@ sub procFriendList
             my $friend = $self->findFriend(tencent => $_->{uin})
                 // Scripts::Windy::Web::Model::Friend->new(tencent => $_->{uin});
             $friend->category($catName);
-            $friend->name($_->{name});
+            $friend->name(html_unescape $_->{name});
             push @friends, $friend;
         }
     }
@@ -105,9 +122,9 @@ sub procGroupList # GetGroupListB
     my @groups;
     for my $type (keys %$json) {
         for (@{$json->{$type}}) {
-            my $group = $self->findGroup(number => $_->{gn})
-                // Scripts::Windy::Web::Model::Group->new(number => $_->{gn});
-            $group->name($_->{gc});
+            my $group = $self->findGroup(number => $_->{gc})
+                // Scripts::Windy::Web::Model::Group->new(number => $_->{gc});
+            $group->name(html_unescape $_->{gn});
             $group->ownerTencent($_->{owner});
             $group->myRelationship($type);
             push @groups, $group;
@@ -118,7 +135,7 @@ sub procGroupList # GetGroupListB
     $self->groups;
 }
 
-my %groupRole = (0 => "founder", 1 => "admin", 2 => "member");
+my %groupRole = (0 => "owner", 1 => "admin", 2 => "member");
 my %groupRoleNum = map {; $groupRole{$_} => $_ } keys %groupRole;
 
 sub procGroupInfo # GetGroupMemberA
@@ -136,9 +153,9 @@ sub procGroupInfo # GetGroupMemberA
     for (@{$json->{mems}}) {
         my $member = $group->findMember(tencent => $_->{uin})
             // Scripts::Windy::Web::Model::GroupMember->new(tencent => $_->{uin});
-        $member->card($_->{card});
+        $member->card(html_unescape $_->{card});
         $member->role($groupRole{ $_->{role} });
-        $member->name($_->{nick});
+        $member->name(html_unescape $_->{nick});
         $member->joinTime($_->{join_time});
         $member->lastSpeakTime($_->{last_speak_time});
         $member->level($_->{lv}{level});
@@ -161,7 +178,8 @@ sub new
              $self->me(Scripts::Windy::Web::Model::User->new(tencent => $tencent));
              say "logged in! getting friend list...";
              $self->isLoggedIn(1);
-             my $r = $self->procFriendList($self->GetFriendList($tencent));
+             my $r = $self->procFriendList
+                 ($self->GetFriendList($tencent));
              if ($r) {
                  say "done!";
                  use Data::Dumper;
@@ -173,6 +191,28 @@ sub new
                  }
              } else {
                  say "error!";
+             }
+             say "getting group list";
+             $r = $self->procGroupList
+                 ($self->GetGroupListB($tencent));
+             if ($r) {
+                 say "done!";
+                 for (@{$self->groups}) {
+                     say term 'name: ' . $_->name
+                         . 'number: ' . $_->number
+                         . 'owner: ' . $_->ownerTencent;
+                 }
+             }
+             say "getting group info...";
+             for my $g (@{$self->groups}) {
+                 $self->procGroupInfo
+                     ($g,
+                      $self->GetGroupMemberA($tencent, $g->number));
+                 for (@{$g->members}) {
+                     say term 'name: ' . $_->name
+                         . 'tencent: ' . $_->tencent
+                         . 'role' . $_->role;
+                 }
              }
          });
     $self->on
