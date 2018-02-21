@@ -5,7 +5,8 @@ use List::Util qw/first/;
 use Mojo::Util ();
 use Encode;
 our @EXPORT = qw/findIn
-    convertUtf8CodePoints html_unescape/;
+    convertUtf8CodePoints html_unescape
+    gbkWithU8Code/;
 
 # findIn ARRAYREF, ATTR, VALUE
 sub findIn
@@ -57,6 +58,17 @@ sub html_unescape
     my $ret = Mojo::Util::html_unescape $text;
     $ret =~ s/\x{a0}/ /g;
     $ret;
+}
+
+sub gbkWithU8Code
+{
+    my $text = shift;
+    encode 'GBK', $text, sub
+    {
+        # utf8 code
+        my $char = encode_utf8 chr shift;
+        '\u' . (uc unpack('H*', $char));
+    };
 }
 
 1;
