@@ -36,6 +36,7 @@ sub new
             # \x{2661} or so
             'x\{([0-9A-Fa-f]{2,8})\}' => sub { chr hex shift },
         },
+        handler => {},
         regex => {},
     };
     bless $self, $class;
@@ -130,12 +131,12 @@ sub genRegex
 sub parse
 {
     my ($self, $text, $scope) = @_;
-    my @exprs = parseText($text);
-    # turn to Lambda
+    my @exprs = @{ $self->parseText($text)->{list} };
 }
 
 =head2 
 =cut
+
 sub parseText
 {
     my ($self, $text, $pos, $state,
@@ -152,14 +153,16 @@ sub parseText
                 # extract the literal and go into command mode
                 my $literal = $1;
                 $cmdDelim = $2;
-                push @list, $literal if length $literal;
+                push @list, $self->handler
+                    ('literal' => $literal) if length $literal;
                 debug((' ' x $depth) . 
                     "Literal: `$literal`, entering command mode");
                 $state = 'command';
             } else { # no command available
                 # extract the literal and end the loop
                 my $literal = substr $text, pos($text);
-                push @list, $literal if length $literal;
+                push @list, $self->handler
+                    ('literal' => $literal) if length $literal;
                 debug((' ' x $depth) .
                       "Literal: `$literal`, ending");
                 die "Unclosed quote in the code\n" if $quoteLevel;
@@ -186,7 +189,7 @@ sub parseText
                 my $quoted = $self->parseQuote
                     ($ret->{'list'}, $quoteLevel);
                 $quoteLevel = 0;
-                push @list, $ret->{'list'};
+                push @list, $self->handler('list' => $quoted);
             } elsif (length $prnDelim
                      and $text =~ /$self->{regex}{'prn-e-'.$prnDelim}/gc) {
                 debug((' ' x $depth) .
@@ -199,7 +202,7 @@ sub parseText
                       "Number: $num");
                 my $quoted = $self->parseQuote($num, $quoteLevel);
                 $quoteLevel = 0;
-                push @list, $num;
+                push @list, $self->handler('number' => $quoted);
             } elsif ($text =~ /$self->{regex}{'identifier'}/gc) {
                 my $name = $self->parseIdentifier($1);
                 debug((' ' x $depth) .
@@ -207,7 +210,7 @@ sub parseText
                 my $symbol = $self->parseQuote
                     (Scripts::insLisp::Symbol->new($name), $quoteLevel);
                 $quoteLevel = 0;
-                push @list, $symbol;
+                push @list, $self->handler('symbol' => $symbol);
             } elsif ($text =~ /$self->{regex}{'str-s'}/gc) {
                 my $delim = $1;
                 debug((' ' x $depth) .
@@ -217,7 +220,7 @@ sub parseText
                 my $quoted = $self->parseQuote($ret->{'str'}, $quoteLevel);
                 $quoteLevel = 0;
                 pos($text) = $ret->{'pos'};
-                push @list, $quoted;
+                push @list, $self->handler('string' => $quoted);
             } elsif ($text =~ /$self->{regex}{'nothing'}/gc) {
                 debug((' ' x $depth) .
                       'Ending in command mode');
@@ -227,7 +230,7 @@ sub parseText
             } else {
                 die 'Unexpected token `'
                     . (substr $text, pos($text), 1)
-                    . "`\n";
+                    . '` at offset ' . pos($text) . "\n";
             }
         }
     }
@@ -321,6 +324,28 @@ sub parseString
         }
     }
     { 'pos' => pos($text), 'str' => $str };
+}
+
+# handlers
+sub handler
+{
+    my $self = shift;
+    my $type = shift;
+    my @ret = @_;
+    ref $self->{handler}{$type} eq 'ARRAY' or return @ret;
+    for (@{$self->{handler}{$type}}) {
+        @ret = $_->(@ret);
+    }
+    @ret;
+}
+
+sub addHandler
+{
+    my ($self, $type, $func) = @_;
+    ref $self->{handler}{$type} eq 'ARRAY'
+        or $self->{handler}{$type} = [];
+    push @{$self->{handler}{$type}}, $func;
+    $self;
 }
 
 1;

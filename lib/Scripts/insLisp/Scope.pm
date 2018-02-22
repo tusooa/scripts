@@ -19,6 +19,11 @@ sub new
     bless $self, $class;
 }
 
+sub scope
+{
+    shift;
+}
+
 sub isRO
 {
     shift->{ro};
@@ -85,16 +90,25 @@ sub setVar
     $self->{vars}{$var} = $val;
 }
 
+sub makeVar
+{
+    my ($self, $var) = @_;
+    $self->{vars}{$var} = undef;
+}
+
 sub var
 {
     my $self = shift;
-    if (@_ == 2) { # set
-        my ($var, $val) = @_;
+    my $var = shift;
+    #if (isSymbol($var)) {
+    #    $var = $var->name;
+    #}
+    if (@_ == 1) { # set
+        my $val = shift;
         my $s = $self->varScopeRW($var) // $self;
         $s->setVar($var, $val);
         $self;
     } else { # get
-        my $var = shift;
         my $s = $self->varScope($var);
         if ($s) {
             $s->getVar($var);

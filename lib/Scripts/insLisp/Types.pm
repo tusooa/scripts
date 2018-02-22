@@ -2,7 +2,8 @@ package Scripts::insLisp::Types;
 
 use Exporter;
 our @ISA = qw/Exporter/;
-our @EXPORT = qw/isLambda isFunc isSymbol isArray isHash dd/;
+our @EXPORT = qw/isLambda isFunc isCallable
+    isSymbol isArray isHash isConstant dd/;
 use Scripts::Base;
 
 sub isLambda
@@ -15,6 +16,12 @@ sub isFunc
     ref shift eq 'Scripts::insLisp::Func';
 }
 
+sub isCallable
+{
+    my $obj = shift;
+    isFunc($obj) or isLambda($obj);
+}
+
 sub isSymbol
 {
     ref shift eq 'Scripts::insLisp::Symbol';
@@ -22,12 +29,17 @@ sub isSymbol
 
 sub isArray
 {
-    ref shift eq 'ARRAY';
+    UNIVERSAL::isa(shift, 'ARRAY');
 }
 
 sub isHash
 {
-    ref shift eq 'HASH';
+    UNIVERSAL::isa(shift, 'HASH');
+}
+
+sub isConstant
+{
+    not ref shift;
 }
 
 sub dd

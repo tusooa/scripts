@@ -3,6 +3,7 @@ package Scripts::insLisp::Func;
 sub new
 {
     my ($class, $func, $quoted) = @_;
+    ref $func eq 'CODE' or die "func must be coderef";
     my $self = {
         func => $func,
         quoted => $quoted // 0,
