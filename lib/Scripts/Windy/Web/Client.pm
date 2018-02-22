@@ -6,6 +6,8 @@ use Scripts::Windy::Web::Model::User;
 use Scripts::Windy::Web::Model::Friend;
 use Scripts::Windy::Web::Model::Group;
 use Scripts::Windy::Web::Model::GroupMember;
+use Scripts::Windy::Web::Model::Discuss;
+use Scripts::Windy::Web::Model::DiscussMember;
 use Scripts::Windy::Web::Util;
 use Mojo::JSON qw/decode_json/;
 #use Mojo::Util qw/html_unescape/;
@@ -13,6 +15,7 @@ use Mojo::JSON qw/decode_json/;
 has [qw/app me isLoggedIn/];
 has friends => sub { []; };
 has groups => sub { []; };
+has discusses => sub { []; };
 
 # call arbitary API
 sub AUTOLOAD
@@ -23,6 +26,7 @@ sub AUTOLOAD
     $self->callApi($method, @_);
 }
 
+# turn crlf into lf, \uXXXX into its unicode
 sub procApiResult
 {
     my ($self, $text) = @_;
@@ -63,9 +67,10 @@ sub callApi
             return $status;
         } else {
             my $err = $tx->error;
+            my $text = $tx->res->text;
             say "$err->{code} response: $err->{message}"
                 if $err->{code};
-            return;
+            return $text;
         }
     }
 }
@@ -82,12 +87,16 @@ sub findGroup
     findIn($self->groups, $attr, $val);
 }
 
+sub findDiscuss
+{
+    my ($self, $attr, $val) = @_;
+    findIn($self->discusses, $attr, $val);
+}
+
 sub procFriendList
 {
     my $self = shift;
     my $text = utf8df shift;
-    use Data::Dumper;
-    print term 'text='. Dumper $text;
     my $json = decode_json $text;
     return if $json->{ec} != 0; # which means it failed
     my @friends;
@@ -99,9 +108,11 @@ sub procFriendList
         for (@{$cat->{mems}}) {
             # check if we need to construct a new instance
             my $friend = $self->findFriend(tencent => $_->{uin})
-                // Scripts::Windy::Web::Model::Friend->new(tencent => $_->{uin});
+                // Scripts::Windy::Web::Model::Friend->new
+                (tencent => $_->{uin},
+                 client => $self);
             $friend->category($catName);
-            $friend->name(html_unescape $_->{name});
+            $friend->markname(html_unescape $_->{name});
             push @friends, $friend;
         }
     }
@@ -123,7 +134,9 @@ sub procGroupList # GetGroupListB
     for my $type (keys %$json) {
         for (@{$json->{$type}}) {
             my $group = $self->findGroup(number => $_->{gc})
-                // Scripts::Windy::Web::Model::Group->new(number => $_->{gc});
+                // Scripts::Windy::Web::Model::Group->new
+                (number => $_->{gc},
+                 client => $self);
             $group->name(html_unescape $_->{gn});
             $group->ownerTencent($_->{owner});
             $group->myRelationship($type);
@@ -135,6 +148,17 @@ sub procGroupList # GetGroupListB
     $self->groups;
 }
 
+sub procGroupName # GetGroupMemberB
+{
+    my ($self, $group, $text) = @_;
+    $text =~ s/^_GroupMember_Callback\(//;
+    $text =~ s/\);$//;
+    $text = utf8df $text;
+    my $json = decode_json $text;
+    return if $json->{code} != 0;
+    $group->name($json->{'group_name'});
+}
+
 my %groupRole = (0 => "owner", 1 => "admin", 2 => "member");
 my %groupRoleNum = map {; $groupRole{$_} => $_ } keys %groupRole;
 
@@ -142,7 +166,12 @@ sub procGroupInfo # GetGroupMemberA
 {
     my ($self, $group, $text) = @_;
     $text = utf8df $text;
-    my $json = decode_json $text;
+    my $json = eval { decode_json $text };
+    if ($@ or not $json) { # fall back, only getting the admins
+        #$self->GetAdminList($self->me->tencent,
+        #                    $group->number);
+        return;
+    }
     return if $json->{ec} != 0;
     # count info
     $group->adminMax($json->{adm_max});
@@ -152,7 +181,10 @@ sub procGroupInfo # GetGroupMemberA
     my @members = ();
     for (@{$json->{mems}}) {
         my $member = $group->findMember(tencent => $_->{uin})
-            // Scripts::Windy::Web::Model::GroupMember->new(tencent => $_->{uin});
+            // Scripts::Windy::Web::Model::GroupMember->new
+            (tencent => $_->{uin},
+             group => $group,
+             client => $self);
         $member->card(html_unescape $_->{card});
         $member->role($groupRole{ $_->{role} });
         $member->name(html_unescape $_->{nick});
@@ -167,6 +199,52 @@ sub procGroupInfo # GetGroupMemberA
     $group;
 }
 
+sub newFriend
+{
+    my $self = shift;
+    my @args = @_;
+    if (@args == 1 and ref $args[0] eq 'HASH') {
+        @args = %{$args[0]};
+    }
+    my $friend = Scripts::Windy::Web::Model::Friend->new
+        (@args, client => $self);
+    push @{$self->friends}, $friend;
+    $friend;
+}
+
+sub newGroup
+{
+    my $self = shift;
+    my @args = @_;
+    if (@args == 1 and ref $args[0] eq 'HASH') {
+        @args = %{$args[0]};
+    }
+    my $group = Scripts::Windy::Web::Model::Group->new
+        (@args, client => $self);
+    #$self->procGroupName
+    #    ($group,
+    #     $self->GetGroupMemberB($self->me->tencent, $group->number));
+    #$self->procGroupInfo
+    #    ($group,
+    #     $self->GetGroupMemberA($self->me->tencent, $group->number));
+    push @{$self->groups}, $group;
+    $group;
+}
+
+sub newDiscuss
+{
+    my $self = shift;
+    my @args = @_;
+    if (@args == 1 and ref $args[0] eq 'HASH') {
+        @args = %{$args[0]};
+    }
+    my $discuss = Scripts::Windy::Web::Model::Discuss->new
+        (@args, client => $self);
+    push @{$self->discusses}, $discuss;
+    $discuss;
+}
+
+debugOn;
 sub new
 {
     my $class = shift;
@@ -175,44 +253,57 @@ sub new
         (loggedIn => sub
          {
              my $tencent = $self->GetQQlist;
-             $self->me(Scripts::Windy::Web::Model::User->new(tencent => $tencent));
-             say "logged in! getting friend list...";
+             $self->me(Scripts::Windy::Web::Model::User->new
+                       (tencent => $tencent,
+                        client => $self));
+             debug "logged in! getting friend list...";
              $self->isLoggedIn(1);
              my $r = $self->procFriendList
                  ($self->GetFriendList($tencent));
              if ($r) {
-                 say "done!";
-                 use Data::Dumper;
-                 print term Dumper($self->friends);
-                 for (@{$self->friends}) {
-                     say term 'name: '.$_->name."\n"
-                         .'uid: '.$_->tencent."\n"
-                         .'cat: '.$_->category;
-                 }
+                 debug "done!";
+                 debug sub
+                 {
+                     for (@{$self->friends}) {
+                         say term 'name: '.$_->name."\n"
+                             .'uid: '.$_->tencent."\n"
+                             .'cat: '.$_->category;
+                     }
+                 };
              } else {
-                 say "error!";
+                 debug "error!";
              }
-             say "getting group list";
+             debug "getting group list";
              $r = $self->procGroupList
                  ($self->GetGroupListB($tencent));
              if ($r) {
-                 say "done!";
-                 for (@{$self->groups}) {
-                     say term 'name: ' . $_->name
-                         . 'number: ' . $_->number
-                         . 'owner: ' . $_->ownerTencent;
-                 }
+                 debug "done!";
+                 debug sub {
+                     for (@{$self->groups}) {
+                         say term 'name: ' . $_->name
+                             . 'number: ' . $_->number
+                             . 'owner: ' . $_->ownerTencent;
+                     }
+                 };
              }
-             say "getting group info...";
+             debug "getting group info...";
              for my $g (@{$self->groups}) {
-                 $self->procGroupInfo
-                     ($g,
-                      $self->GetGroupMemberA($tencent, $g->number));
-                 for (@{$g->members}) {
-                     say term 'name: ' . $_->name
-                         . 'tencent: ' . $_->tencent
-                         . 'role' . $_->role;
+                 #debug "Sleeping 2s...";
+                 #sleep 2;
+                 debug "Group: ". $g->number . $g->name;
+                 my $res = $self->GetGroupMemberA($tencent, $g->number);
+                 $self->procGroupInfo($g, $res);
+                 if ($@) {
+                     debug "error: $@";
                  }
+                 debug sub {
+                     for (@{$g->members}) {
+                         say term 'name: ' . $_->name
+                             . 'card: ' . $_->card
+                             . 'tencent: ' . $_->tencent
+                             . 'role: ' . $_->role;
+                     }
+                 };
              }
          });
     $self->on
@@ -220,12 +311,27 @@ sub new
          {
              $self->isLoggedIn(0);
          });
-    #say "getting friend list...";
-    ##(sub { $self->procFriendList(@_); });
-    #say "done!";
-    #use Data::Dumper;
-    #print Dumper($self->friends);
     $self;
+}
+
+my %SendMessageType = (
+    'friend-message' => 1,
+    'group-message' => 2,
+    'discuss-message' => 3,
+    'group-sess-message' => 4,
+    'discuss-sess-message' => 5,
+    );
+
+sub sendMessage
+{
+    my ($self, $typeName, $source, $receiver, $content) = @_;
+    $self->SendMsg($self->me->tencent,
+                   $SendMessageType{$typeName},
+                   0, # Fixed
+                   $source,
+                   $receiver,
+                   $content,
+        );
 }
 
 1;

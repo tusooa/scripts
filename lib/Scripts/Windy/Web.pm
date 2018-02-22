@@ -1,8 +1,8 @@
 package Scripts::Windy::Web;
 
-use Scripts::Base;
 use Mojo::Base 'Mojolicious';
-#use Scripts::Windy;
+use Scripts::Base;
+use Scripts::Windy::Startup;
 use Time::HiRes qw/time/;
 
 use Scripts::Windy::Web::Controller::Receiver;
@@ -16,9 +16,6 @@ sub onReceive
 {
     my ($self, $event, $callback) = @_;
     my $retJson = { ret => 0, msg => '', };
-    # Dump it
-    use Data::Dumper;
-    print Dumper($event);
     # login/logout/...
     if ($event->type == 11001) {
         #$self->emit(loggedIn => $event->subject);
@@ -31,25 +28,121 @@ sub onReceive
         return;
     }
     #my $windy = $self->windy;
-    #my $text = parseRichText($windy, $event);
-    #my ($context) = $event->type =~ /^(group|discuss)_message$/;
-    #$windy->logger("收到 `$text` 从".msgSender($windy, $event));
+    my $text = parseRichText($windy, $event);
+    my ($context) = $event->typeName =~ /^(group|discuss)-message$/;
+    my $inGroup = ($context
+                   ? " 在 "
+                   .($context eq 'group'
+                     ? msgGroupName($windy, $event)
+                     .'('.msgGroupId($windy, $event).')'
+                     : msgDiscussName($windy, $event))
+                   : '');
+    $windy->logger("收到 `$text` 从 "
+                   .uName(msgSender($windy, $event))
+                   .'('.uid(msgSender($windy, $event)).')'
+                   .$inGroup);
 
     my $time = time;
     # 真正的处理
-    #my $r = $windy->parse($event);
-    #my $resp = $r->{Text};
-    #if (length $resp) {
-    #    my $num = $r->{Num};
-    #    $windy->logger("送出第 ${num} 条 `".$resp."`, 在 ".( time - $time )." 秒内");
-        #my $to = recordLast($event, $context);
-        #sendTo($to, $resp);
-    #    $retJson->{ret} = 1;
-    #}
+    my $r = $windy->parse($event);
+    my $resp = $r->{Text};
+    if (length $resp) {
+        my $num = $r->{Num};
+        $windy->logger("送出第 ${num} 条 `".$resp."`, 在 ".( time - $time )." 秒内");
+        my $to = recordLast($event, $context);
+        sendTo($to, $resp);
+        $retJson->{ret} = 1;
+    }
     #$self->emit(recvEvent => $event);
     # 处理完了调用 callback 传回去
     $callback->($retJson) if ref $callback eq 'CODE';   
 }
+
+# last channel
+my $lastChannelFile = $configDir."windy-conf/last-channel";
+my $lastChannel = [];
+sub loadLast
+{
+    my $client = shift;
+    if (open my $f, '<', $lastChannelFile) {
+        chomp (my $line = <$f>);
+        my ($context, $lastid) = $line =~ /^([DP]?)(\d+)$/;
+        my $channel = undef;
+        given ($context) {
+            $channel = $client->findDiscuss(id => $lastid) when 'D';
+            $channel = $client->findFriend(tencent => $lastid) when 'P';
+            $channel = $client->findGroup(number => $lastid) when '';
+        }
+        close $f;
+        $windy->logger("上一次的channel是: ".$line);
+        $lastChannel = [$channel, $context];
+        $channel;
+    } else {
+        undef;
+    }
+}
+
+sub recordLast
+{
+    my ($last, $context) = @_;
+    given ($context) {
+        $lastChannel = [$last->sourcePlace, ''] when 'group';
+        $lastChannel = [$last->sourcePlace, 'D'] when 'discuss';
+        $lastChannel = [$last->subjectUser, 'P'] when undef;
+        default { $windy->logger("不能记下现在的channel。"); }
+    };
+    $lastChannel->[0];
+}
+
+sub saveLast
+{
+    if ($lastChannel and open my $f, '>', $lastChannelFile) {
+        binmode $f, ':unix';
+        my $id;
+        given ($lastChannel->[1]) {
+            $id = $lastChannel->[0]->did when 'D';
+            $id = $lastChannel->[0]->qq when 'P';
+            $id = $lastChannel->[0]->gnumber when '';
+        }
+        $windy->logger("记下现在的channel是 ".$id."(".$lastChannel->[1].")");
+        say $f $lastChannel->[1].$id;
+        close $f;
+    }
+}
+
+# admin correspond with main group
+my $mainGroup = undef;
+sub loadMainGroup
+{
+    my $t = shift;
+    if ($mainGroupId) {
+        $mainGroup = $t->findGroup(number => $mainGroupId);
+    }
+    $windy->{mainGroup} = $mainGroup;
+}
+sub loadAdmins
+{
+    $windy->{Admin} = [];
+    if (loadMainGroup) {
+        $windy->{Admin} = [(map { $_->tencent } $mainGroup->findMember(role => 'admin')),
+            (map { $_->tencent } $mainGroup->findMember(role => 'owner'))];
+        $windy->logger("管理列表: ".(join ',', @{$windy->{Admin}}));
+    }
+}
+####
+sub updateAdmin
+{
+    my (undef,$member,$property,$old,$new) = @_;
+    return if $member->group->gnumber ne $mainGroupId or $property ne 'role';
+    if ($new eq 'admin' or $new eq 'owner') { # 成为管理就添加
+        $windy->logger("添加管理: ". $member->qq);
+        push @{$windy->{Admin}}, $member->qq;
+    } elsif (($old eq 'admin' or $old eq 'owner') and $new eq 'member') { # 撤销管理就删去
+        $windy->logger("撤销管理: ". $member->qq);
+        @{$windy->{Admin}} = grep { $member->qq ne $_ } @{$windy->{Admin}};
+    }
+}
+
 
 sub startup
 {
@@ -115,7 +208,7 @@ EOF
                   });
     # process event
     $self->client->on(recvEvent => \&onReceive);
-    #$self->helper(windy => sub { state $windy = Scripts::Windy->new; });
+    $self->helper(windy => sub { $windy; });
     #$self->helper(ua => sub { state $ua = Mojo::UserAgent->new; });
 }
 

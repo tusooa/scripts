@@ -40,7 +40,16 @@ static bool firstLoad = true;
         json output;
         output["seq"] = json::array();
         for (auto & curFunc : input["seq"]) {
-          vector<string> args = curFunc["args"];
+          json a = curFunc["args"];
+          vector<string> args;
+          for (auto & i : a) {
+            // ensure all args are string
+            if (i.is_string()) {
+              args.push_back(i);
+            } else {
+              args.push_back(i.dump());
+            }
+          }
           string func = curFunc["func"];
           string result = callApi(func, args);
           output["seq"].push_back(result);
@@ -107,7 +116,9 @@ EXTERN __declspec(dllexport) char * info()
     loadLibs();
     startServer();
     targetAvail = false;
-    checkTarget();
+    if (config.testAddr.length()) { // meaning we want testing
+      checkTarget();
+    }
     initDone = true;
   }
   return "Mew~~~";
@@ -174,7 +185,9 @@ EventFun(char *tencent, int type, int subtype, char *source, char *subject, char
     stringstream jsonStream;
     jsonStream << send;
     string ss = jsonStream.str();
-    if (targetAvail) {
+    if (targetAvail
+        || // or we do not want testing
+        config.testAddr.length() == 0) {
       try {
         auto ret = client.request("POST", config.sendAddr, ss);
         try {

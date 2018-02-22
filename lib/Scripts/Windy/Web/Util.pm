@@ -20,35 +20,51 @@ sub findIn
 sub convertUtf8CodePoint
 {
     my $possibleCode = shift;
-    my $first = lc substr $possibleCode, 0, 1;
-    my $len;
-    # look at first four bits
-    # 0xxx => 1 Byte, 110x => 2B, 1110 => 3B, 1111 => 4B
-    if ($first lt 'c') {
-        $len = 1;
-    } elsif ($first lt 'e') {
-        $len = 2;
-    } elsif ($first lt 'f') {
-        $len = 3;
-    } else {
-        $len = 4;
+    my $ret = '';
+    while (length $possibleCode) {
+        my $first = lc substr $possibleCode, 0, 1;
+        my $len;
+        # look at first four bits
+        # 0xxx => 1 Byte, 110x => 2B, 1110 => 3B, 1111 => 4B
+        if (lc substr($possibleCode, 0, 2) eq '00') { # 00XX represented
+            # ASCII char
+            $len = 1; # special case; still uses 4 digits
+        } elsif ($first lt 'e') {
+            $len = 2;
+        } elsif ($first lt 'f') {
+            $len = 3;
+        } else {
+            $len = 4;
+        }
+        # two Hex digits = 1 Byte
+        my $code = substr $possibleCode, 0, 2 * $len, '';
+        if (hex $code == 0) { # we need to get the next code
+            $code = substr $possibleCode, 0, 2 * $len, '';
+        }
+        if (length $code < 2 * $len) {
+            $ret .= $code;
+        } else {
+            # turn to Unicode code points, or literal char
+            # note pack expects a STRING, not NUMBER
+            my $ord = ord decode_utf8 pack('H*', $code);
+            my $char = $ord >= 0x10000
+                # we'd better get it literally
+                # since mojo-json does not support \u{xxxxx}
+                ? chr $ord # here the char is utf8-on
+                # turn to Unicode code points
+                # in case of ctrl chars
+                : sprintf '\u%04X', $ord;
+            $ret .= $char;
+        }
     }
-    # two Hex digits = 1 Byte
-    my $code = substr $possibleCode, 0, 2 * $len;
-    # turn to literal char
-    # note pack expects a STRING, not NUMBER
-    my $char = pack 'H*', $code;
-    my $rest = substr $possibleCode, 2 * $len + 1;
-    use Data::Dumper;
-    print Dumper [$code, $char, $rest];
-    decode_utf8($char.$rest);
+    $ret . $possibleCode;
 }
 
 sub convertUtf8CodePoints
 {
     my $text = shift;
     _utf8_on $text;
-    $text =~ s/\\u([0-9A-F]{2,8})/convertUtf8CodePoint($1)/ge;
+    $text =~ s/\\u([0-9A-F]{4,})/convertUtf8CodePoint($1)/ge;
     $text;
 }
 

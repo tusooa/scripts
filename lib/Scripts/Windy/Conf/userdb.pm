@@ -463,7 +463,7 @@ sub findDB
         $id = 0;
     }
     my $rPattern;
-    my $maxCount = $maxCount || 5;
+    $maxCount = $maxCount || 5;
     if ($pattern) {
         $rPattern = eval { qr/$pattern/ };
         $rPattern = qr/\Q$pattern\E/ if $@;

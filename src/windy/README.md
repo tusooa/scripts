@@ -18,6 +18,8 @@ If you modify this Program, or any covered work, by linking or combining it with
 
 ### 附注
 
+
+
 MyPCQQ **不是**自由软件，其许可协议可能会对您使用或分发 MyPCQQ 造成限制。并且，我无法保证它能够正确工作且不损害您的计算机。
 
 在您考虑修改或重新发布本程序时，希望您能先考虑实现一个自由的 MyPCQQ 替代品。
@@ -73,6 +75,10 @@ config.perl -a windy.xx.conf windy recvPort -s 3000
 ```
 
 ## 用法
+
+### 关于编码
+
+对于不能在 GBK 下表示的字符，仍然需要手动用 \uXXXXXX 的形式表示。
 
 ### 调用 API
 

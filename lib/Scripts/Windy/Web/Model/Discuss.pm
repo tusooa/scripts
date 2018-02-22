@@ -1,13 +1,19 @@
-package Scripts::Windy::Web::Model::Group;
+package Scripts::Windy::Web::Model::Discuss;
 
 use Mojo::Base 'Scripts::Windy::Web::Model::Base';
 use Scripts::Base;
+use Scripts::Windy::Web::Model::DiscussMember;
 use Scripts::Windy::Web::Util;
-use Scripts::Windy::Web::Model::GroupMember;
 
-has [qw/name number ownerTencent myRelationship
-     adminMax memberMax levelName client/];
+has [qw/id client/];
 has members => sub { []; };
+
+sub name
+{
+    my $self = shift;
+    # MPQ does not have discuss name for us
+    $self->id;
+}
 
 sub findMember
 {
@@ -22,8 +28,8 @@ sub newMember
     if (@args == 1 and ref $args[0] eq 'HASH') {
         @args = %{$args[0]};
     }
-    my $member = Scripts::Windy::Web::Model::GroupMember->new
-        (@args, group => $self, client => $self->client);
+    my $member = Scripts::Windy::Web::Model::DiscussMember->new
+        (@args, discuss => $self, client => $self->client);
     push @{$self->members}, $member;
     $member;
 }
@@ -32,9 +38,9 @@ sub send
 {
     my ($self, $text) = @_;
     $self->client->sendMessage
-        ('group-message',
-         $self->number, # source
-         '', # receiver?
+        ('discuss-message',
+         $self->id, # source
+         '', # receiver
          $text,
         );
 }

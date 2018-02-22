@@ -1,20 +1,22 @@
-package Scripts::Windy::Web::Model::GroupMember;
+package Scripts::Windy::Web::Model::DiscussMember;
+
 use Mojo::Base 'Scripts::Windy::Web::Model::User';
 use Scripts::Base;
 
-has [qw/card joinTime lastSpeakTime level point role group/];
+has [qw/joinTime lastSpeakTime level point role discuss/];
 
 sub displayname
 {
     my $self = shift;
-    $self->card // $self->name;
-}
-
-sub isAdminOrOwner
-{
-    my $self = shift;
-    my $role = $self->role;
-    $role eq 'admin' or $role eq 'owner';
+    # same as Tencent policy:
+    #   if the member is my friend, get their mark name (if possible)
+    #     or get nick
+    my $friend = $self->client->findFriend(tencent => $self->tencent);
+    if ($friend) {
+        $friend->name;
+    } else {
+        $self->name;
+    }
 }
 
 sub send
@@ -31,8 +33,8 @@ sub send
             );
     } else {
         $self->client->sendMessage
-            ('group-sess-message',
-             $self->group->number, # source
+            ('discuss-sess-message',
+             $self->discuss->id, # source
              $self->tencent, # receiver
              $text,
             );
