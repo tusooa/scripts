@@ -11,6 +11,8 @@ use Scripts::Base;
 use Scripts::Windy::Web::Model::Friend;
 use Scripts::Windy::Web::Model::Group;
 use Scripts::Windy::Web::Model::GroupMember;
+use Scripts::Windy::Web::Model::Discuss;
+use Scripts::Windy::Web::Model::User;
 
 has [qw/tencent
      type typeName
@@ -19,8 +21,7 @@ has [qw/tencent
      subject subjectUser
      object objectUser
      msg
-     rawmsg
-     client/];
+     rawmsg/];
 
 my %Codes = (
     1 => 'friend-message',
@@ -102,6 +103,10 @@ sub new
         if ($self->typeName eq 'add-friend'
             or $self->typeName eq 'add-friend-oneway') {
             # we do not have the friend yet
+            $self->subjectUser(Scripts::Windy::Web::Model::User->new
+                               (tencent => $self->subject,
+                                client => $self->client));
+            $self->objectUser($self->client->me);
         } else {
             my $subject = $self->client->findFriend
                 (tencent => $self->subject)
@@ -122,9 +127,11 @@ sub new
         $self->objectUser($object);
     } else {
         $self->subjectUser(Scripts::Windy::Web::Model::User->new
-                           (tencent => $self->subject));
+                           (tencent => $self->subject,
+                            client => $self->client));
         $self->objectUser(Scripts::Windy::Web::Model::User->new
-                          (tencent => $self->object));
+                          (tencent => $self->object,
+                           client => $self->client));
     }
     $self;
 }
@@ -165,7 +172,10 @@ sub isAboutDiscuss
 sub reply
 {
     my ($self, $text) = shift;
-    $self->subject->send($text);
+    (($self->typeName eq 'discuss-message'
+      or $self->typeName eq 'group-message')
+     ? $self->sourcePlace
+     : $self->subjectUser)->send($text);
 }
 
 

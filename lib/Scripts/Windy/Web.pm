@@ -15,10 +15,11 @@ use Mojo::Util qw/xml_escape/;
 sub onReceive
 {
     my ($self, $event, $callback) = @_;
+    # self here is client
     my $retJson = { ret => 0, msg => '', };
     # login/logout/...
     if ($event->type == 11001) {
-        #$self->emit(loggedIn => $event->subject);
+        $self->emit(loggedIn => $event->subject);
     } elsif ($event->type == 11002
              or $event->type == 11003
              or $event->type == 11004) {
@@ -100,9 +101,9 @@ sub saveLast
         binmode $f, ':unix';
         my $id;
         given ($lastChannel->[1]) {
-            $id = $lastChannel->[0]->did when 'D';
-            $id = $lastChannel->[0]->qq when 'P';
-            $id = $lastChannel->[0]->gnumber when '';
+            $id = $lastChannel->[0]->id when 'D';
+            $id = $lastChannel->[0]->tencent when 'P';
+            $id = $lastChannel->[0]->number when '';
         }
         $windy->logger("记下现在的channel是 ".$id."(".$lastChannel->[1].")");
         say $f $lastChannel->[1].$id;
@@ -116,16 +117,17 @@ sub loadMainGroup
 {
     my $t = shift;
     if ($mainGroupId) {
-        $mainGroup = $t->findGroup(number => $mainGroupId);
+        $mainGroup = $t->findGroup(number => $mainGroupId)
+            // $t->newGroup(number => $mainGroupId);
     }
     $windy->{mainGroup} = $mainGroup;
 }
 sub loadAdmins
 {
+    my $client = shift;
     $windy->{Admin} = [];
-    if (loadMainGroup) {
-        $windy->{Admin} = [(map { $_->tencent } $mainGroup->findMember(role => 'admin')),
-            (map { $_->tencent } $mainGroup->findMember(role => 'owner'))];
+    if ($client->loadMainGroup) {
+        $windy->{Admin} = $mainGroup->adminList;
         $windy->logger("管理列表: ".(join ',', @{$windy->{Admin}}));
     }
 }
@@ -150,6 +152,7 @@ sub startup
     # for (TODO) web-based client
     my $renderer = $self->renderer;
     $renderer->paths([$dataDir.'windy']);
+    $self->log->level('info');
     # routes
     my $route = $self->routes;
     $route->any
@@ -207,6 +210,16 @@ EOF
                       state $c = Scripts::Windy::Web::Client->new(app => $self);
                   });
     # process event
+    $self->client->once
+        (recvEvent => sub {
+            if (not defined $self->me) {
+                my $tencent = $self->GetQQlist;
+                $self->me(Scripts::Windy::Web::Model::User->new
+                          (tencent => $tencent,
+                           client => $self));
+            }
+         });
+    $self->client->once(recvEvent => \&loadAdmins);
     $self->client->on(recvEvent => \&onReceive);
     $self->helper(windy => sub { $windy; });
     #$self->helper(ua => sub { state $ua = Mojo::UserAgent->new; });

@@ -9,6 +9,8 @@ use Mojolicious::Commands;
 
 if (!@ARGV) { # provide default args
     @ARGV = ('daemon', '-l', 'http://*:7457');
+    say term '如果在 MPQ 登陆之后才开始运行，在浏览器中访问 http://127.0.0.1:7457/confirm';
+    say term 'v看到 Server available 的字样就可以登陆了v';
 }
 
 Mojolicious::Commands->start_app('Scripts::Windy::Web');

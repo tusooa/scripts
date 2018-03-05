@@ -429,6 +429,7 @@ sub realDBId
 sub dbToString
 {
     my $num = shift;
+    my $mainName = $windyConf->get('main-name') // '风儿';
     my $realNum;
     ($realNum, $num) = realDBId $num;
     my $line = $database->all->[$realNum];
@@ -439,16 +440,16 @@ sub dbToString
     my $ret;
     given ($ask->{style}) {
         when ('S') {
-            $ret = '风儿当问'.$q.'则答'.$a;
+            $ret = $mainName.'当问'.$q.'则答'.$a;
         }
         when ('s') {
-            $ret = '风儿对问'.$q.'则答'.$a;
+            $ret = $mainName.'对问'.$q.'则答'.$a;
         }
         default {
-            $ret = '风儿若问'.$q.'即答'.$a;
+            $ret = $mainName.'若问'.$q.'即答'.$a;
         }
     }
-    nicknameById(undef, $line->[0]->{teacher})."第".$num."，".$ret;
+    nicknameById(undef, $line->[0]->{teacher}).($line->[0]->{teacher})."第".$num."，".$ret;
 }
 
 sub findDB

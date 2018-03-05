@@ -6,7 +6,7 @@ use Mojo::Util ();
 use Encode;
 our @EXPORT = qw/findIn
     convertUtf8CodePoints html_unescape
-    gbkWithU8Code/;
+    gbkWithU8Code convertUtf8ForMpq/;
 
 # findIn ARRAYREF, ATTR, VALUE
 sub findIn
@@ -85,6 +85,12 @@ sub gbkWithU8Code
         my $char = encode_utf8 chr shift;
         '\u' . (uc unpack('H*', $char));
     };
+}
+
+sub convertUtf8ForMpq
+{
+    my $text = shift;
+    utf8 gbkWithU8Code $text;
 }
 
 1;

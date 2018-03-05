@@ -5,7 +5,7 @@ use Scripts::Base;
 use Scripts::Windy::Web::Model::DiscussMember;
 use Scripts::Windy::Web::Util;
 
-has [qw/id client/];
+has [qw/id/];
 has members => sub { []; };
 
 sub name

@@ -239,7 +239,7 @@ sub utf8df
 {
     my $str = join '', @_;
     my $ret;
-    $ret = eval { decode 'GBK', $str };
+    $ret = eval { decode 'GBK', $str, 1 };
     $ret = $str if $@;
     _utf8_off($ret);
     $ret;
@@ -252,7 +252,7 @@ sub utf8
 {
     my $str = join '', @_;
     my $ret;
-    $ret = eval { decode 'GBK', $str };
+    $ret = eval { decode 'GBK', $str, 1 };
     $ret = $str if $@;
     _utf8_on($ret);
     $ret;

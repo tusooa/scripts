@@ -23,7 +23,11 @@ sub AUTOLOAD
     my $self = shift;
     our $AUTOLOAD;
     my $method = $AUTOLOAD =~ s/.+:://r;
-    $self->callApi($method, @_);
+    if ($method =~ /^[A-Z]/) { # api names begin with capital letter
+        $self->callApi($method, @_);
+    } else {
+        die "cannot find method $method";
+    }
 }
 
 # turn crlf into lf, \uXXXX into its unicode
@@ -41,7 +45,7 @@ sub callApi
 {
     my $self = shift;
     my $callback = ref $_[-1] eq 'CODE' ? pop : undef;
-    my @args = @_;
+    my @args = map { convertUtf8ForMpq $_ } @_;
     if ($callback) {
         $self->app->apiCaller->callSeq
             (\@args,
@@ -156,7 +160,7 @@ sub procGroupName # GetGroupMemberB
     $text = utf8df $text;
     my $json = decode_json $text;
     return if $json->{code} != 0;
-    $group->name($json->{'group_name'});
+    $group->name(html_unescape $json->{'group_name'});
 }
 
 my %groupRole = (0 => "owner", 1 => "admin", 2 => "member");
@@ -196,6 +200,9 @@ sub procGroupInfo # GetGroupMemberA
     }
     # replace
     $group->members(\@members);
+    $group->adminList([map { $_->tencent }
+                       $group->findMember(role => 'admin'),
+                       $group->findMember(role => 'owner')]);
     $group;
 }
 
@@ -244,11 +251,12 @@ sub newDiscuss
     $discuss;
 }
 
-debugOn;
+#debugOn;
 sub new
 {
     my $class = shift;
     my $self = $class->Mojo::EventEmitter::new(@_);
+=comment
     $self->on
         (loggedIn => sub
          {
@@ -311,6 +319,7 @@ sub new
          {
              $self->isLoggedIn(0);
          });
+=cut
     $self;
 }
 

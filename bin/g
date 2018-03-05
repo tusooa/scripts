@@ -17,7 +17,7 @@ my (@files, @regex);
 my $help = 0;
 my $showVersion = 0;
 #print ((fileparse $0)[0]);
-my $commonGrep = ((fileparse $0)[0] ~~ qw/cg gg gc/) ? 1 : 0; #根据文件名判断
+my $commonGrep = ((fileparse $0)[0] ~~ [qw/cg gg gc/]) ? 1 : 0; #根据文件名判断
 #print $commonGrep;
 my $ln = 0;
 my $fn = 'DEFAULT';

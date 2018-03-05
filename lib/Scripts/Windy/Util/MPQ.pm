@@ -28,7 +28,7 @@ msgSource/;
 
 our @EXPORT_OK = qw//;
 use Scripts::Windy::Util::Base;
-our $atPrefix = "[at";
+our $atPrefix = "[";
 our $atSuffix = "]";
 my @privMsg = ('friend-message',
                'group-sess-message',
@@ -67,10 +67,8 @@ sub parseRichText
     my $match = $windy->{_db}->{_match};
     my $text = $msg->msg;
     _utf8_on($text);
-    $text =~ s/\[\@/\[at\@/g;
     my $id = uid(msgReceiver($windy, $msg));
     isAt($windy, $msg) = $text =~ /\Q$atPrefix\E\@$id\Q$atSuffix\E/;
-    say term "is at: ". isAt($windy, $msg);
     msgText($windy, $msg) = $text;
     my ($pre, $post) = ($match->{preMatch}, $match->{postMatch});
     $text =~ $pre; msgPosStart($windy, $msg) = length $&;
@@ -199,9 +197,9 @@ sub msgSenderIsGroupAdmin
     my ($windy, $msg) = @_;
     if (isGroupMsg($windy, $msg)) {
         msgSender($windy, $msg)->isAdminOrOwner;
-    } elsif (isPrivateMsg($windy, $msg)) {
+    } elsif (isPrivateMsg($windy, $msg)) { # person is always their admin
         1;
-    } else {
+    } else { # discuss message
         0;
     }
 }

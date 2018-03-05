@@ -2,7 +2,7 @@
 3519431603	Ans``stop({不是讯息})''
 S	Ask【对我】<出来>
 3519431603	Ans``cmd(start)''
-	Ask【不是私讯而且不是群讯开启】
+	Ask``c(not(is-start))''
 3519431603	Ans【截止:没开启】
 S	Ask【对我或者私讯】<不要><理>(\d+)
 3519431603	Ans``cmd(blackList 1)''

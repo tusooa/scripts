@@ -66,7 +66,7 @@ sub checkReopenLogFile
     if ($self->{date} ne $today) {
         my $oldlog = $self->{log};
         $self->{date} = $today;
-        open $self->{log}, '>>', $configDir.'windy-cache/logs'.$self->{date}.'.txt' or say "Cannot open logf: $!";
+        open $self->{log}, '>>', term $configDir.'windy-cache/logs'.$self->{date}.'.txt' or say "Cannot open logf: $!";
         binmode $self->{log}, ':unix';
         close $oldlog if $oldlog;
     }

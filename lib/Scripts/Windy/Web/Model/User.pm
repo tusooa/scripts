@@ -3,7 +3,13 @@ package Scripts::Windy::Web::Model::User;
 use Scripts::Base;
 use Mojo::Base 'Scripts::Windy::Web::Model::Base';
 
-has [qw/tencent client/];
+has [qw/tencent/];
+
+sub displayname
+{
+    my $self = shift;
+    $self->name;
+}
 
 sub name
 {

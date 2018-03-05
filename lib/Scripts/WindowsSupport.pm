@@ -6,7 +6,7 @@ use Encode qw/encode decode/;
 our $VERSION = 0.1;
 our @ISA = qw/Exporter/;
 our @EXPORT_OK = qw//;
-our @EXPORT = qw/%winFunc isWindows winPath unixPath/;
+our @EXPORT = qw/%winFunc isWindows winPath unixPath setEnv addPathEnv/;
 
 sub isWindows
 {
@@ -25,6 +25,32 @@ sub unixPath
     my $path = shift;
     $path =~ s{\\}{/}g;
     $path;
+}
+
+sub setEnv
+{
+    my ($name, $value) = @_;
+    system 'setx', $name, $value;
+}
+
+sub addPathEnv
+{
+    my ($name, $value) = @_;
+    $value = winPath $value;
+    my $oldValue = $ENV{$name};
+    my @paths = split ';', $oldValue;
+    for (@paths) {
+        s{[/\\]$}{}g;
+        if ((lc winPath $_)
+            eq
+            (lc $value)) {
+            return;
+        }
+    }
+    setEnv $name,
+        length $oldValue
+        ? ($oldValue . ';' . $value)
+        : $value;
 }
 
 our %winFunc = (

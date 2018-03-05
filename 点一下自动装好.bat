@@ -1,4 +1,4 @@
-perl.exe perl-mods.perl
-perl.exe perl-assoc.perl
+rem perl.exe perl-mods.perl
+rem perl.exe perl-assoc.perl
 perl.exe installer.perl --here
-cmd
+cmd.exe

@@ -1,9 +1,11 @@
 #!/usr/bin/env perl
 
-use Win32::Env;
+use lib 'lib';
+use Scripts::WindowsSupport;
 
 system 'assoc', '.perl=PerlScript';
 system 'ftype PerlScript=' . $^X . ' "%1" %*';
 
-InsertPathEnv(ENV_USER, PATHEXT => '.PERL');
-BroadcastEnv;
+addPathEnv PATHEXT => '.PERL';
+
+

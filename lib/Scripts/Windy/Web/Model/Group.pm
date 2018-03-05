@@ -5,9 +5,27 @@ use Scripts::Base;
 use Scripts::Windy::Web::Util;
 use Scripts::Windy::Web::Model::GroupMember;
 
-has [qw/name number ownerTencent myRelationship
-     adminMax memberMax levelName client/];
+has [qw/number ownerTencent myRelationship
+     adminMax memberMax levelName/];
 has members => sub { []; };
+
+sub name
+{
+    my $self = shift;
+    if (@_) {
+        $self->{name} = shift;
+        $self;
+    } else {
+        if (not defined $self->{name}) {
+            $self->client->procGroupName(
+                $self,
+                $self->client->GetGroupMemberB
+                ($self->client->me->tencent,
+                 $self->number));
+        }
+        $self->{name};
+    }
+}
 
 sub findMember
 {
@@ -37,6 +55,20 @@ sub send
          '', # receiver?
          $text,
         );
+}
+
+sub adminList
+{
+    my $self = shift;
+    if (@_) {
+        $self->{adminList} = shift;
+        return $self;
+    } else {
+        return $self->{adminList} //= [split /\n/,
+            $self->client->GetAdminList(
+                $self->client->me->tencent,
+                $self->number)];
+    }
 }
 
 1;

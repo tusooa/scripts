@@ -10,19 +10,19 @@ our @EXPORT = qw/$uid $password $mainGroupId $windy $replyScan @reply/;
 my $file = $accountDir.'windy';
 our $uid;
 our $password;
-if (open my $w, '<', $file) {
+if (open my $w, '<', term $file) {
     chomp ($uid = <$w>);
     chomp ($password = <$w>);
     close $w;
 } else {
-    die term "打不开文件 $file: $!\n";
+    say term "打不开文件 $file: $!\n";
 }
 
 my $mainGroupFile = $configDir.'windy-conf/main-group';
 our $mainGroupId = undef;
 sub loadMainGroupId
 {
-    if (open my $f, '<', $mainGroupFile) {
+    if (open my $f, '<', term $mainGroupFile) {
         chomp($mainGroupId = <$f>);
         close $f;
     }
