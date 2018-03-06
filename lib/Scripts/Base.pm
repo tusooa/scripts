@@ -21,7 +21,6 @@ Scripts::Base - 引用了一些基础库
 
 =cut
 package Scripts::Base;
-use Scripts::scriptFunctions ();
 use feature ();
 use utf8;
 use warnings;
@@ -29,6 +28,7 @@ use Encode qw/_utf8_on _utf8_off/;
 use strict;
 sub import
 {
+    my $self = shift;
     my $pack = (caller 0)[0];
     'feature'->import(':5.12');
     'utf8'->import;
@@ -37,6 +37,13 @@ sub import
     no strict 'refs';
     *{$pack.'::_utf8_on'} = \&_utf8_on;
     *{$pack.'::_utf8_off'} = \&_utf8_off;
-    Scripts::scriptFunctions->export_to_level(1, @_);
+    if (@_ && $_[0] eq '-minimal') {
+        shift;
+        require Scripts::WindowsSupport;
+        Scripts::WindowsSupport->export_to_level(1, $self, @_);
+    } else {
+        require Scripts::scriptFunctions;
+        Scripts::scriptFunctions->export_to_level(1, $self, @_);
+    }
 }
 1;

@@ -39,7 +39,7 @@ $accountDir $scriptsDir $libDir
 $verbose verbose debug confFound
 conf $pathConf $userPathConf $defg $scriptName
 multiArgs time2date final ln term
-formatTime utf8 utf8df randFromTo debugOn debugOff
+formatTime gbk utf8 utf8df randFromTo debugOn debugOff
 isWindows printHelp winPath unixPath/;
 use Scripts::WindowsSupport;
 use Scripts::Path::defConf;
@@ -48,13 +48,10 @@ sub multiArgs;
 sub conf;
 sub confFound;
 sub ln;
-sub term;
 sub final;
 sub debug;
 sub formatTime;
 sub printHelp;
-sub utf8;
-sub utf8df;
 =head1 变量
 
 本节中的变量，如果没有额外说明，都是 our 声明的，被导出的变量。
@@ -235,55 +232,20 @@ sub ln
 
 将 LIST 直接拼接后由 GBK 转化为 UTF-8 编码，并关闭 utf8 flag。返回转化后的字符串。
 =cut
-sub utf8df
-{
-    my $str = join '', @_;
-    my $ret;
-    $ret = eval { decode 'GBK', $str, 1 };
-    $ret = $str if $@;
-    _utf8_off($ret);
-    $ret;
-}
 =head2 utf8 LIST
 
 将 LIST 直接拼接后由 GBK 转化为 UTF-8 编码，并打开 utf8 flag。返回转化后的字符串。
 =cut
-sub utf8
-{
-    my $str = join '', @_;
-    my $ret;
-    $ret = eval { decode 'GBK', $str, 1 };
-    $ret = $str if $@;
-    _utf8_on($ret);
-    $ret;
-}
 =head2 gbk LIST
 
 将 LIST 原样拼接后从 UTF-8 转化为 GBK。
 =cut
-sub gbk
-{
-    my $str = join '', @_;
-    my $ret;
-    eval { $ret = encode 'GBK', decode 'utf-8', $str };
-    eval { $ret = encode 'GBK', $str } if $@;
-    die "error: $@, @_" if $@;
-    $ret;
-}
 =head2 term LIST
 
 在 Windows 下，返回 gbk(LIST)。否则，将 LIST 原样拼接后返回。
 
 在 Windows 下，当涉及终端输出和访问文件，且输出内容或文件名是 UTF-8 编码时，应该总是使用 term 函数。
 =cut
-sub term
-{
-    if (isWindows) {
-        gbk @_;
-    } else {
-        join '', @_;
-    }
-}
 =head2 final
 
 打印一段信息，表示程序执行完满结束。
