@@ -3,7 +3,7 @@ use warnings;
 use Encode qw(_utf8_on _utf8_off encode decode);
 use Cairo;
 use Gtk2;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use 5.012;
 no if $] >= 5.018, warnings => "experimental";
 

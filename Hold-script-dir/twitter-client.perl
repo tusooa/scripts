@@ -2,7 +2,7 @@
 
 use 5.012;
 use Net::Twitter;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 #use Data::Dumper;
 use Scalar::Util qw/blessed/;
 use Gtk2 qw/-init/;

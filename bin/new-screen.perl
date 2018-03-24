@@ -2,7 +2,7 @@
 
 use 5.012;
 use Getopt::Long;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use IPC::Open2;
 
 my $config = conf 'new-screen.perl';

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use POSIX qw/strftime/;
 use 5.012;
 use Getopt::Long;

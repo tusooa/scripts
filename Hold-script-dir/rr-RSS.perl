@@ -2,7 +2,7 @@
 
 use 5.012;
 use XML::Feed;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use LWP::UserAgent;
 use Encode qw/_utf8_on _utf8_off encode_utf8 decode_utf8/;
 #use encoding 'utf8';

@@ -3,7 +3,7 @@ use Exporter;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/windy/;
 our $windy;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Scripts::Windy::Conf::userdb;
 use 5.012;
 no warnings 'experimental';

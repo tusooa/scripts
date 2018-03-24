@@ -16,7 +16,7 @@ if (!@ARGV) { # provide default args
 Mojolicious::Commands->start_app('Scripts::Windy::Web');
 __END__
 use 5.012;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Scripts::Windy::Startup;
 use Time::HiRes qw/time/;
 use Scripts::Windy::Util;

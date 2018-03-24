@@ -6,9 +6,9 @@
 (defvar git-commit-add-face 'git-commit-add-face)
 (defvar git-commit-mode-keywords '())
 (setq git-commit-mode-keywords
-      `(("^# \\(\\+\\+\\+\\|---\\) .*$" . git-commit-filename-face)
-        ("^# \\+.*$" . git-commit-add-face)
-        ("^# -.*$" . git-commit-removal-face)
+      `(("^#\\(\\+\\+\\+\\|---\\) .*$" . git-commit-filename-face)
+        ("^#\\+.*$" . git-commit-add-face)
+        ("^#-.*$" . git-commit-removal-face)
         ("^#.*$" . font-lock-comment-face)))
 (defvar git-commit-mode-hook '())
 (define-derived-mode git-commit-mode fundamental-mode "Commit-Msg"

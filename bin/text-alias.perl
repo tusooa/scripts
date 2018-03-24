@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Getopt::Long qw/:config gnu_getopt/;
 use 5.014;#才能使用s///r
 no if $] >= 5.018, warnings => "experimental";

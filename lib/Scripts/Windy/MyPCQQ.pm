@@ -2,7 +2,7 @@
 package Scripts::Windy::MyPCQQ;
 #use threads;
 use 5.012;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use utf8;
 use Scripts::Windy;
 use Time::HiRes qw/time/;

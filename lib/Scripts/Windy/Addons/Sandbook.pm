@@ -1,6 +1,6 @@
 package Scripts::Windy::Addons::Sandbook;
 
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Encode qw/_utf8_on _utf8_off/;
 use 5.012;
 use utf8;

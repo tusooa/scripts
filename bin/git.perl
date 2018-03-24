@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 use 5.012;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 no warnings 'experimental';
 use POSIX qw/strftime/;
 #use utf8;
@@ -98,7 +98,7 @@ my @status;
 {
     local %ENV = %ENV;
     $ENV{LC_ALL} = 'C';#git变成中文的了,倒不好作了
-    @status = `$git status`;
+    @status = utf8 `$git status`;
 }
 #因为这个脚本 名字叫 git.perl，
 #在闻到死底下，git 和 git.perl是等价的，而且，git.exe 不在 PATH里，就会出现死循环的问题。
@@ -114,18 +114,18 @@ if ($status[-1] =~ /nothing to commit/) {
 
 if ($addAll) {
     system $git, 'add', '-A';
-    @status = `$git status`;
+    @status = utf8 `$git status`;
 }
 my ($fh, $fn) = tempfile;
-my @diff = `$git diff --no-color`;
-my @diffCached = `$git diff --cached --no-color`;
+my @diff = utf8 `$git diff --no-color`;
+my @diffCached = utf8 `$git diff --cached --no-color`;
 my $content = "文件:\n@status"."差异:\n @diff @diffCached";
 $content =~ s/\e\[[0-9]*[A-Za-z]//g;
 $content =~ s/^/#/gm;
 chomp $content;
 #print $content;
 say $fh '';
-print $fh term $content;
+print $fh utf8df $content;
 #print $fh "文件:\n@status";
 #print $fh "差异:\n @diff";
 say term "在提交之前。得先编辑一下提交的信息。";

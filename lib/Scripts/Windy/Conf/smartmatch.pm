@@ -15,7 +15,7 @@ use Scripts::TextAlias::Parser;
 use Scripts::Windy::SmartMatch::TextAlias;
 use Scripts::TextAlias::Expr qw/quoteExpr/;
 use List::Util qw/sum/;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Exporter;
 use utf8;
 use Encode qw/_utf8_on _utf8_off/;

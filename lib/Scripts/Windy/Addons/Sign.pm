@@ -2,7 +2,7 @@ package Scripts::Windy::Addons::Sign;
 
 use 5.012;
 use Exporter;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Scripts::Windy::Util;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/sign loadSign/;

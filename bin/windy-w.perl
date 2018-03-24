@@ -10,7 +10,7 @@ while (1) {
 }
 __END__
 use Gtk2 qw/-init/;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Scripts::Windy::Util;
 
 sub windy;

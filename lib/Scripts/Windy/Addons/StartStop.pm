@@ -1,7 +1,7 @@
 package Scripts::Windy::Addons::StartStop;
 use Exporter;
 use 5.012;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 no warnings 'experimental';
 use Scripts::Windy::Util;
 use List::Util qw/first/;

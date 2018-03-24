@@ -5,7 +5,7 @@ use Cairo;
 use utf8;
 use Encode;
 use Getopt::Long;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use 5.012;
 my $file = 'pango';
 my $w = 1200;

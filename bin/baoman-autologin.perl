@@ -2,7 +2,7 @@
 
 use 5.012;
 use Scripts::RageComics;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 no warnings qw/expermental/;
 my $net = "${scriptsDir}waitForNetwork.perl";
 system { $net } $net;

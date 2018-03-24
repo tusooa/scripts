@@ -5,7 +5,7 @@ use Getopt::Long qw/:config gnu_getopt/;
 use WWW::Mechanize;
 use MIME::Base64;
 use Encode;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 
 my $base64 = 0;
 my @command;

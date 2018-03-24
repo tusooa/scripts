@@ -2,7 +2,7 @@ package Scripts::Windy::Addons::Mood;
 
 use Exporter;
 use 5.012;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Scripts::Windy::Util;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/loadMood addMood curMood moodedSense/;

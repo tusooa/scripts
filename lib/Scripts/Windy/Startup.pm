@@ -1,7 +1,7 @@
 package Scripts::Windy::Startup;
 use Exporter;
 use 5.012;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Scripts::Windy;
 use Scripts::Windy::Util;
 our @ISA =  qw/Exporter/;

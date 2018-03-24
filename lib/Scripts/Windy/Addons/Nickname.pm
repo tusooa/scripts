@@ -1,6 +1,6 @@
 package Scripts::Windy::Addons::Nickname;
 use Scripts::Windy::Util;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 #$Scripts::scriptFunctions::debug = 1;
 use Exporter;
 use 5.012;

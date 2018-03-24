@@ -1,6 +1,6 @@
 #!/usr/bin env perl
 use 5.012;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 my $path = 'C:\Home\Programs\\';
 chdir $path;
 my $perl32 = 'perl32';

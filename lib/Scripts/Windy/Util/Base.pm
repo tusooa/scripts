@@ -2,7 +2,7 @@ package Scripts::Windy::Util::Base;
 
 use 5.012;
 use Exporter;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use utf8;
 
 our @ISA = qw/Exporter/;

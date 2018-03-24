@@ -3,7 +3,7 @@ package Scripts::Windy::SmartMatch::MatchObject;
 use 5.012;
 use Scripts::Windy::Util;
 use Encode qw/_utf8_on _utf8_off/;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use List::Util qw/all/;
 no warnings 'experimental';
 use Scripts::TextAlias::Lambda;

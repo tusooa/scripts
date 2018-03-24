@@ -3,7 +3,7 @@
 use 5.012;
 use Gtk2 '-init';
 use Getopt::Long qw/:config gnu_getopt/;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 # usage: show-png.perl file [x y]
 my $movable = 0;
 my $conf = conf 'show-png.perl';

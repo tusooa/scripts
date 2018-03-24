@@ -2,7 +2,7 @@ package Scripts::Windy::Util::Mojo;
 
 use 5.012;
 use Exporter;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Scripts::Windy::Util::Base;
 use utf8;
 use Encode qw/_utf8_on _utf8_off/;

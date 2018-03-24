@@ -3,7 +3,7 @@ package Scripts::Windy::APICall;
 use 5.012;
 use Mojo::UserAgent;
 use Exporter;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Encode qw/encode decode _utf8_on _utf8_off/;
 use utf8;
 use Mojo::JSON qw/encode_json decode_json from_json to_json/;

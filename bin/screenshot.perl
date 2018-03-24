@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Getopt::Long qw/:config gnu_getopt/;
 use POSIX qw/strftime/;
 use 5.012;

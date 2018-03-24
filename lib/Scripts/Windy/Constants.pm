@@ -1,7 +1,7 @@
 package Scripts::Windy::Constants;
 
 use 5.012;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Exporter;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/%EventRet %Events %EventId %Status/;

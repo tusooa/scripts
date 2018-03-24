@@ -2,7 +2,7 @@
 
 use 5.012;
 use Gtk2 qw/-init/;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use utf8;
 use Encode;
 no if $] >= 5.018, warnings => "experimental";

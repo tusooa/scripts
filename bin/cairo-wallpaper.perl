@@ -2,7 +2,7 @@
 #● convert desktop.jpg -resize 1680x1260 desktop.png (now)
 #● convert desktop.jpg -resize 1400x1050 desktop.png
 use 5.012;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Cairo;
 use warnings;
 use Getopt::Long;

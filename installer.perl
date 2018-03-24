@@ -3,40 +3,18 @@
 use lib 'lib';
 use Getopt::Long;
 use Scripts::Configure;
-use Scripts::WindowsSupport;
-use 5.012;
-use utf8;
+use Scripts::Base -minimal;
 use File::Path qw/make_path/;
 use FindBin;
 use Encode qw/encode decode _utf8_on _utf8_off/;
 use Data::Dumper;
-
-sub utf8df
-{
-    my $str = join '', @_;
-    my $ret;
-    $ret = eval { decode 'GBK', $str };
-    $ret = $str if $@;
-    _utf8_off($ret);
-    $ret;
-}
-
-sub term
-{
-    my $str = join '', @_;
-    my $ret;
-    eval { $ret = encode 'GBK', decode 'utf-8', $str };
-    eval { $ret = encode 'GBK', $str } if $@;
-    die "error: $@, @_" if $@;
-    $ret;
-}
 
 my $prefix = isWindows ? "/usr/local" : "c:/Home/Programs/Scripts";
 my $bindir;
 my $libdir;
 my $datadir;
 my $confdir;
-my $installHere = 0;
+my $installHere = 1;
 #my $target = ENV_USER;
 GetOptions(
     'prefix' => \$prefix,
@@ -68,6 +46,7 @@ my $xdgCache = $ENV{XDG_CACHE_HOME} ? "$ENV{XDG_CACHE_HOME}/" : "$home/.cache/";
 my $cacheDir = utf8df "${xdgCache}Scripts/";
 say "creating config and cache directories...";
 make_path($configDir, $cacheDir);
+make_path($configDir.'windy-conf', $configDir.'windy-cache');
 say "done.";
 
 # paths
@@ -92,6 +71,11 @@ say "processing defconf...";
 my $writeTo = $libdir.'/Scripts/Path/defConf.pm';
 open WRITE, '>', $writeTo or die "Cannot open $writeTo: $!\n";
 binmode WRITE, ':unix';
+say WRITE <<'EOF';
+package Scripts::Path::defConf;
+use base 'Exporter';
+our @EXPORT = qw/$defConfDir/;
+EOF
 print WRITE 'our ';
 print WRITE Data::Dumper->Dump(
     [unixPath $confdir.'/'],

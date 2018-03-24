@@ -1,6 +1,6 @@
 package Scripts::Windy::Event;
 use 5.012;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 #use List::Util qw/first/;
 use Scripts::Windy::Constants;
 no warnings 'experimental';
@@ -50,7 +50,7 @@ sub content
 1;
 
 package Scripts::Windy::Dest;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use 5.012;
 use Scripts::Windy::Constants;
 use Scripts::Windy::Util;

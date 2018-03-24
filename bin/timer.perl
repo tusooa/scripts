@@ -3,7 +3,7 @@
 use 5.012;
 use warnings;
 use Term::ReadKey;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 sub timeFormat;
 ReadMode 3;
 

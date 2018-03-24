@@ -2,7 +2,7 @@
 use 5.012;
 use utf8;
 use Gtk2 qw/-init/;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Encode qw/decode_utf8/;
 sub popM
 {

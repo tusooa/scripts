@@ -2,7 +2,7 @@
 
 use 5.012;
 use utf8;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 say term '正在开始...';
 # this script is only meant to be run under windows
 if ($^O ne 'MSWin32') {

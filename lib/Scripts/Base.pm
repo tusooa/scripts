@@ -26,6 +26,7 @@ use utf8;
 use warnings;
 use Encode qw/_utf8_on _utf8_off/;
 use strict;
+use Scripts::scriptFunctions ();
 sub import
 {
     my $self = shift;
@@ -39,10 +40,10 @@ sub import
     *{$pack.'::_utf8_off'} = \&_utf8_off;
     if (@_ && $_[0] eq '-minimal') {
         shift;
-        require Scripts::WindowsSupport;
-        Scripts::WindowsSupport->export_to_level(1, $self, @_);
+        Scripts::scriptFunctions->export_to_level(1, $self, @_);
     } else {
-        require Scripts::scriptFunctions;
+        require Scripts::Path;
+        Scripts::Path->export_to_level(1, $self, @_);
         Scripts::scriptFunctions->export_to_level(1, $self, @_);
     }
 }

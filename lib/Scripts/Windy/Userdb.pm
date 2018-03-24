@@ -1,7 +1,7 @@
 package Scripts::Windy::Userdb;
 use 5.012;
 no warnings 'experimental';
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Scripts::Windy::Util;
 use Scripts::TextAlias::Parser;
 use Scripts::Windy::SmartMatch::TextAlias;

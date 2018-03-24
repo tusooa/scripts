@@ -9,7 +9,7 @@ use LWP::UserAgent;
 #binmode STDOUT, 'utf-8';
 use Encode qw/encode_utf8 decode_utf8/;
 use HTML::Entities;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Scripts::IRC qw/$ircPassword/;
 use String::CRC32;
 #use URI::Title qw/title/;

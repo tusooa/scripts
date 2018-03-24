@@ -9,7 +9,8 @@ Scripts::scriptFunctions - 一些基础函数
 
 use Scripts::scriptFunctions;
 
-my $conf = conf 'scriptFunctions';
+say term 'mewmewmew';
+final;
 =cut
 
 =head1 概述
@@ -19,136 +20,34 @@ my $conf = conf 'scriptFunctions';
 默认情况下几乎所有的变量和函数都会被导出。
 =cut
 package Scripts::scriptFunctions;
-use Exporter;
+use base 'Exporter';
 use Scripts::Configure qw/$defg/;
-use Scripts::Path;
 use 5.014;
-use feature ();
-use File::Basename qw/basename dirname/;
 no if $] >= 5.018, warnings => "experimental";
 use Encode qw/encode decode _utf8_on _utf8_off/;
 use POSIX qw/strftime/;
 use Pod::Text;
+use Scripts::WindowsSupport;
 
 our $VERSION = 0.1;
-our @ISA = qw/Exporter/;
-our @EXPORT_OK = qw/$appsDir/;
-our @EXPORT = qw/$home
-$configDir $cacheDir $dataDir
-$accountDir $scriptsDir $libDir
-$verbose verbose debug confFound
-conf $pathConf $userPathConf $defg $scriptName
-multiArgs time2date final ln term
-formatTime gbk utf8 utf8df randFromTo debugOn debugOff
-isWindows printHelp winPath unixPath/;
-use Scripts::WindowsSupport;
-use Scripts::Path::defConf;
+our @EXPORT = qw/
+debug $defg
+multiArgs time2date final ln
+formatTime randFromTo debugOn debugOff
+printHelp/;
+push @EXPORT, @Scripts::WindowsSupport::EXPORT;
 sub time2date;
 sub multiArgs;
-sub conf;
-sub confFound;
 sub ln;
 sub final;
 sub debug;
 sub formatTime;
 sub printHelp;
-=head1 变量
+#%debug
+#未被导出。它的键指示了一个模块名，而值表示在这个模块下是否开启调试输出。
+#参见 C<函数> 一节的 C<debugOn> 和 C<debugOff>。
 
-本节中的变量，如果没有额外说明，都是 our 声明的，被导出的变量。
-=cut
-=head2 $home
-
-指明了家目录的位置。支持 Windows 和 Linux。
-=cut
-our $home = isWindows ? $ENV{HOMEDRIVE}.$ENV{HOMEPATH} : $ENV{HOME};
-=head2 $scriptName
-
-设定为正在执行的程序的文件名(C<basename $0>)。
-=cut
-our $scriptName = basename $0;
-=head2 $verbose
-
-这个变量指明了是否显示详细信息。默认值为0。
-=cut
-our $verbose = 0;
-=head2 %debug
-
-未被导出。它的键指示了一个模块名，而值表示在这个模块下是否开启调试输出。
-
-参见 C<函数> 一节的 C<debugOn> 和 C<debugOff>。
-=cut
 our %debug = ();
-# 目录，其名称最后一定要加上/，可能是eexp最差的一个设计了。然而却提升了伊的流动性。
-=head2 my $xdgConf
-
-未被导出。指示了 XDG_CONFIG_HOME 的位置，如果这个环境变量未被设定，则使用家目录下的 .config。
-
-应当总是使用环境变量来指定配置文件的位置，因为在访问配置文件之前，Scripts 不能从别处得知配置文件的存放处。
-
-采用系统编码。
-=cut
-my $xdgConf = $ENV{XDG_CONFIG_HOME} ? "$ENV{XDG_CONFIG_HOME}/" : "$home/.config/";
-=head2 $configDir
-
-指示了 Scripts 的配置存放的地方。在 $xdgConf 下的 Scripts 目录中。
-
-使用 utf8 编码。
-=cut
-our $configDir = utf8df "${xdgConf}Scripts/";
-=head2 my $xdgCache
-
-未被导出。指示了 XDG_CACHE_HOME 的位置，如果这个环境变量未被设定，则使用家目录下的 .cache。
-
-使用系统编码。
-
-应当总是使用环境变量来指定缓存的位置，因为要和 $xdgConf 保持对称。
-=cut
-my $xdgCache = $ENV{XDG_CACHE_HOME} ? "$ENV{XDG_CACHE_HOME}/" : "$home/.cache/";
-=head2 $cacheDir
-
-指示了 Scripts 的缓存存放的地方。在 $xdgCache 下的 Scripts 目录中。
-=cut
-our $cacheDir = utf8df "${xdgCache}Scripts/";
-=head2 $defConfDir
-
-未被导出。指示了默认配置存放的地方。是从 Scripts::Path::defConf 导入的。
-
-Scripts::Path::defConf 是由 defConf.perl 生成的文件。这个程序应该在安装的时候被调用。
-=cut
-# 占位
-=head2 $pathConf, $appsDir(未导出), $dataDir, $accountDir, $scriptsDir, $libDir
-
-$pathConf 是存储配置信息的 Scripts::Configure 对象。
-
-其对应的配置文件名是 C<scriptFunctions> 或者 C<scriptpath>。
-
-C<$--Dir> 变量是从配置文件里读取的。参阅下文 C<配置文件> 一节。
-=cut
-our $pathConf = (confFound 'syspath')
-    // (confFound 'scriptFunctions')
-    // (confFound 'scriptpath')
-    // die "No pathConf found in your config dir.\n"
-         . "Please run installer.perl\n";
-our $appsDir = $pathConf->get('appsDir') // "$home/应用/";
-our $dataDir = $pathConf->get('dataDir') // "${appsDir}数据/";
-our $userPathConf = (confFound 'userpath')
-    // (confFound 'scriptFunctions')
-    // (confFound 'scriptpath')
-    // die "No userPathConf found in your config dir.\n"
-         . "Please create a file named `userpath' in $configDir\n";
-our $accountDir = $userPathConf->get('accountDir') // "$home/个人/账号/";
-our $scriptsDir = $pathConf->get('scriptsDir') // "${appsDir}脚本/";
-our $libDir = $pathConf->get('libDir') // "${appsDir}库/脚本/";
-
-if (my $p = $pathConf->get('addPath')) {
-    debug "Adding path: $p";
-    if ($^O eq 'MSWin32') {
-        $ENV{PATH} = term $p =~ s!/!\\!gr . ';' . $ENV{PATH};
-    } else {
-        $ENV{PATH} = term $p . ':' . $ENV{PATH};
-    }
-    debug "Path now is: $ENV{PATH}";
-}
 =head1 函数
 =cut
 =head2 time2date LIST
@@ -190,44 +89,12 @@ sub multiArgs
     }
     @args;
 }
-=head2 conf CONFIG
-=cut
-=head2 conf
-
-读取配置文件。如果 CONFIG 未被指定，默认为 $scriptName。返回 Scripts::Configure 对象。
-
-配置文件存放在 $configDir 里。
-=cut
-sub conf
-{
-    my $file = shift // $scriptName;
-    Scripts::Configure->new ((term $configDir.$file),
-                             (term $defConfDir.$file));
-}
-=head2 confFound
-    同上。但是若文件未找到则返回 undef。
-=cut
-sub confFound
-{
-    my $file = shift;
-    my $config = conf($file);
-    $config->found ? $config : undef;
-}
 =head2 ln TARGET, NAME
 
 创建从 TARGET 到 NAME 的链接。
 
 在 Windows 系统下，将会使用 Windows 自带的软链接程序。可能需要管理员权限。
 =cut
-sub ln
-{
-    if (isWindows) {
-        $winFunc{ln}->(@_);
-    } else {
-        my ($target, $name) = @_;
-        symlink $target, $name;
-    }
-}
 =head2 utf8df LIST
 
 将 LIST 直接拼接后由 GBK 转化为 UTF-8 编码，并关闭 utf8 flag。返回转化后的字符串。

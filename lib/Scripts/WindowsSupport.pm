@@ -5,7 +5,7 @@ use Encode qw/encode decode _utf8_on _utf8_off/;
 
 our $VERSION = 0.1;
 our @EXPORT_OK = qw//;
-our @EXPORT = qw/%winFunc isWindows winPath unixPath setEnv addPathEnv utf8df utf8 gbk term/;
+our @EXPORT = qw/isWindows winPath unixPath setEnv addPathEnv utf8df utf8 gbk term/;
 
 sub isWindows
 {
@@ -82,33 +82,29 @@ sub gbk
     $ret;
 }
 
-sub term
-{
-    if (isWindows) {
-        gbk @_;
-    } else {
-        join '', @_;
-    }
+sub term;
+if (isWindows) {
+    *term = sub { gbk @_; };
+} else {
+    *term = sub { join '', @_; };
 }
 
-our %winFunc = (
-    ln => sub {
+sub ln;
+if (isWindows) {
+    *ln = sub {
         my ($target, $name) = @_; # use windows-style path
         $target = winPath $target;
-        $name = winPath $target;
+        $name = winPath $name;
         my @args;
         @args = ('/D') if -d $target;
         system 'mklink', @args, $name, $target;
-    },
-    term => sub {
-        my $str = join '', @_;
-        my $ret;
-        eval { $ret = encode 'GBK', decode 'utf-8', $str };
-        eval { $ret = encode 'GBK', $str } if $@;
-        die "error: $@, @_" if $@;
-        $ret;
     }
-    );
+} else {
+    *ln = sub {
+        my ($target, $name) = @_;
+        symlink $target, $name;
+    }
+}
 
 if (isWindows) {
     # 才可以使用终端颜色。

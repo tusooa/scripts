@@ -5,7 +5,7 @@ BEGIN
     $ENV{WINDY_BACKEND} = 'mojo';
 }
 use 5.012;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Mojo::Webqq;
 use Mojo::Util qw/md5_sum/;
 use Time::HiRes qw/time/;

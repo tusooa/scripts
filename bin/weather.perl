@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use 5.012;
 use LWP::Simple qw/get/;
 use Encode qw/encode_utf8 _utf8_on _utf8_off/;

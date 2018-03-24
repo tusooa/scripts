@@ -16,10 +16,15 @@
  '(gnus-thread-operation-ignore-subject t)
  '(indent-tabs-mode nil)
  '(js-indent-level 2)
+ '(magit-git-executable "C:/Home/Programs/Git/bin/git.exe")
  '(max-specpdl-size 3000)
+ '(mouse-wheel-progressive-speed nil)
+ '(mouse-wheel-scroll-amount (quote (1 ((shift) . 1) ((control)))))
  '(org-agenda-files (quote ("~/Private/todo.org")))
  '(org-startup-truncated nil)
- '(package-selected-packages (quote (zlc flycheck-perl6 flycheck perl6-mode)))
+ '(package-selected-packages
+   (quote
+    (markdown-mode zlc flycheck-perl6 flycheck perl6-mode)))
  '(pop3-connection-type (quote ssl))
  '(rainbow-identifiers-face-count 10))
 (custom-set-faces
@@ -34,6 +39,7 @@
  '(erc-nick-default-face ((t (:weight bold))))
  '(erc-pal-face ((t (:foreground "LightBlue" :weight bold))))
  '(font-lock-comment-face ((t (:foreground "#bb66ff" :slant normal))))
+ '(markdown-code-face ((t (:inherit ##))))
  '(rainbow-delimiters-depth-1-face ((t (:foreground "red" :weight bold))))
  '(rainbow-delimiters-depth-2-face ((t (:foreground "orange" :weight bold))))
  '(rainbow-delimiters-depth-3-face ((t (:foreground "yellow" :weight bold))))

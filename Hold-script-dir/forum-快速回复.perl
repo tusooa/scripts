@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 use 5.012;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use WWW::Mechanize;
 use Gtk2 qw/-init/;
 

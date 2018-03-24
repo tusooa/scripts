@@ -1,6 +1,6 @@
 package Scripts::Windy::Addons::BlackList;
 use Exporter;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/addBlackList loadBlackList removeBlackList onBlackList/;
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 use 5.012;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use WWW::Mechanize;
 use utf8; #文件名才可以使用中文.
 use Encode qw/encode_utf8 decode_utf8/;

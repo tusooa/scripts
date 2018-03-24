@@ -3,7 +3,7 @@
 use 5.012;
 
 use Getopt::Long;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 
 my $num;
 GetOptions(

@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 use 5.016;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 #use LWP::UserAgent;
 use LWP::Simple;
 use utf8;

@@ -2,7 +2,7 @@ package Scripts::Windy::SmartMatch;
 
 use 5.012;
 use Exporter;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Scripts::Windy::Util;
 use Scripts::Windy::Expr;
 use Scripts::Windy::SmartMatch::MatchObject;
