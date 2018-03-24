@@ -39,6 +39,8 @@
  '(erc-nick-default-face ((t (:weight bold))))
  '(erc-pal-face ((t (:foreground "LightBlue" :weight bold))))
  '(font-lock-comment-face ((t (:foreground "#bb66ff" :slant normal))))
+ '(git-commit-add-face ((t (:background "sea green" :foreground "snow" :weight normal))))
+ '(git-commit-removal-face ((t (:background "brown" :foreground "snow" :weight normal))))
  '(markdown-code-face ((t (:inherit ##))))
  '(rainbow-delimiters-depth-1-face ((t (:foreground "red" :weight bold))))
  '(rainbow-delimiters-depth-2-face ((t (:foreground "orange" :weight bold))))

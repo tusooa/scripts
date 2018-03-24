@@ -72,7 +72,7 @@ my $git = $conf->get('git-exec');
 $git or $git = isWindows ? 'C:\\Home\\usr\\Git\\bin\\git.exe' : 'git';
 
 for (split /\n/, `$git config -l`) {
-    m/^alias\.(.+)=/ or next;
+    m/^alias\.([^=]++)=/ or next;
     push @gitCommands, $1;
 }
 sub setRealGit
