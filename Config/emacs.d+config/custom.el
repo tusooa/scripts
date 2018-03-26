@@ -24,7 +24,7 @@
  '(org-startup-truncated nil)
  '(package-selected-packages
    (quote
-    (markdown-mode zlc flycheck-perl6 flycheck perl6-mode)))
+    (wc-mode markdown-mode zlc flycheck-perl6 flycheck perl6-mode)))
  '(pop3-connection-type (quote ssl))
  '(rainbow-identifiers-face-count 10))
 (custom-set-faces

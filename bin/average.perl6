@@ -1,0 +1,24 @@
+#!/usr/bin/env perl6
+say 'Input Data:';
+my Rat @data = $*IN.lines>>.Rat;
+@data.perl.say;
+say 'Ins diff:';
+my Rat $ins = $*IN.get.Rat;
+
+my $average = (sum @data) / @data;
+say 'Average: ', $average;
+my $stddiff = sqrt(
+    ((0, |@data).reduce: { $^a + ($^b - $average)**2 })
+    / (@data - 1));
+say 'Std Diff: ', $stddiff;
+my @tn = qw/0 0 8.99 2.48 1.59 1.24 1.05 0.93 0.84 0.77 0.72 0.55 0.47 0.37/;
+my $ua = @tn[@data] * $stddiff;
+say 'Ua = ', $ua;
+my $ub = $ins;
+say 'Ub = ', $ub;
+my $u = sqrt($ua*$ua + $ub*$ub);
+say 'U = ', $u;
+my $ur = $u / $average;
+say 'Ur = ', $ur;
+
+
