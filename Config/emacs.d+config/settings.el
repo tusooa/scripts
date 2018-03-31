@@ -17,11 +17,13 @@
 ; emacs server
 (server-start)
 ;; font
-(set-frame-font "Ubuntu Mono-16")
+(set-frame-font "DejaVu Sans Mono-14")
 (set-fontset-font (frame-parameter nil 'font)
-                  'han (if (eq system-type 'windows-nt)
-                           "Microsoft YaHei" ; 在闻道死底下，DejaVu Sans YuanTi 显示很不好。
-                         "DejaVu Sans YuanTi Mono"))
+                  'han
+                  "DejaVu Sans YuanTi Mono")
+; 这个字体是不是只在闻到死下才有？
+(when (eq system-type 'windows-nt)
+  (emoji-fontset-enable "Segoe UI Emoji"))
 (setq
  ;;禁用启动画面
  inhibit-startup-message t

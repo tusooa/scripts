@@ -24,9 +24,10 @@
  '(org-startup-truncated nil)
  '(package-selected-packages
    (quote
-    (wc-mode markdown-mode zlc flycheck-perl6 flycheck perl6-mode)))
+    (emoji-fontset wc-mode markdown-mode zlc flycheck-perl6 flycheck perl6-mode)))
  '(pop3-connection-type (quote ssl))
- '(rainbow-identifiers-face-count 10))
+ '(rainbow-identifiers-face-count 10)
+ '(wc-modeline-format "(%tww/%tcc)"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
