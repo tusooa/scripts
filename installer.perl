@@ -67,6 +67,7 @@ close FILE;
 say "conf file ready.";
 
 # default config dir
+make_path($libdir.'/Scripts/Path');
 say "processing defconf...";
 my $writeTo = $libdir.'/Scripts/Path/defConf.pm';
 open WRITE, '>', $writeTo or die "Cannot open $writeTo: $!\n";

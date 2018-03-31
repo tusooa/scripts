@@ -26,6 +26,7 @@ pathappend PATH /sbin /usr/sbin
 
 # Tusooa Tree
 pathprepend PATH "$HOME/Apps/bin"
+pathprepend PERL5LIB "$HOME/Apps/lib"
 
 # distro
 pathprepend PATH "$HOME/Apps/bin/$(distro)-aliases"
@@ -42,7 +43,7 @@ pathprepend PATH "$HOME/Install/perl6/bin" "$HOME/Install/perl6/languages/perl6/
 #pathprepend "$HOME/应用/源码/gcode-svn/compile-program"
 
 export PATH
-export PERL6LIB
+export PERL5LIB PERL6LIB
 export PKG_CONFIG_PATH
 export LD_LIBRARY_PATH
 
