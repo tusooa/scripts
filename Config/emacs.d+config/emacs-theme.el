@@ -1,8 +1,13 @@
 (require 'color-theme)
 ;(load-file "~/.emacs.d/themes/color-theme-blackboard.el")
 (color-theme-initialize)
-(load-file "~/.emacs.d/themes/darkmate.el")
-(color-theme-darkmate)
+(require 'powerline)
+(require 'moe-theme)
+(moe-theme-set-color 'magenta)
+(moe-dark)
+(powerline-moe-theme)
+;(load-file "~/.emacs.d/themes/darkmate.el")
+;(color-theme-darkmate)
 ; 光标不闪烁
 (blink-cursor-mode -1)
 ; 光标黄色

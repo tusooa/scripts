@@ -24,7 +24,7 @@
  '(org-startup-truncated nil)
  '(package-selected-packages
    (quote
-    (emoji-fontset wc-mode markdown-mode zlc flycheck-perl6 flycheck perl6-mode)))
+    (powerline moe-theme emoji-fontset wc-mode markdown-mode zlc flycheck-perl6 flycheck perl6-mode)))
  '(pop3-connection-type (quote ssl))
  '(rainbow-identifiers-face-count 10)
  '(wc-modeline-format "(%tww/%tcc)"))
