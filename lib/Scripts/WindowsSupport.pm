@@ -5,7 +5,7 @@ use Encode qw/encode decode _utf8_on _utf8_off/;
 
 our $VERSION = 0.1;
 our @EXPORT_OK = qw//;
-our @EXPORT = qw/isWindows winPath unixPath setEnv addPathEnv utf8df utf8 gbk term/;
+our @EXPORT = qw/isWindows winPath unixPath setEnv addPathEnv utf8df utf8 gbk term ln/;
 
 sub isWindows
 {

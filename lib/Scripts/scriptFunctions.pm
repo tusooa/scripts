@@ -38,7 +38,7 @@ printHelp/;
 push @EXPORT, @Scripts::WindowsSupport::EXPORT;
 sub time2date;
 sub multiArgs;
-sub ln;
+#sub ln;
 sub final;
 sub debug;
 sub formatTime;
