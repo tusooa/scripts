@@ -118,9 +118,9 @@ Default is 5 minutes."
   :type 'list
   :group 'erc-nick-notify)
 
-(defcustom erc-nick-notify-cmd "notice-msg" ;changed
+(defcustom erc-nick-notify-cmd '("notice-msg") ;changed
   "The command that use for notify."
-  :type 'string
+  :type 'list
   :group 'erc-nick-notify)
 
 (defcustom erc-nick-notify-icon "info"
@@ -196,23 +196,31 @@ This function should be in the insert-post-hook."
                   (concat "<" (match-string-no-properties 3)
                               ">\n"))
                     (when (> (length (match-string-no-properties 5)) 0) ; /me 信息包含的send nick
-(concat "<* " (match-string-no-properties 5)
+                      (concat "<* " (match-string-no-properties 5)
                               ">\n"))
                     (when (> (length (match-string-no-properties 6)) 0) ; /notice 信息包含的send nick
-(concat "-" (match-string-no-properties 6)
+                      (concat "-" (match-string-no-properties 6)
                               "-\n"))
                     (match-string-no-properties 8))))
           (setq erc-nick-notify-buffer (buffer-name))
-          (start-process
-           "erc-nick-notify" nil erc-nick-notify-cmd
+          (let ((erc-nick-notify-command-sequence
+                (append
+;                 (if (stringp erc-nick-notify-cmd)
+;                     (list erc-nick-notify-cmd)
+                   erc-nick-notify-cmd;)
+                 (list (if (boundp 'msg)
+                     msg "Empty message")))))
+            (apply 'start-process "erc-nick-notify" nil erc-nick-notify-command-sequence))
+;          (start-process
+;           "erc-nick-notify" nil erc-nick-notify-cmd
 ;           "-i" erc-nick-notify-icon
 ;           "-t" (int-to-string
 ;                 erc-nick-notify-timeout)
 ;           "-u" erc-nick-notify-urgency
 ;           "-c" erc-nick-notify-category
 ;           "--" erc-nick-notify-buffer
-           (if (boundp 'msg)
-               msg ""))
+;           (if (boundp 'msg)
+;               msg ""))
 ;          (shell-command
 ;           (concat erc-nick-notify-cmd
 ;                  " -i " erc-nick-notify-icon

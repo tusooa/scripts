@@ -119,7 +119,7 @@ color (#rrrrggggbbbb)."
     (let (bounds word color new-nick-face)
       (goto-char (point-min))
       (while (re-search-forward "\\w+" nil t)
-        (setq bounds (bounds-of-thing-at-point 'word))
+        (setq bounds (cons (match-beginning 0) (match-end 0)));(bounds-of-thing-at-point 'word))
         (setq word (buffer-substring-no-properties
                     (car bounds) (cdr bounds)))
         (when (erc-get-server-user word)

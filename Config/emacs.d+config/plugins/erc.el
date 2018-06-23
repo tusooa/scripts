@@ -44,6 +44,8 @@
  (erc-update-modules)
 )
 (require 'erc-nick-notify)
+(if (eq system-type 'windows-nt)
+    (setq erc-nick-notify-cmd '("perl" "-S" "notice-msg.perl" "-u")))
 
 (defun erc-init ()
   (interactive)
