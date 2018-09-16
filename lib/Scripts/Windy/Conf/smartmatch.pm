@@ -181,16 +181,16 @@ $subs = {
     fromGroup => sub {
         my ($self, $windy, $msg) = @_;
         isGroupMsg($windy, $msg)
-            and isStartOn(msgGroupId($windy, $msg));
+            and isStartOn(msgGroupId($windy, $msg), $windy, $msg);
     },
     isStart => sub {
         my ($self, $windy, $msg) = @_;
-        isStartOn(msgSource($windy, $msg));
+        isStartOn(msgSource($windy, $msg), $windy, $msg);
     },
     callerName => sub {
         my $self = shift;
         my ($windy, $msg) = @_;
-        if (my $uid = isStartOn(msgSource($windy, $msg))) {
+        if (my $uid = isStartOn(msgSource($windy, $msg)), $windy, $msg) {
             if ($uid != -1) {
                 userNickname($self,
                              findUserInGroup($windy, $uid, msgGroup($windy, $msg)));

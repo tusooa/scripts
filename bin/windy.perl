@@ -23,7 +23,7 @@ my $t = Mojo::Webqq->new(
     pwd => Digest::MD5::md5_hex($password),
     login_type => 'login',
     tmpdir => $configDir.'windy-cache/',
-    qrcode_path => $Scripts::scriptFunctions::home.'/OneDrive/windy.png',
+    qrcode_path => $home.'/OneDrive/windy.png',
     log_level => $debug ? 'debug' : 'info',
     group_member_use_fullcard => 1,
     model_ext => 1,
@@ -100,7 +100,7 @@ sub onReceive
 }
 $t->interval(60, \&saveLast);
 #$SIG{INT} = sub { saveLast;$t->stop(['auto']); };
-$t->timer(2400, sub { saveLast; $t->clean_qrcode; $t->clean_pid; exit 1; });
+#$t->timer(2400, sub { saveLast; $t->clean_qrcode; $t->clean_pid; exit 1; });
 
 $t->on(receive_message => \&onReceive);
 

@@ -12,7 +12,7 @@ my %startGroup = ();
 my $default;
 sub loadConf
 {
-    $default = $windyConf->get('startstop', 'default') // -1;
+    $default = Scripts::Windy::Conf::smartmatch::sr($windyConf->get('startstop', 'default') // -1);
 }
 
 my $file = $configDir.'windy-conf/channels';
@@ -49,7 +49,7 @@ sub startOn
     my $groupId = shift;
     my $windy = shift;
     my $msg = shift;
-    if (not isStartOn($groupId)) {
+    if (not isStartOn($groupId, $windy, $msg)) {
         my $uid;
         $uid = ($windy and $msg) ? uid(msgSender($windy, $msg)) : -1;
         $startGroup{$groupId} = $uid;
@@ -62,8 +62,8 @@ sub startOn
 
 sub stopOn
 {
-    my $groupId = shift;
-    if (isStartOn($groupId)) {
+    my ($groupId, $windy, $msg) = @_;
+    if (isStartOn($groupId, $windy, $msg)) {
         $startGroup{$groupId} = 0;
         saveGroups;
         $groupId;
@@ -74,8 +74,8 @@ sub stopOn
 
 sub isStartOn
 {
-    my $groupId = shift;
-    $startGroup{$groupId} // $default;
+    my ($groupId, $windy, $msg) = @_;
+    $startGroup{$groupId} // $default->run($windy, $msg);
 }
 
 1;
