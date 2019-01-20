@@ -34,3 +34,18 @@
 
 (add-hook 'org-mode-hook 'thistusooa-org-mode-hook)
 
+
+;; Save the org-agenda for display with conky
+(defadvice org-save-all-org-buffers (after saveorgagenda activate)
+  "save this output to my todo file"
+  ;(get-buffer-create "todo")
+  ;(with-current-buffer "todo"
+  ;  (set-buffer-modified-p nil))
+  (org-agenda-write (if (eq system-type 'windows-nt) "C:\\Home\\Documents\\todo" "~/todo"))
+  ;(kill-buffer "todo")
+  
+  (message "wrote todo file"))
+
+(setq org-agenda-files (if (eq system-type 'windows-nt)
+                           '("c:/Home/Documents/todo.org")
+                         '("~/Private/todo.org")))

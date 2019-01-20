@@ -1,13 +1,11 @@
 package Scripts::ToDo;
 
 #use DateTime;
-use Scripts::scriptFunctions;
-use 5.012;
+use Scripts::Base;
 use List::Util qw/max/;
 use Encode;
 use Term::ReadKey;
 use Scripts::TimeDay;
-no if $] >= 5.018, warnings => "experimental";
 our $showAll = 0;
 =todo file style
 name<tab>emergency<tab>done?<tab>due<tab>tag1 tag2...

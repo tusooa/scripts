@@ -6,7 +6,6 @@
         php-mode
         highlight-tail
        ;gentoo-syntax
-        linum
         tramp
         colorize
         rainbow-identifiers
@@ -14,8 +13,11 @@
         text-alias-mode
         git-commit-mode))
 
-; linum
-(global-linum-mode t)
+; line numbers
+(if (> emacs-major-version 25)
+    (global-display-line-numbers-mode t)
+  (require 'linum)
+  (global-linum-mode t))
 ;这是干什么的啊
 (defun no-linum (&rest ignore)
   (when linum-mode (linum-mode 0)))
