@@ -27,7 +27,7 @@ my $showColor = 1;
 my $ignoreCase = 0;
 my $fixed = 0;
 my $invert = 0;
-my $autoCase = 0;
+my $autoCase = 1;
 
 GetOptions (
     'help' => \$help,
@@ -75,6 +75,16 @@ qq{$scriptName $version, 简写 g.
     --end                       结束多参数选项(如：-f)
     -c, --remove-comment        去除行首注释
     -s, --comment-startswith='' 设置注释以什么开头(默认是'#')
+    -i, --ignore-case           Ignore case
+    -I, --no-ignore-case        Don't ignore case
+    -a, --autocase              Ignore case for expressions without capital letters (default)
+    -A, --no-autocase           Disable autocase
+    -v, --invert                Display only lines that does not match
+    -V, --no-invert             Disable invert
+    -F, --fixed                 Don't use regex, just plain text matching
+    -r, --no-fixed              Disable fixed
+    --color                     Show colors
+    -C, --no-color              Do not show colors
 高级玩法
     g -lnf files ... # 连接这些文件并显示文件名和行号
                      # 不是cgrep模式的话，正则可以省略的。
@@ -116,17 +126,22 @@ if ($removeComment) { # eexpress https://github.com/eexpress/eexp-bin/blob/maste
 if ($fixed) {
     @regex = map quotemeta $_, @regex;
 }
-if ($ignoreCase) {
-    @regex = map qr/$_/i, @regex;
+if ($autoCase) {
+    for (@regex) {
+        if (! /[A-Z]/) { # ignore case if there is no capital letter
+            $_ = qr/$_/i;
+        } else {
+            $_ = qr/$_/;
+        }
+    }
 } else {
-    @regex = map qr/$_/, @regex;
+    if ($ignoreCase) {
+        @regex = map qr/$_/i, @regex;
+    } else {
+        @regex = map qr/$_/, @regex;
+    }
 }
 # TODO
-#if ($autoCase) {
-#    for ('a'...'z') {
-#        @regex = map 
-#    }
-#}
 my @col;
 my $nocol;
 my $filenameColor;
