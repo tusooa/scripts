@@ -20,3 +20,4 @@
 (add-to-load-path (directory-files "~/.emacs.d/lisp-others/" t "^[^\\.]"))
 (mapc 'load (directory-files "~/.emacs.d/config/" t "^[a-zA-Z0-9].*.el$"))
 
+(put 'downcase-region 'disabled nil)

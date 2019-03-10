@@ -32,6 +32,7 @@ alias ']'=''
 alias 'tlcr:'=':' #这一行都是提示符.
 alias p5='perl -M5.012'
 alias onlybird='ssh -D7070 -p8888 -Nt onlybird@ssh2015.unssh.com'
+alias get-contributors-list='git log --pretty=email G "^From:" | perl -e '\''while (<>) {chomp; $_{$_}++ }; print $_, ": ", $_{$_}, "\n" for sort { $_{$b} <=> $_{$a} } keys %_'\'
 
 that()
 {

@@ -1,10 +1,13 @@
 (add-to-list 'load-path "/usr/share/emacs/site-lisp/erc/")
 (require 'erc)
 
-; disable linum mode in erc
-(add-hook 'erc-mode-hook 'no-linum)
-(add-hook 'erc-hook 'no-linum)
-(add-hook 'erc-insert-pre-hook 'no-linum)
+;; disable linum mode in erc
+(if (> emacs-major-version 25)
+    t
+  (add-hook 'erc-mode-hook 'no-linum)
+  (add-hook 'erc-hook 'no-linum)
+  (add-hook 'erc-insert-pre-hook 'no-linum)
+  (add-hook 'erc-send-pre-hook 'no-linum))
 (setq erc-default-coding-system '(utf-8 . utf-8)
 ;       erc-enable-logging nil
 ;       erc-ignore-list (quote ("^ls\\(\\s+-[aA]\\)?$" "^while\\s+:\\s*;\\s*do\\s+ls\\(\\s+-[aA]\\)?\\s*;\\s*done$"))
@@ -36,7 +39,7 @@
   (setq str (replace-regexp-in-string "\n+$" "" msg))
 )
 (add-hook 'erc-send-pre-hook 'erc-remove-trailing-newlines)
-(add-hook 'erc-send-pre-hook 'no-linum)
+
 ; highlight nicknames
 (and
  (require 'erc-highlight-nicknames)

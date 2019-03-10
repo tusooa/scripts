@@ -16,13 +16,13 @@
  '(gnus-thread-operation-ignore-subject t)
  '(indent-tabs-mode nil)
  '(ispell-extra-args (quote ("--lang=en_CA")))
- '(ispell-program-name "c:/Home/Programs/Aspell/bin/aspell.exe")
+ '(ispell-program-name "C:/Home/Programs/Aspell/bin/aspell.exe")
  '(js-indent-level 2)
  '(magit-git-executable "C:/Home/Programs/Git/bin/git.exe")
  '(max-specpdl-size 3000)
  '(mouse-wheel-progressive-speed nil)
  '(mouse-wheel-scroll-amount (quote (1 ((shift) . 1) ((control)))))
-  '(org-startup-truncated nil)
+ '(org-startup-truncated nil)
  '(package-selected-packages
    (quote
     (egg mew pandoc-mode powerline moe-theme emoji-fontset wc-mode markdown-mode zlc flycheck-perl6 flycheck perl6-mode)))
