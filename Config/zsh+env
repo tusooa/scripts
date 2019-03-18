@@ -7,12 +7,13 @@ export XMODIFIERS="@im=fcitx"
 export QT_IM_MODULE=fcitx GTK_IM_MODULE=fcitx
 export XIM=fcitx XIM_PROGRAM=fcitx
 
+# do not set language for ourselves
 # LANG
-if [[ $TERM = linux ]] ; then
-    LANG=en_US.UTF-8
-else
-    LANG=zh_CN.UTF-8
-fi
+#if [[ $TERM = linux ]] ; then
+#    LANG=en_US.UTF-8
+#else
+#    LANG=zh_CN.UTF-8
+#fi
 # 解决了如下bug
 # ssh -pXXX tusooa@tusooa-laptop
 # 时ls显问号的问题
