@@ -9,19 +9,19 @@ export PATH="$HOME/Apps/bin:$PATH"
 
 xset -b
 xrdb ~/.Xresource
-xbacklight -set 45
+#xbacklight -set 45
 #/usr/libexec/polkit-gnome-authentication-agent-1 &
 #xbindkeys&
 #trayer --widthtype pixel --width 200 --edge bottom --align left --transparent true &
 #nm-applet &
 menu2ctrl.bash &
-罗技鼠标-m525.bash &
+#罗技鼠标-m525.bash &
 fcitx &
-stardict &
+#stardict &
 #xcompmgr -CF &
-urxvt -e tmux &
-tray-volume.perl &
-(waitForNetwork.perl && cairo-wallpaper.perl )&
+#urxvt -e tmux &
+#tray-volume.perl &
+#(waitForNetwork.perl && cairo-wallpaper.perl )&
 #plasma-desktop
 #sleep 2
 #FvwmCommand 'Next (env) WarpToWindow 20 110'
@@ -30,7 +30,7 @@ tray-volume.perl &
 #sleep 2
 #FvwmCommand "All (urxvt) Maximize"
 #sleep 3
-conky &
+#conky &
 #mlnet &
 #switch-roll.bash default &
 

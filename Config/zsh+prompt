@@ -78,7 +78,9 @@ git_branch_precmd ()
 # Fish-style 的截短路径
 prompt_pwd ()
 {
-    local ppwd="${^${(%):-%~}}" restwidth=$[$COLUMNS - 60]
+    # tlcr: 128 2019,xx,xx(x) xx,xx,xx `user`@`hostname` `dir` git-branch
+    local usedwidth=$[ 9 + 14 + 9 + ${#USER} + 4 + ${#HOST} + ${#__CURRENT_GIT_BRANCH} + 2 ]
+    local ppwd="${^${(%):-%~}}" restwidth=$[$COLUMNS - $usedwidth]
     if [ ${#ppwd} -gt $restwidth ] ; then
         local bfpwd="$(echo "$ppwd" | \egrep -o '^~\w+/')"
         ppwd="${ppwd#$bfpwd}"
@@ -91,6 +93,12 @@ prompt_pwd ()
 
 setopt promptsubst
 _DATE_NOW="${_BLUE}%D{%Y,%-m,%-d (%u)} ${_MAGENTA}%D{%H,%M,%S}"
+if [[ $UID -eq 0 ]]; then
+    _USER="${_RED}$USER${NOCOL}"
+else
+    _USER="${_GREEN}$USER${NOCOL}"
+fi
+
 _HOSTNAME="${_GREEN}%m${NOCOL}"
 _TLCR="%(?!${_GREEN}tlcr: \$?${NOCOL}!${_RED}tlcr: \$?${NOCOL})"
 _JOBS="%(1j!%U${_YELLOW}jobs: %j${NOCOL}%u !)" #!${_GREEN}jobs: %j${NOCOL})"
@@ -110,7 +118,7 @@ zle_highlight=(
     default:bold,fg=$__color # 输入
 )
 # 提示符和输入的命令同一颜色
-PROMPT="${NOCOL}$_TLCR $_JOBS$_DATE_NOW $_HOSTNAME $_CYAN\$_prompt_pwd$NOCOL \$(get_prompt_git)
+PROMPT="${NOCOL}$_TLCR $_JOBS$_DATE_NOW ${_USER}@$_HOSTNAME $_CYAN\$_prompt_pwd$NOCOL \$(get_prompt_git)
 \${_$__COLOR}]$NOCOL "
 PROMPT2="${RED}%_\${_$__COLOR}>$NOCOL "
 unset __colors __COLORS __num __color __COLOR
@@ -122,8 +130,8 @@ SPROMPT="${_YELLOW}修正${NOCOL}:${_RED}%R${NOCOL}->${_GREEN}%r${NOCOL}:[${_CYA
 export SUDO_PROMPT=$'sudo: Password for \e[1;33m%p\e[0m:'
 
 preexec_functions=()
-precmd_functions=(prompt_pwd git_branch_precmd)
-chpwd_functions=(prompt_pwd git_branch_chpwd)
+precmd_functions=(git_branch_precmd prompt_pwd)
+chpwd_functions=(git_branch_chpwd prompt_pwd)
 
 screentitle ()
 {
