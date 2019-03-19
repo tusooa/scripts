@@ -24,9 +24,11 @@ xrdb ~/.Xresource
 #罗技鼠标-m525.bash &
 echo "fcitx"
 fcitx &
-sleep 5
-echo "menu2ctrl"
-menu2ctrl.bash
+setxkbmap -option ctrl:menu_rctrl -option ctrl:nocaps
+
+#sleep 5
+#echo "menu2ctrl"
+#menu2ctrl.bash
 
 #stardict &
 #xcompmgr -CF &
