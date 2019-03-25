@@ -1,17 +1,21 @@
+#!/bin/bash
 # -*- shell-script -*-
 
 # Jump to X11 env
 
 #eval "$(dbus-launch --sh-syntax --exit-with-session)"
 
-export LANG=zh_CN.UTF-8 TERM=xterm LC_ALL= XIM=fcitx XIM_PROGRAM=fcitx
-export LC_CTYPE=zh_CN.UTF-8
+#export LANG=zh_CN.UTF-8 TERM=xterm LC_ALL=
+export XIM=fcitx XIM_PROGRAM=fcitx
+#export LC_CTYPE=zh_CN.UTF-8
 export XMODIFIERS="@im=fcitx"
 export QT_IM_MODULE=fcitx GTK_IM_MODULE=fcitx
 export PATH="$HOME/Apps/bin:$HOME/Install/perl6/bin:$HOME/Install/perl6/languages/perl6/site/bin:$PATH"
-xrdb ~/.Xresource
+#xrdb ~/.Xresource
+#~/.fvwm/autostart.bash
 #exec /usr/bin/fvwm
-exec /usr/bin/startkde
+#exec /usr/bin/startkde
 #exec /usr/bin/mate-session
-#exec /usr/bin/gnome-session -a "$HOME/.config/autostart/"
-
+exec /usr/bin/gnome-session -a "$HOME/.config/autostart/"
+#exec gnome-shell
+#exec /usr/bin/gnome-session

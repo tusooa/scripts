@@ -18,7 +18,7 @@ if (@ARGV) {
 }
 if (@del) {
     say "\e[1;32m=> Moving files to trash...\e[0m";
-    system 'kioclient', 'move', @del, 'trash:/';
+    system 'kioclient5', 'move', @del, 'trash:/';
     final;
 } else {
     say "没有文件需要删除";

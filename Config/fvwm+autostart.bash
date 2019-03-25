@@ -1,27 +1,40 @@
 #!/bin/bash
 
 cd
+set -x
+exec >> ~/.autostart.log
+exec 2>&1
+date
+echo "autostart starting"
 export LANG=zh_CN.UTF-8 TERM=xterm LC_ALL= XIM=fcitx XIM_PROGRAM=fcitx
 export LC_CTYPE=zh_CN.UTF-8
 export XMODIFIERS="@im=fcitx"
 export QT_IM_MODULE=fcitx GTK_IM_MODULE=fcitx
 export PATH="$HOME/Apps/bin:$PATH"
 
+echo "xset -b"
 xset -b
+echo "xrdb"
 xrdb ~/.Xresource
-xbacklight -set 45
+#xbacklight -set 45
 #/usr/libexec/polkit-gnome-authentication-agent-1 &
 #xbindkeys&
 #trayer --widthtype pixel --width 200 --edge bottom --align left --transparent true &
 #nm-applet &
-menu2ctrl.bash &
-罗技鼠标-m525.bash &
+#罗技鼠标-m525.bash &
+echo "fcitx"
 fcitx &
-stardict &
+setxkbmap -option ctrl:menu_rctrl -option ctrl:nocaps
+
+#sleep 5
+#echo "menu2ctrl"
+#menu2ctrl.bash
+
+#stardict &
 #xcompmgr -CF &
-urxvt -e tmux &
-tray-volume.perl &
-(waitForNetwork.perl && cairo-wallpaper.perl )&
+#urxvt -e tmux &
+#tray-volume.perl &
+#(waitForNetwork.perl && cairo-wallpaper.perl )&
 #plasma-desktop
 #sleep 2
 #FvwmCommand 'Next (env) WarpToWindow 20 110'
@@ -30,7 +43,7 @@ tray-volume.perl &
 #sleep 2
 #FvwmCommand "All (urxvt) Maximize"
 #sleep 3
-conky &
+#conky &
 #mlnet &
 #switch-roll.bash default &
 
