@@ -5,8 +5,24 @@
 ;; just comment it out by adding a semicolon to the start of the line.
 ;; You may delete these explanatory comments.
 (require 'package)
-(setq package-archives '(("gnu"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
-                         ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")))
+(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
+                    (not (gnutls-available-p))))
+       (proto (if no-ssl "http" "https")))
+  (when no-ssl
+    (warn "\
+Your version of Emacs does not support SSL connections,
+which is unsafe because it allows man-in-the-middle attacks.
+There are two things you can do about this warning:
+1. Install an Emacs version that does support SSL and be safe.
+2. Remove this warning from your init file so you won't see it again."))
+  ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
+  (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
+  ;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
+  (when (< emacs-major-version 24)
+    ;; For important compatibility libraries like cl-lib
+    (add-to-list 'package-archives (cons "gnu" (concat proto "://elpa.gnu.org/packages/")))))
+;(setq package-archives '(("gnu"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
+;                         ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")))
 (package-initialize)
 
 (defun add-to-load-path (files)
@@ -16,8 +32,20 @@
             (and (file-directory-p f)
                  (add-to-list 'load-path f))))
         files))
-(add-to-load-path '("~/.emacs.d/load/" "~/.emacs.d/lisp-others/"))
-(add-to-load-path (directory-files "~/.emacs.d/lisp-others/" t "^[^\\.]"))
-(mapc 'load (directory-files "~/.emacs.d/config/" t "^[a-zA-Z0-9].*.el$"))
 
 (put 'downcase-region 'disabled nil)
+
+(add-to-load-path '("~/.emacs.d/load/" "~/.emacs.d/lisp-others/"))
+(add-to-load-path (directory-files "~/.emacs.d/lisp-others/" t "^[^\\.]"))
+
+(setq spacemacs-start-directory "~/.emacs.d/spacemacs/")
+(load-file (concat spacemacs-start-directory "init.el"))
+
+
+;(mapc 'load (directory-files "~/.emacs.d/config/" t "^[a-zA-Z0-9].*.el$"))
+
+;(load "~/.emacs.d/config/0-base-functions.el")
+;(load "~/.emacs.d/config/settings.el")
+;(load "~/.emacs.d/config/keybindings.el")
+;(load "~/.emacs.d/config/emacs-theme.el")
+
