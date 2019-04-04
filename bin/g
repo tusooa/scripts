@@ -214,6 +214,7 @@ for my $file (@files) {
         print "${lineNumColor}${.}:$nocol" if $ln;
         print;
     }
+    close $fh;
 }
 #● g -clns'#|$' -f g |wc -l
 #128

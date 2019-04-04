@@ -78,6 +78,7 @@
 
 ;; I don't like undo-tree-mode, since it forces `C-x u' to
 ;; `undo-tree-visualize', which is undesirable.
+(global-set-key (kbd "C-_") 'undo-tree-undo)
 (global-set-key (kbd "C-x u") 'undo-tree-undo)
 (global-set-key (kbd "C-x .") 'undo-tree-redo)
 (global-set-key (kbd "C-x C-t") 'undo-tree-visualize)
@@ -90,21 +91,32 @@
   (global-linum-mode t))
 
 ;; colors like red or #ff0000
+;; replaced by `rainbow-mode'
 ;; why it's not working?
-(require 'colorize)
-(spacemacs|diminish colorize-mode " c" " c")
-(global-colorize-mode)
+;;(require 'colorize)
+;;(spacemacs|diminish colorize-mode " c" " c")
+;;(global-colorize-mode)
+(require 'rainbow-mode)
+(defun turn-on-rainbow-mode ()
+  (unless (string= major-mode "erc-mode")
+    (rainbow-mode 1)))
+(define-globalized-minor-mode global-rainbow-mode rainbow-mode turn-on-rainbow-mode)
+(global-rainbow-mode 1)
 
 ;;; give variable names different colors
 (require 'rainbow-identifiers)
 (defun tusooa-prog-mode-hook () (rainbow-identifiers-mode t))
 (add-hook 'prog-mode-hook 'tusooa-prog-mode-hook)
+;;(require 'color-identifiers-mode)
+;;(defun tusooa-prog-mode-hook () (color-identifiers-mode 1))
+;;(add-hook 'prog-mode-hook 'tusooa-prog-mode-hook)
+
 (use-package pandoc-mode)
 
 ;; -)
 (require 'moe-theme)
 (moe-theme-set-color 'magenta)
 (moe-dark)
-(powerline-moe-theme)
+;; (powerline-moe-theme)
 
 (use-package wc-mode)
