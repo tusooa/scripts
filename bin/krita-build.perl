@@ -24,7 +24,7 @@ You should have received a copy of the Perl interpreter from MSYS
 
 Invoke the script with:
 
-    <mingwDir>/usr/bin/perl.exe <path-to>/krita-build.perl ARGS
+    <msysDir>/usr/bin/perl.exe <path-to>/krita-build.perl ARGS
 
 In the following lines I will use `<krita-build>` to denote `<mingwDir>/usr/bin/perl.exe <path-to>/krita-build.perl`.
 
