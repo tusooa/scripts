@@ -6,6 +6,8 @@
 
 Install MinGW & MSYS
 
+Install CMake, either through `pacman -S mingw-w64-x86_64-cmake` or by yourself (you need to manually add it to PATH)
+
 Install Python 3.6
 
 Download and unpack krita-deps.zip
