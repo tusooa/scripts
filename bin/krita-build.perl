@@ -58,6 +58,13 @@ sub winPath
     $path;
 }
 
+sub winPathInStr
+{
+    my $path = shift;
+    $path =~ s{/}{\\\\}g;
+    $path;
+}
+
 sub unixPath
 {
     my $path = shift;
@@ -102,11 +109,16 @@ if ($action eq 'cmake') {
     # from build.cmd
     system 'cmake', $kritaSrcDir,
         "-DCMAKE_INSTALL_PREFIX=$kritaInstallDir",
-        qw@-DBUILD_TESTING=OFF
-        -DHAVE_MEMORY_LEAK_TRACKER=OFF
-        -DFOUNDATION_BUILD=ON
-        -DUSE_QT_TABLET_WINDOWS=ON
-        -Wno-dev@,
+        '-DBoost_DEBUG=OFF',
+        "-DBOOST_INCLUDEDIR=$depsDir/include",
+        "-DBOOST_ROOT=$depsDir",
+        "-DBOOST_LIBRARYDIR=$depsDir/lib",
+        "-DCMAKE_PREFIX_PATH=$depsDir",
+        '-DBUILD_TESTING=OFF',
+        '-DHAVE_MEMORY_LEAK_TRACKER=OFF',
+        '-DFOUNDATION_BUILD=ON',
+        '-DUSE_QT_TABLET_WINDOWS=ON',
+        '-Wno-dev',
         '-G', "MinGW Makefiles",
         '-DCMAKE_BUILD_TYPE=RelWithDebInfo';
 } elsif ($action eq 'build') {
@@ -114,16 +126,31 @@ if ($action eq 'cmake') {
 } elsif ($action eq 'install') {
     system 'mingw32-make', "-j$jobs", 'install';
 } elsif ($action eq 'prepare') {
+    my $origDepsDir = 'C:/Packaging/KritaWS/deps-install';
+    my $escapedOrigDepsDir = winPathInStr $origDepsDir;
     # change the hardcoded path in VcConfig
     my $vcConfig = "$depsDir/lib/cmake/Vc/VcConfig.cmake";
     open VCCONF, '<', $vcConfig;
     my $content = join '', <VCCONF>;
-    $content =~ s@C:/Packaging/KritaWS/deps-install@$depsDir@g;
     close VCCONF;
+    $content =~ s@\Q$origDepsDir\E@$depsDir@g;
 
     open VCCONFW, '>', $vcConfig;
     print VCCONFW $content;
     close VCCONFW;
+
+    # ...and sipconfig.py
+    my $sipConfig = "$depsDir/lib/krita-python-libs/sipconfig.py";
+    my $escapedDepsDir = winPathInStr $depsDir;
+    open SIPCONF, '<', $sipConfig;
+    $content = join '', <SIPCONF>;
+    close SIPCONF;
+    $content =~ s@\Q$origDepsDir\E@$depsDir@g;
+    $content =~ s@\Q$escapedOrigDepsDir\E@$escapedDepsDir@g;
+
+    open SIPCONFW, '>', $sipConfig;
+    print SIPCONFW $content;
+    close SIPCONFW;
 
     say 'The source is prepared to build.';
 } else {
