@@ -87,6 +87,14 @@ my $jobs = 3;
 $ENV{'PATH'} = (winPath "$pythonDir;$depsDir/bin;$mingwDir/bin;").$ENV{'PATH'};
 $ENV{'PYTHONPATH'} = winPath "$depsDir/lib/krita-python-libs";
 
+# Just in case you have some Boost installed...
+# it will cause problems if you do not have the libraries of the correct type
+# these environment variables are specified in FindBoost.cmake:40-45 (provided by CMake)
+delete $ENV{'BOOST_ROOT'};
+delete $ENV{'BOOSTROOT'};
+delete $ENV{'BOOST_LIBRARYDIR'};
+delete $ENV{'BOOST_INCLUDEDIR'};
+
 chdir $kritaBuildDir;
 
 my $action = $ARGV[0];
