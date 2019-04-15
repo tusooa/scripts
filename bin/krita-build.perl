@@ -185,6 +185,5 @@ if ($action eq 'cmake') {
                  -verbose => 2,
                  -output  => \*STDOUT);
 } else {
-    exec @ARGV;
-    warn "Cannot launch the program: $!\n";
+    system @ARGV;
 }
