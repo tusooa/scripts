@@ -30,7 +30,7 @@ Invoke the script with:
 
     <msysDir>/usr/bin/perl.exe <path-to>/krita-build.perl ARGS
 
-In the following lines I will use `<krita-build>` to denote `<mingwDir>/usr/bin/perl.exe <path-to>/krita-build.perl`.
+In the following lines I will use `<krita-build>` to denote `<msysDir>/usr/bin/perl.exe <path-to>/krita-build.perl`.
 
 First, modify some hardcoded paths in krita-deps:
 
