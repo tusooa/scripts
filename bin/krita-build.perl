@@ -6,7 +6,9 @@
 
 Install MinGW & MSYS
 
-Install CMake, either through `pacman -S mingw-w64-x86_64-cmake` or by yourself (you need to manually add it to PATH)
+Install CMake, either through `pacman -S mingw-w64-x86_64-cmake` -- or the corresponding 32-bit version if you are building on a 32-bit system -- or by yourself (you need to manually add it to PATH)
+
+Install Boost in MinGW, through `pacman -S mingw-w64-x86_64-boost` -- the Boost in krita-deps will only be found if we use MinGW 7.3, not any other version
 
 Install Python 3.6
 
@@ -36,6 +38,7 @@ First, modify some hardcoded paths in krita-deps:
 
 Then, run cmake:
 
+    cd <kritaBuildDir>
     <krita-build> cmake
 
 Then, compile the sources:
@@ -92,7 +95,6 @@ my $jobs = 3;
 
 # Chances are MinGW has a higher version of Python, which we do not want.
 $ENV{'PATH'} = (winPath "$pythonDir;$depsDir/bin;$mingwDir/bin;").$ENV{'PATH'};
-$ENV{'PYTHONPATH'} = winPath "$depsDir/lib/krita-python-libs";
 
 # Just in case you have some Boost installed...
 # it will cause problems if you do not have the libraries of the correct type
@@ -102,7 +104,7 @@ delete $ENV{'BOOSTROOT'};
 delete $ENV{'BOOST_LIBRARYDIR'};
 delete $ENV{'BOOST_INCLUDEDIR'};
 
-chdir $kritaBuildDir;
+#chdir $kritaBuildDir;
 
 my $action = $ARGV[0];
 if ($action eq 'cmake') {
@@ -110,9 +112,14 @@ if ($action eq 'cmake') {
     system 'cmake', $kritaSrcDir,
         "-DCMAKE_INSTALL_PREFIX=$kritaInstallDir",
         '-DBoost_DEBUG=OFF',
-        "-DBOOST_INCLUDEDIR=$depsDir/include",
-        "-DBOOST_ROOT=$depsDir",
-        "-DBOOST_LIBRARYDIR=$depsDir/lib",
+        # Here we gotta make another exception for Boost --
+        # if your mingw version doesn't match the one that compiled boost-system in krita-deps,
+        # chances are cmake can't find them at all ;(
+        "-DBOOST_INCLUDEDIR=$mingwDir/include",
+        "-DBOOST_ROOT=$mingwDir",
+        # dynamic libraries are located at prefix/bin, under MinGW
+        "-DBOOST_LIBRARYDIR=$mingwDir/bin",
+        # used by FindSIP.cmake to set PYTHONPATH -- it will mess up with Boost, though
         "-DCMAKE_PREFIX_PATH=$depsDir",
         '-DBUILD_TESTING=OFF',
         '-DHAVE_MEMORY_LEAK_TRACKER=OFF',
@@ -139,7 +146,7 @@ if ($action eq 'cmake') {
     print VCCONFW $content;
     close VCCONFW;
 
-    # ...and sipconfig.py
+    # ... and sipconfig.py
     my $sipConfig = "$depsDir/lib/krita-python-libs/sipconfig.py";
     my $escapedDepsDir = winPathInStr $depsDir;
     open SIPCONF, '<', $sipConfig;
@@ -152,7 +159,17 @@ if ($action eq 'cmake') {
     print SIPCONFW $content;
     close SIPCONFW;
 
+    # ... and ask CMake not to find boost inside deps dir
+    my @boostDirs = glob "$depsDir/include/boost*";
+    for (@boostDirs) {
+        rename $_, $_.'-backup';
+    }
+
     say 'The source is prepared to build.';
+} elsif ($action eq '' or $action eq 'help') {
+    say 'Usage: krita-build.perl cmake|build|install|prepare|help|<cmdline>';
+    say 'If the first argument is not one of cmake, build, install, prepare and help, the program specified by <cmdline> will be run in the build environment.';
+    say 'e.g.: krita-build.perl gmake -j5 install';
 } else {
-    say 'Usage: krita-build.perl cmake|build|install|prepare';
+    system @ARGV;
 }
