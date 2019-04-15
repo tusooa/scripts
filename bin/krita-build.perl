@@ -65,6 +65,8 @@ It is probably a good idea to use the same set of environment vairables to run k
 
 Alternatively, permanently add `<pythonDir>;<depsDir>/bin;<depsDir>/lib;<mingwDir>/bin` to your PATH, in Control Panel.
 
+You will probably encounter the problem that Krita's startup is *very* slow. See https://docs.krita.org/en/KritaFAQ.html#slow-start-up and add an exception for the krita directory.
+
 `install` will also trigger `build` so if you want to build AND install,
 `build` can be skipped to avoid re-scanning of all targets.
 =cut
