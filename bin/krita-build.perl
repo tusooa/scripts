@@ -45,16 +45,33 @@ Then, compile the sources:
 
     <krita-build> build
 
-Finally, install:
+Then, install:
 
     <krita-build> install
 
-`install` will also trigger `build` so if you want to build AND install, `build` can be skipped to avoid re-scanning of all targets.
+To make sure Krita can correctly run, some libraries need to be linked in the krita installation directory,
+if you do not want to create an installer (chances are you want to keep both your build and another one,
+say, the stable version).
+If you are using a windows with symlink support (via mklink), you can run the following command to do so.
+You will probably need to run *As Administrator*:
+
+    <krita-build> link-deps
+
+Alternatively, if your system does not support symlinks, copy these directories to your installation directory.
+
+It is probably a good idea to use the same set of environment vairables to run krita. You can do so by:
+
+    <krita-build> run
+
+Alternatively, permanently add `<pythonDir>;<depsDir>/bin;<depsDir>/lib;<mingwDir>/bin` to your PATH, in Control Panel.
+
+`install` will also trigger `build` so if you want to build AND install,
+`build` can be skipped to avoid re-scanning of all targets.
 =cut
-use strict;
-use 5.010;
+use 5.012;
 use Pod::Usage;
 
+# from lib/Scripts/WindowsSupport.pm
 sub winPath
 {
     my $path = shift;
@@ -76,6 +93,17 @@ sub unixPath
     $path;
 }
 
+sub ln {
+    my ($target, $name) = @_;
+    say "`$name' -> `$target'";
+    # use windows-style path
+    $target = winPath $target;
+    $name = winPath $name;
+    my @args;
+    @args = ('/D') if -d $target;
+    system 'mklink', @args, $name, $target;
+}
+
 ### Config Part -- change as needed
 # the directory extracted from krita-deps.zip
 # you should have downloaded it from https://binary-factory.kde.org/job/Krita_Nightly_Windows_Dependency_Build/
@@ -95,7 +123,7 @@ my $jobs = 3;
 ### End config part
 
 # Chances are MinGW has a higher version of Python, which we do not want.
-$ENV{'PATH'} = (winPath "$pythonDir;$depsDir/bin;$mingwDir/bin;").$ENV{'PATH'};
+$ENV{'PATH'} = (winPath "$pythonDir;$depsDir/bin;$depsDir/lib;$mingwDir/bin;").$ENV{'PATH'};
 $ENV{'PYTHONPATH'} = length $ENV{'PYTHONPATH'} ?
     (winPath "$depsDir/lib/krita-python-libs").";$ENV{'PYTHONPATH'}" :
     (winPath "$depsDir/lib/krita-python-libs");
@@ -170,14 +198,49 @@ if ($action eq 'cmake') {
     }
 
     say 'The source is prepared to build.';
+} elsif ($action eq 'run') {
+    my $program = "$kritaInstallDir/bin/krita.exe";
+    system { $program } $program;
+} elsif ($action eq 'link-deps') {
+    # Well, if these are not directly inside <kritaInstallDir>/bin, it just won't run
+    my $pluginsDir = "$depsDir/plugins";
+
+    opendir PLUGINSDIR, $pluginsDir;
+    while (readdir PLUGINSDIR) {
+        /^\./ && next;
+        ln "$pluginsDir/$_", "$kritaInstallDir/bin/$_";
+    }
+    closedir PLUGINSDIR;
+
+    # Krita forces to use bundled python...
+    ln "$depsDir/python", "$kritaInstallDir/python";
+
+    my $pythonLibsDir = "$depsDir/lib/krita-python-libs";
+
+    opendir PYLIBDIR, $pythonLibsDir;
+    while (readdir PYLIBDIR) {
+        /^\./ && next;
+        /__pycache__/ && next;
+        ln "$pythonLibsDir/$_", "$kritaInstallDir/lib/krita-python-libs/$_";
+    }
+    closedir PYLIBDIR;
+
+    # QtQuick QMLs, for touch docker
+    my $qmlDir = "$depsDir/qml";
+    opendir QMLDIR, $qmlDir;
+    while (readdir QMLDIR) {
+        /^\./ && next;
+        ln "$qmlDir/$_", "$kritaInstallDir/bin/$_";
+    }
+    closedir QMLDIR;
 } elsif ($action eq '' or
          $action eq 'help' or
          $action eq '-h' or
          $action eq '--help' or
          $action eq '-help' or
          $action eq '-?') {
-    say 'Usage: krita-build.perl cmake|build|install|prepare|help|<cmdline>';
-    say 'If the first argument is not one of cmake, build, install, prepare and help, the program specified by <cmdline> will be run in the build environment.';
+    say 'Usage: krita-build.perl cmake|build|install|prepare|link-deps|run|help|<cmdline>';
+    say 'If the first argument is not one of cmake, build, install, prepare, link-deps, run and help, the program specified by <cmdline> will be run in the build environment.';
     say 'e.g.: krita-build.perl gmake -j5 install';
     say '';
     pod2usage(   -msg     => '',
@@ -185,5 +248,5 @@ if ($action eq 'cmake') {
                  -verbose => 2,
                  -output  => \*STDOUT);
 } else {
-    system @ARGV;
+    system { $ARGV[0] } @ARGV;
 }
