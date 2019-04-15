@@ -53,6 +53,7 @@ Finally, install:
 =cut
 use strict;
 use 5.010;
+use Pod::Usage;
 
 sub winPath
 {
@@ -95,6 +96,9 @@ my $jobs = 3;
 
 # Chances are MinGW has a higher version of Python, which we do not want.
 $ENV{'PATH'} = (winPath "$pythonDir;$depsDir/bin;$mingwDir/bin;").$ENV{'PATH'};
+$ENV{'PYTHONPATH'} = length $ENV{'PYTHONPATH'} ?
+    (winPath "$depsDir/lib/krita-python-libs").";$ENV{'PYTHONPATH'}" :
+    (winPath "$depsDir/lib/krita-python-libs");
 
 # Just in case you have some Boost installed...
 # it will cause problems if you do not have the libraries of the correct type
@@ -166,10 +170,21 @@ if ($action eq 'cmake') {
     }
 
     say 'The source is prepared to build.';
-} elsif ($action eq '' or $action eq 'help') {
+} elsif ($action eq '' or
+         $action eq 'help' or
+         $action eq '-h' or
+         $action eq '--help' or
+         $action eq '-help' or
+         $action eq '-?') {
     say 'Usage: krita-build.perl cmake|build|install|prepare|help|<cmdline>';
     say 'If the first argument is not one of cmake, build, install, prepare and help, the program specified by <cmdline> will be run in the build environment.';
     say 'e.g.: krita-build.perl gmake -j5 install';
+    say '';
+    pod2usage(   -msg     => '',
+                 -exitval => 0,
+                 -verbose => 2,
+                 -output  => \*STDOUT);
 } else {
-    system @ARGV;
+    exec @ARGV;
+    warn "Cannot launch the program: $!\n";
 }
