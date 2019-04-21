@@ -1,6 +1,6 @@
 # -*- conf-unix -*-
 [user]
-	name = ThisTusooa
+	name = Tusooa Zhu
 	email = tusooa@vista.aero
     signingkey = tusooa@gmail.com
 [color]
