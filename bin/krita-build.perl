@@ -161,7 +161,9 @@ if ($action eq 'cmake') {
         '-DUSE_QT_TABLET_WINDOWS=ON',
         '-Wno-dev',
         '-G', "MinGW Makefiles",
-        '-DCMAKE_BUILD_TYPE=RelWithDebInfo';
+        '-DCMAKE_BUILD_TYPE=RelWithDebInfo',
+        # " For MinGW make to work correctly sh.exe must NOT be in your path."
+        '-DCMAKE_SH=CMAKE_SH-NOT-FOUND';
 } elsif ($action eq 'build') {
     system 'mingw32-make', "-j$jobs";
 } elsif ($action eq 'install') {
