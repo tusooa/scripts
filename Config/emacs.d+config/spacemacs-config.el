@@ -120,3 +120,5 @@
 ;; (powerline-moe-theme)
 
 (use-package wc-mode)
+
+(server-start)
