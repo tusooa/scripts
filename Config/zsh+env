@@ -48,3 +48,8 @@ export G_COLORS='fn=1;33:ln=1;32'
 if [ "$SSH_CONNECTION" ] ; then
     export DISPLAY="${SSH_CONNECTION%% *}:0"
 fi
+
+# Under msys, use real symlinks
+if [ "$(uname -o)" == "Msys" ] ; then
+    export MSYS=winsymlinks:nativestrict
+fi
