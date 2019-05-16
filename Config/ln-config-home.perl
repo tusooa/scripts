@@ -5,6 +5,7 @@ use File::Basename qw/basename/;
 use Scripts::Base;
 use Cwd;
 
+my $forceUnlink = $ARGV[0] eq '-f';
 my $cwd = cwd;
 while (<*>) {
     next if /~$/;
@@ -12,7 +13,7 @@ while (<*>) {
     my $target = $_;
     $target =~ s{\+}{/}g;
     $target = $home.'/.'.$target;
-    if (-l $target) {
+    if (-l $target || $forceUnlink) {
         say "\e[1;34m==> unlink \e[0m$target";
         unlink $target;
     } elsif (-e $target) {
