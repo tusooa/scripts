@@ -122,6 +122,8 @@ my $kritaSrcDir = 'c:/Home/Code/krita';
 my $kritaBuildDir = 'c:/Home/Code/krita-build';
 # how many jobs can we run at the same time
 my $jobs = 3;
+# whether to build tests
+my $tests = 1;
 ### End config part
 
 # Chances are MinGW has a higher version of Python, which we do not want.
@@ -155,7 +157,7 @@ if ($action eq 'cmake') {
         "-DBOOST_LIBRARYDIR=$mingwDir/bin",
         # used by FindSIP.cmake to set PYTHONPATH -- it will mess up with Boost, though
         "-DCMAKE_PREFIX_PATH=$depsDir",
-        '-DBUILD_TESTING=OFF',
+        '-DBUILD_TESTING=' . ($tests ? 'ON' : 'OFF'),
         '-DHAVE_MEMORY_LEAK_TRACKER=OFF',
         '-DFOUNDATION_BUILD=ON',
         '-DUSE_QT_TABLET_WINDOWS=ON',
