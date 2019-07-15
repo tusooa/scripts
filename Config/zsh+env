@@ -1,6 +1,12 @@
 #!/bin/zsh --source
 
-export EDITOR='emacsclient' PACKAGER='tusooa@gmail.com'
+if [[ "$(uname -o)" == "Msys" ]]; then
+    export EDITOR='c:/Home/Programs/emacs/bin/emacsclientw.exe'
+else
+    export EDITOR='emacsclient'
+fi
+
+export PACKAGER='tusooa@gmail.com'
 export FCDWDIR="$HOME/个人/下载/full circle"
 # 输入法
 export XMODIFIERS="@im=fcitx"
