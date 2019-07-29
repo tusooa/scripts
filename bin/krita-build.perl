@@ -4,7 +4,7 @@
 =cut
 =head2 Preparation
 
-Install MinGW & MSYS
+Install MinGW & MSYS -- MSYS is only for its Perl. Alternatively install a Perl interpretor.
 
 Install CMake, either through `pacman -S mingw-w64-x86_64-cmake` -- or the corresponding 32-bit version if you are building on a 32-bit system -- or by yourself (you need to manually add it to PATH)
 
@@ -12,7 +12,7 @@ Install Boost in MinGW, through `pacman -S mingw-w64-x86_64-boost` -- the Boost 
 
 Install Python 3.6
 
-Download and unpack krita-deps.zip
+Download and unpack krita-deps.zip -- the download link is at https://binary-factory.kde.org/job/Krita_Nightly_Windows_Dependency_Build/
 
 Fetch the source code of krita
 =cut
@@ -48,6 +48,11 @@ Then, compile the sources:
 Then, install:
 
     <krita-build> install
+
+If you use an IDE like KDevelop or QtCreator, you can try to launch your IDE from this script,
+after you have run cmake on the sources (and then choose the build directory in your IDE).
+This will automatically add the suitable environment variables so that your IDE can find the
+correct libraries.
 
 To make sure Krita can correctly run, some libraries need to be linked in the krita installation directory,
 if you do not want to create an installer (chances are you want to keep both your build and another one,
