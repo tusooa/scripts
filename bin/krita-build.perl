@@ -170,7 +170,9 @@ if ($action eq 'cmake') {
         '-G', "MinGW Makefiles",
         '-DCMAKE_BUILD_TYPE=RelWithDebInfo',
         # " For MinGW make to work correctly sh.exe must NOT be in your path."
-        '-DCMAKE_SH=CMAKE_SH-NOT-FOUND';
+        # if you are experiencing the problem above, uncomment the next line
+        #'-DCMAKE_SH=CMAKE_SH-NOT-FOUND'
+        ;
 } elsif ($action eq 'build') {
     system 'mingw32-make', "-j$jobs";
 } elsif ($action eq 'install') {
