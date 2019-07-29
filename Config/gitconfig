@@ -14,7 +14,7 @@
     fontui = -family ZhunYuan -size 13 -weight normal -slant roman -underline 0 -overstrike 0
     fontdiff = -family Monaco -size 13 -weight normal -slant roman -underline 0 -overstrike 0
 [pretty]
-    graph = %Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset
+    graph = %Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%aI) %C(bold blue)<%an>%Creset
 [alias]
     c = commit -a
     p = push origin HEAD

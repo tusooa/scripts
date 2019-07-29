@@ -3,9 +3,9 @@
 export EDITOR='emacsclient' PACKAGER='tusooa@gmail.com'
 export FCDWDIR="$HOME/个人/下载/full circle"
 # 输入法
-export XMODIFIERS="@im=fcitx"
-export QT_IM_MODULE=fcitx GTK_IM_MODULE=fcitx
-export XIM=fcitx XIM_PROGRAM=fcitx
+#export XMODIFIERS="@im=fcitx"
+#export QT_IM_MODULE=fcitx GTK_IM_MODULE=fcitx
+#export XIM=fcitx XIM_PROGRAM=fcitx
 
 # do not set language for ourselves
 # LANG
