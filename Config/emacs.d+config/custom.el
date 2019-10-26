@@ -11,6 +11,7 @@
  '(cperl-indent-level 4)
  '(custom-file "~/.emacs.d/config/custom.el")
  '(emojify-emoji-styles (quote (unicode)))
+ '(emojify-program-contexts (quote (comments)))
  '(gnus-no-groups-message "-- No Groups --")
  '(gnus-permanently-visible-groups ".+")
  '(gnus-summary-gather-exclude-subject "^ *$\\|^(none)$")
@@ -23,10 +24,12 @@
  '(max-specpdl-size 3000)
  '(mouse-wheel-progressive-speed nil)
  '(mouse-wheel-scroll-amount (quote (1 ((shift) . 1) ((control)))))
+ '(nyan-animate-nyancat nil)
+ '(nyan-wavy-trail nil)
  '(org-startup-truncated nil)
  '(package-selected-packages
    (quote
-    (emojify helm-files emms fvwm-mode color-theme egg mew pandoc-mode powerline moe-theme emoji-fontset wc-mode markdown-mode zlc flycheck-perl6 flycheck perl6-mode)))
+    (gnu-elpa-keyring-update dim delight nyan-mode emojify helm-files emms fvwm-mode color-theme egg mew pandoc-mode powerline moe-theme emoji-fontset wc-mode markdown-mode zlc flycheck-perl6 flycheck perl6-mode)))
  '(pop3-connection-type (quote ssl))
  '(powerline-default-separator nil)
  '(powerline-height nil)

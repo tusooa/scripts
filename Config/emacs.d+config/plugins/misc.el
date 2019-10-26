@@ -14,7 +14,13 @@
 ;        git-commit-mode))
 
 (use-package ibuffer :ensure t)
-(use-package undo-tree :ensure t)
+(use-package undo-tree :ensure t
+  :config
+  (global-set-key (kbd "C-_") 'undo-tree-undo)
+  (global-set-key (kbd "C-x u") 'undo-tree-undo)
+  (global-set-key (kbd "C-x .") 'undo-tree-redo)
+  (global-set-key (kbd "C-.") 'undo-tree-redo)
+  (global-set-key (kbd "C-x C-t") 'undo-tree-visualize))
 (use-package fvwm-mode :ensure t)
 (use-package cmake-mode :ensure t)
 (require 'highlight-tail)
@@ -141,18 +147,36 @@
 (use-package editorconfig :ensure t :config
 (editorconfig-mode 1))
 
-(use-package diminish :ensure t
+(use-package delight :ensure t
   :config
-  (diminish 'editorconfig-mode " 🖋")
-  (diminish 'highlight-tail-mode)
-  (diminish 'helm-mode)
-  (diminish 'flycheck-mode " 🕊")
-  (diminish 'flyspell-mode " ⎀")
-  (diminish 'rainbow-mode " 🌈")
-  (diminish 'eldoc-mode)
-  (diminish 'abbrev-mode " ⋯")
-  (diminish 'overwrite-mode " ⌦")
-  )
+  (defun flycheck-status (&optional status)
+    (let ((s (or status flycheck-last-status-change)))
+      (cond
+       ((eq s 'not-checked) "⭘")
+       ((eq s 'no-checker) "∄")
+       ((eq s 'running) "🚋")
+       ((eq s 'errored) "🇽")
+       ((eq s 'finished)
+        (let-alist (flycheck-count-errors flycheck-current-errors)
+          (if (or .error .warning)
+              (format "❌%s❘⚠%s" (or .error 0) (or .warning 0))
+            "✔")))
+       ((eq s 'interrupted) "⭼")
+       ((eq s 'suspicious) "⯑"))))
+  (delight
+   '((editorconfig-mode " 🖋" editorconfig)
+     (highlight-tail-mode " 🐁" highlight-tail)
+     (helm-mode " →" helm)
+     (flycheck-mode (:eval (concat " 🕊❘" (flycheck-status))) flycheck)
+     (flyspell-mode " ⎀" flyspell)
+     (rainbow-mode " 🌈")
+     (eldoc-mode " 🛈" eldoc)
+     (abbrev-mode " ⋯" abbrev)
+     (overwrite-mode " ⌦" t)
+     (isearch-mode " 🔎" t)
+     (help-mode "㉄" :major)
+     (emacs-lisp-mode "EL" :major)))
+  (require 'delight-powerline))
 
 (use-package powerline :ensure t :config
   (powerline-default-theme)
@@ -160,3 +184,6 @@
 
 (use-package emojify :ensure t :config
   (global-emojify-mode 1))
+
+(use-package nyan-mode :ensure t :config
+  (nyan-mode 1))
