@@ -16,9 +16,50 @@
  '(gnus-permanently-visible-groups ".+")
  '(gnus-summary-gather-exclude-subject "^ *$\\|^(none)$")
  '(gnus-thread-operation-ignore-subject t)
+ '(ibuffer-never-show-predicates (quote ("^\\*helm[- ]")) nil (ibuf-ext))
+ '(ibuffer-saved-filter-groups nil)
+ '(ibuffer-saved-filters
+   (quote
+    (("programming"
+      (or
+       (derived-mode . prog-mode)
+       (mode . ess-mode)
+       (mode . compilation-mode)))
+     ("text document"
+      (and
+       (derived-mode . text-mode)
+       (not
+        (starred-name))))
+     ("TeX"
+      (or
+       (derived-mode . tex-mode)
+       (mode . latex-mode)
+       (mode . context-mode)
+       (mode . ams-tex-mode)
+       (mode . bibtex-mode)))
+     ("web"
+      (or
+       (derived-mode . sgml-mode)
+       (derived-mode . css-mode)
+       (mode . javascript-mode)
+       (mode . js2-mode)
+       (mode . scss-mode)
+       (derived-mode . haml-mode)
+       (mode . sass-mode)))
+     ("gnus"
+      (or
+       (mode . message-mode)
+       (mode . mail-mode)
+       (mode . gnus-group-mode)
+       (mode . gnus-summary-mode)
+       (mode . gnus-article-mode))))))
  '(indent-tabs-mode nil)
  '(ispell-extra-args (quote ("--lang=en_CA")))
- '(ispell-program-name "C:/Home/Programs/Aspell/bin/aspell.exe")
+ '(ispell-program-name
+   (if
+       (eq system-type
+           (quote windows-nt))
+       "C:/Home/Programs/Aspell/bin/aspell.exe" "/usr/bin/aspell"))
  '(js-indent-level 2)
  '(magit-git-executable "C:/Home/Programs/Git/bin/git.exe")
  '(max-specpdl-size 3000)
@@ -34,7 +75,7 @@
  '(powerline-default-separator nil)
  '(powerline-height nil)
  '(rainbow-identifiers-face-count 10)
- '(wc-modeline-format "(%tww/%tcc)"))
+ '(wc-modeline-format "✒❘%tww❘%tcc"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

@@ -163,6 +163,7 @@
             "✔")))
        ((eq s 'interrupted) "⭼")
        ((eq s 'suspicious) "⯑"))))
+
   (delight
    '((editorconfig-mode " 🖋" editorconfig)
      (highlight-tail-mode " 🐁" highlight-tail)
