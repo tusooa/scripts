@@ -1,4 +1,4 @@
-
+(when nil
 (set-fontset-font (frame-parameter nil 'font)
                   'han
                   "DejaVu Sans YuanTi Mono")
@@ -122,3 +122,4 @@
 (use-package wc-mode)
 
 (server-start)
+)

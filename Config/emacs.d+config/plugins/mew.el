@@ -1,9 +1,10 @@
-(autoload 'mew "mew" nil t)
+(when nil
+    (autoload 'mew "mew" nil t)
 (autoload 'mew-send "mew" nil t)
 
 ;; Optional setup (Read Mail menu):
 (setq read-mail-command 'mew)
-
+)
 ;; Optional setup (e.g. C-xm for sending a message):
 ;(autoload 'mew-user-agent-compose "mew" nil t)
 ;(if (boundp 'mail-user-agent)

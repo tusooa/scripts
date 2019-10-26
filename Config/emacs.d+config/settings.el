@@ -17,7 +17,7 @@
 ; emacs server
 (server-start)
 ;; font
-(set-frame-font "DejaVu Sans Mono-14")
+(set-frame-font (concat "DejaVu Sans Mono-" (if (string= (system-name) "tusooa-surface") "28" "15")))
 (set-fontset-font (frame-parameter nil 'font)
                   'han
                   "DejaVu Sans YuanTi Mono")

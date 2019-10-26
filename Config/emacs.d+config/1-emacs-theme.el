@@ -1,11 +1,9 @@
 (require 'color-theme)
 ;(load-file "~/.emacs.d/themes/color-theme-blackboard.el")
 (color-theme-initialize)
-(require 'powerline)
 (require 'moe-theme)
 (moe-theme-set-color 'magenta)
 (moe-dark)
-(powerline-moe-theme)
 ;(load-file "~/.emacs.d/themes/darkmate.el")
 ;(color-theme-darkmate)
 ; 光标不闪烁

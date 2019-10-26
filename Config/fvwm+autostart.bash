@@ -23,7 +23,7 @@ xrdb ~/.Xresource
 #nm-applet &
 #罗技鼠标-m525.bash &
 #echo "fcitx"
-#fcitx &
+fcitx &
 setxkbmap -option ctrl:menu_rctrl -option ctrl:nocaps
 
 #sleep 5
