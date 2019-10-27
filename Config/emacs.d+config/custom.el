@@ -70,7 +70,7 @@
  '(org-startup-truncated nil)
  '(package-selected-packages
    (quote
-    (gnu-elpa-keyring-update dim delight nyan-mode emojify helm-files emms fvwm-mode color-theme egg mew pandoc-mode powerline moe-theme emoji-fontset wc-mode markdown-mode zlc flycheck-perl6 flycheck perl6-mode)))
+    (editorconfig cmake-mode gnu-elpa-keyring-update dim delight nyan-mode emojify helm-files emms fvwm-mode color-theme egg mew pandoc-mode powerline moe-theme emoji-fontset wc-mode markdown-mode zlc flycheck-perl6 flycheck perl6-mode)))
  '(pop3-connection-type (quote ssl))
  '(powerline-default-separator nil)
  '(powerline-height nil)
