@@ -6,6 +6,12 @@
  ;; If there is more than one, they won't work right.
  '(ansi-color-names-vector
    ["black" "firebrick1" "lime green" "gold1" "RoyalBlue3" "HotPink1" "dark turquoise" "white"])
+ '(c-default-style
+   (quote
+    ((c-mode . "cc-mode")
+     (java-mode . "java")
+     (awk-mode . "awk")
+     (other . "gnu"))))
  '(canlock-password "64af8575f06472636c3a0709394ee6a2eae4520d")
  '(cperl-highlight-variables-indiscriminately t)
  '(cperl-indent-level 4)
