@@ -49,3 +49,13 @@
 (setq org-agenda-files (if (eq system-type 'windows-nt)
                            '("c:/Home/Documents/todo.org")
                          '("~/Private/todo.org")))
+
+(when nil
+  (eval-after-load 'tex-mode
+  (progn
+    (define-skeleton LaTeX-enum
+      "Insert an enumerate environment"
+      "\n\\begin{enumerate}\n"
+      _
+      "\n\\end{enumerate}")
+    (define-abbrev latex-mode-abbrev-table "-enum-" "" 'LaTeX-enum))))

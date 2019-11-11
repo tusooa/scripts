@@ -132,3 +132,5 @@
 
 ;(add-hook 'find-file-hooks 'unixize)
 (prefer-coding-system 'utf-8-unix)
+
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
