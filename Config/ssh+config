@@ -1,0 +1,4 @@
+Host invent.kde.org
+    User                    git
+    Hostname invent.kde.org
+    ProxyCommand            socat - PROXY:127.0.0.1:%h:%p,proxyport=1081

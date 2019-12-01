@@ -38,11 +38,11 @@ There are two things you can do about this warning:
 (add-to-load-path '("~/.emacs.d/load/" "~/.emacs.d/lisp-others/"))
 (add-to-load-path (directory-files "~/.emacs.d/lisp-others/" t "^[^\\.]"))
 
-(setq spacemacs-start-directory "~/.emacs.d/spacemacs/")
-(load-file (concat spacemacs-start-directory "init.el"))
+;(setq spacemacs-start-directory "~/.emacs.d/spacemacs/")
+;(load-file (concat spacemacs-start-directory "init.el"))
+(require 'use-package)
 
-
-;(mapc 'load (directory-files "~/.emacs.d/config/" t "^[a-zA-Z0-9].*.el$"))
+(mapc 'load (directory-files "~/.emacs.d/config/" t "^[a-zA-Z0-9].*.el$"))
 
 ;(load "~/.emacs.d/config/0-base-functions.el")
 ;(load "~/.emacs.d/config/settings.el")

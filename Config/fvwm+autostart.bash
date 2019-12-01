@@ -6,10 +6,10 @@ exec >> ~/.autostart.log
 exec 2>&1
 date
 echo "autostart starting"
-export LANG=zh_CN.UTF-8 TERM=xterm LC_ALL= XIM=fcitx XIM_PROGRAM=fcitx
-export LC_CTYPE=zh_CN.UTF-8
-export XMODIFIERS="@im=fcitx"
-export QT_IM_MODULE=fcitx GTK_IM_MODULE=fcitx
+#export LANG=zh_CN.UTF-8 TERM=xterm LC_ALL= XIM=fcitx XIM_PROGRAM=fcitx
+#export LC_CTYPE=zh_CN.UTF-8
+#export XMODIFIERS="@im=fcitx"
+#export QT_IM_MODULE=fcitx GTK_IM_MODULE=fcitx
 export PATH="$HOME/Apps/bin:$PATH"
 
 echo "xset -b"
@@ -22,7 +22,7 @@ xrdb ~/.Xresource
 #trayer --widthtype pixel --width 200 --edge bottom --align left --transparent true &
 #nm-applet &
 #罗技鼠标-m525.bash &
-echo "fcitx"
+#echo "fcitx"
 fcitx &
 setxkbmap -option ctrl:menu_rctrl -option ctrl:nocaps
 

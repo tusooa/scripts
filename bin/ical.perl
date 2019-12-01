@@ -1,7 +1,8 @@
 #!/usr/bin/env perl
 use 5.012;
 use LWP::Simple;
-use utf8;
+use Scripts::Base;
+
 my $year = (localtime time)[5] + 1900;
 #say $year;
 #my %files = (#'/tmp/enh' => 'http://www.google.com/calendar/ical/en.australian%23holiday%40group.v.calendar.google.com/public/basic.ics',
@@ -10,7 +11,6 @@ my $year = (localtime time)[5] + 1900;
 open (OUT, '>', "$ENV{HOME}/.calendar/cal-holidays") or die "Cannot open file: $!\n";
 say OUT "#ifndef _holidays_convert_ics_\n#define _holidays_convert_ics_\n\n";
 my @content = split /\n/,get 'http://ical.mac.com/ical/China32Holidays.ics';
-
 my $print = 1;
 for (@content) {
     when (/^END:VEVENT/) {

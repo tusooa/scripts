@@ -1,4 +1,4 @@
-
+(when nil
 (set-fontset-font (frame-parameter nil 'font)
                   'han
                   "DejaVu Sans YuanTi Mono")
@@ -120,3 +120,6 @@
 ;; (powerline-moe-theme)
 
 (use-package wc-mode)
+
+(server-start)
+)

@@ -1,6 +1,6 @@
 # -*- shell-script -*-
 #color{{{
-autoload colors 
+autoload colors
 colors
 for color in RED GREEN YELLOW BLUE MAGENTA CYAN WHITE; do
 eval _$color='%{$terminfo[bold]$fg[${(L)color}]%}'
@@ -26,4 +26,8 @@ typeset -U path fpath
 if [ -f /etc/profile.d/autojump.zsh ] ; then
     . /etc/profile.d/autojump.zsh
 fi
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 

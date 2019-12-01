@@ -17,13 +17,15 @@
 ; emacs server
 (server-start)
 ;; font
-(set-frame-font "DejaVu Sans Mono-14")
-(set-fontset-font (frame-parameter nil 'font)
-                  'han
-                  "DejaVu Sans YuanTi Mono")
-; 这个字体是不是只在闻到死下才有？
+(set-frame-font (concat "DejaVu Sans Mono-" (if (string= (system-name) "tusooa-surface") (if (eq system-type 'windows-nt) "14" "28") "15")))
+(set-fontset-font (frame-parameter nil 'font) 'han "DejaVu Sans YuanTi Mono")
+(set-fontset-font t
+                  'unicode
+                  "Symbola"
+                  nil
+                  'append)
 (when (eq system-type 'windows-nt)
-  (emoji-fontset-enable "Segoe UI Emoji"))
+  (set-fontset-font t 'unicode "Segoe UI Emoji" nil 'append))
 (setq
  ;;禁用启动画面
  inhibit-startup-message t
@@ -130,3 +132,5 @@
 
 ;(add-hook 'find-file-hooks 'unixize)
 (prefer-coding-system 'utf-8-unix)
+
+(add-hook 'before-save-hook 'delete-trailing-whitespace)

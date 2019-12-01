@@ -1,13 +1,12 @@
 #!/usr/bin/env perl
 
-use 5.012;
-use Scripts::scriptFunctions;
+use Scripts::Base;
 use Getopt::Long qw/:config gnu_getopt/;
 
 my $config = conf 'gssh';
 my $server = $config->get ('server') // '';
 my $localPort = $config->get ('local-port') // 7070;
-my $loginWithoutTunnel = $config->get ('login-without-tunnel') // 1;
+my $loginWithoutTunnel = $config->get ('login-without-tunnel') // 0;
 GetOptions('s|server=s' => \$server, 'n|no-tunnel' => \$loginWithoutTunnel);
 my $passwordFile = "${accountDir}ssh-${server}";
 

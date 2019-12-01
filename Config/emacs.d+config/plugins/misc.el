@@ -1,22 +1,46 @@
-(mapc 'require
-      '(ibuffer
-        redo
-        fvwm-mode
-        cmake-mode
-        php-mode
-        highlight-tail
-       ;gentoo-syntax
-        tramp
-        colorize
-        rainbow-identifiers
-        rainbow-delimiters
-        text-alias-mode
-        git-commit-mode))
+;(mapc 'use-package
+;      '(ibuffer
+;        redo
+;        fvwm-mode
+;        cmake-mode
+;        php-mode
+;        highlight-tail
+;       ;gentoo-syntax
+;        tramp
+;        colorize
+;        rainbow-identifiers
+;        rainbow-delimiters
+;        text-alias-mode
+;        git-commit-mode))
+
+(use-package ibuffer :ensure t)
+(use-package undo-tree :ensure t
+  :config
+  (global-set-key (kbd "C-_") 'undo-tree-undo)
+  (global-set-key (kbd "C-x u") 'undo-tree-undo)
+  (global-set-key (kbd "C-x .") 'undo-tree-redo)
+  (global-set-key (kbd "C-.") 'undo-tree-redo)
+  (global-set-key (kbd "C-x C-t") 'undo-tree-visualize))
+(use-package fvwm-mode :ensure t)
+(use-package cmake-mode :ensure t)
+(require 'highlight-tail)
+(use-package tramp :ensure t)
+(use-package rainbow-mode :ensure t
+  :config
+  (defun turn-on-rainbow-mode ()
+  (unless (string= major-mode "erc-mode")
+    (rainbow-mode 1)))
+  (define-globalized-minor-mode global-rainbow-mode rainbow-mode turn-on-rainbow-mode)
+  (global-rainbow-mode 1))
+(use-package rainbow-identifiers :ensure t)
+(use-package rainbow-delimiters :ensure t)
+(require 'text-alias-mode)
+(require 'git-commit-mode)
 
 ; line numbers
 (if (> emacs-major-version 25)
     (global-display-line-numbers-mode t)
-  (require 'linum)
+  (use-package linum :ensure t)
   (global-linum-mode t))
 ;这是干什么的啊
 (defun no-linum (&rest ignore)
@@ -40,7 +64,6 @@
 ;(wg-create-workgroup "tusooa")
 ;(workgroups-mode 100)
 
-(global-colorize-mode t);例如#6cf这样的文字，显示对应的颜色。
 ;rainbow
 ; 把括号都给加上颜色
 ; https://github.com/luochen1990/rainbow (vim)
@@ -86,14 +109,22 @@
                          (concat (getenv "PERL6LIB") ";" p6-lib)
                        p6-lib)))
 
-(require 'perl6-mode)
+(use-package perl6-mode :ensure t)
 
-(require 'flycheck)
+(use-package flycheck :ensure t :config
 (defun enable-flycheck-in-prog ()
   (flycheck-mode t))
 (add-hook 'prog-mode-hook 'enable-flycheck-in-prog)
 
-(require 'flycheck-perl6)
+(use-package flycheck-perl6))
+(use-package helm :ensure t :config
+  (global-set-key (kbd "M-x") #'helm-M-x)
+  (global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
+  (global-set-key (kbd "C-x C-f") #'helm-find-files)
+  (helm-mode 1)
+  (define-key helm-map (kbd "TAB") #'helm-execute-persistent-action)
+  (define-key helm-map (kbd "<tab>") #'helm-execute-persistent-action)
+  (define-key helm-map (kbd "C-z") #'helm-select-action))
 
 ; is buggy.
 ;(require 'zlc)
@@ -113,6 +144,47 @@
 ;  (define-key map (kbd "C-c") 'zlc-reset)
 ;  )
 
-(require 'editorconfig)
-(editorconfig-mode 1)
+(use-package editorconfig :ensure t :config
+(editorconfig-mode 1))
 
+(use-package delight :ensure t
+  :config
+  (defun flycheck-status (&optional status)
+    (let ((s (or status flycheck-last-status-change)))
+      (cond
+       ((eq s 'not-checked) "⭘")
+       ((eq s 'no-checker) "∄")
+       ((eq s 'running) "🚋")
+       ((eq s 'errored) "🇽")
+       ((eq s 'finished)
+        (let-alist (flycheck-count-errors flycheck-current-errors)
+          (if (or .error .warning)
+              (format "❌%s❘⚠%s" (or .error 0) (or .warning 0))
+            "✔")))
+       ((eq s 'interrupted) "⭼")
+       ((eq s 'suspicious) "⯑"))))
+
+  (delight
+   '((editorconfig-mode " 🖋" editorconfig)
+     (highlight-tail-mode " 🐁" highlight-tail)
+     (helm-mode " →" helm)
+     (flycheck-mode (:eval (concat " 🕊❘" (flycheck-status))) flycheck)
+     (flyspell-mode " ⎀" flyspell)
+     (rainbow-mode " 🌈")
+     (eldoc-mode " 🛈" eldoc)
+     (abbrev-mode " ⋯" abbrev)
+     (overwrite-mode " ⌦" t)
+     (isearch-mode " 🔎" t)
+     (help-mode "㉄" :major)
+     (emacs-lisp-mode "EL" :major)))
+  (require 'delight-powerline))
+
+(use-package powerline :ensure t :config
+  (powerline-default-theme)
+  (powerline-reset))
+
+(use-package emojify :ensure t :config
+  (global-emojify-mode 1))
+
+(use-package nyan-mode :ensure t :config
+  (nyan-mode 1))

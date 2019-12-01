@@ -1,6 +1,15 @@
 (add-to-list 'load-path "/usr/share/emacs/site-lisp/erc/")
-(require 'erc)
 
+
+(defun erc-init ()
+  (interactive)
+  (erc :server "irc.freenode.net" :port erc-port :nick erc-nick)
+)
+
+(use-package erc
+  :commands erc erc-init
+  :ensure t
+  :config
 ;; disable linum mode in erc
 (if (> emacs-major-version 25)
     t
@@ -25,8 +34,7 @@
        erc-startup-file-list (quote ("~/.emacs.d/.ercrc.el" "~/.emacs.d/.ercrc" "~/.ercrc.el" "~/.ercrc" ".ercrc.el" ".ercrc" "~/个人/账号/irc-login"))
       erc-try-new-nick-p t
       erc-user-full-name "tusooa"
-      erc-interpret-mirc-color t
-)
+      erc-interpret-mirc-color t)
 ; 历史版本.简单地 /load ~/个人/账号/irc-login
 ;(require 'erc-join)
 ;(erc-autojoin-mode 1)
@@ -49,9 +57,5 @@
 (require 'erc-nick-notify)
 (if (eq system-type 'windows-nt)
     (setq erc-nick-notify-cmd '("perl" "-S" "notice-msg.perl" "-u")))
-
-(defun erc-init ()
-  (interactive)
-  (erc :server "irc.freenode.net" :port erc-port :nick erc-nick)
 )
 

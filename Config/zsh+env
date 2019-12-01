@@ -1,11 +1,17 @@
 #!/bin/zsh --source
 
-export EDITOR='emacsclient' PACKAGER='tusooa@gmail.com'
+if [[ "$(uname -o)" == "Msys" ]]; then
+    export EDITOR='c:/Home/Programs/emacs/bin/emacsclientw.exe'
+else
+    export EDITOR='emacsclient'
+fi
+
+export PACKAGER='tusooa@gmail.com'
 export FCDWDIR="$HOME/个人/下载/full circle"
 # 输入法
-export XMODIFIERS="@im=fcitx"
-export QT_IM_MODULE=fcitx GTK_IM_MODULE=fcitx
-export XIM=fcitx XIM_PROGRAM=fcitx
+#export XMODIFIERS="@im=fcitx"
+#export QT_IM_MODULE=fcitx GTK_IM_MODULE=fcitx
+#export XIM=fcitx XIM_PROGRAM=fcitx
 
 # do not set language for ourselves
 # LANG
@@ -47,4 +53,9 @@ export G_COLORS='fn=1;33:ln=1;32'
 # android ssh auto set display
 if [ "$SSH_CONNECTION" ] ; then
     export DISPLAY="${SSH_CONNECTION%% *}:0"
+fi
+
+# Under msys, use real symlinks
+if [ "$(uname -o)" == "Msys" ] ; then
+    export MSYS=winsymlinks:nativestrict
 fi
