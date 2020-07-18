@@ -42,3 +42,4 @@ debug*.txt
 libp6/.precomp
 # install-specific files
 lib/Scripts/Path/defConf.pm
+default-cfg/syspath
