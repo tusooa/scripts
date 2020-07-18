@@ -51,7 +51,7 @@
   "Ensure that powerline's major mode names are delighted.
 
 See `delight-major-mode'."
-  (let ((inhibit-mode-name-delight nil))
+  (let ((delight-mode-name-inhibit nil)) ;; changed here to suppress deprecated warning
     ad-do-it))
 
 (provide 'delight-powerline)

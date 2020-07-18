@@ -17,7 +17,12 @@
 ; emacs server
 (server-start)
 ;; font
-(set-frame-font (concat "DejaVu Sans Mono-" (if (string= (system-name) "tusooa-surface") (if (eq system-type 'windows-nt) "14" "28") "15")))
+(set-frame-font (concat "DejaVu Sans Mono-"
+                        (cond
+                         ((string= (system-name) "tusooa-surface")
+                          (if (eq system-type 'windows-nt) "14" "28"))
+                         ((string= (system-name) "tusooa-yoga") "13")
+                         (t "15"))))
 (set-fontset-font (frame-parameter nil 'font) 'han "DejaVu Sans YuanTi Mono")
 (set-fontset-font t
                   'unicode
@@ -31,14 +36,14 @@
  inhibit-startup-message t
  ;;设定行距
  default-line-spacing 0
- ;;页宽 
+ ;;页宽
  default-fill-column 90
  ;;缺省模式 text-mode
  default-major-mode 'text-mode
  ;;设置删除纪录
  kill-ring-max 200
  ;;以空行结束
- require-final-newline t 
+ require-final-newline t
  ;;页面平滑滚动， scroll-margin 5 靠近屏幕边沿3行时开始滚动，可以很好的看到上下文。
  scroll-margin 5
  scroll-conservatively 10000
@@ -72,7 +77,7 @@
  ;;只渲染当前屏幕语法高亮，加快显示速度
  font-lock-maximum-decoration t
  ;;使用X剪贴板
- x-select-enable-clipboard t 
+ x-select-enable-clipboard t
  ;;;;;;;; 使用空格缩进 ;;;;;;;;
  ;; indent-tabs-mode  t 使用 TAB 作格式化字符  nil 使用空格作格式化字符
  indent-tabs-mode nil

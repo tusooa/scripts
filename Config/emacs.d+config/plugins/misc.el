@@ -15,12 +15,14 @@
 
 (use-package ibuffer :ensure t)
 (use-package undo-tree :ensure t
-  :config
-  (global-set-key (kbd "C-_") 'undo-tree-undo)
-  (global-set-key (kbd "C-x u") 'undo-tree-undo)
-  (global-set-key (kbd "C-x .") 'undo-tree-redo)
-  (global-set-key (kbd "C-.") 'undo-tree-redo)
-  (global-set-key (kbd "C-x C-t") 'undo-tree-visualize))
+             :config
+             (global-undo-tree-mode 1)
+             (define-key undo-tree-map (kbd "C-_") 'undo-tree-undo)
+             (define-key undo-tree-map (kbd "C-x u") 'undo-tree-undo)
+             (define-key undo-tree-map (kbd "C-x .") 'undo-tree-redo)
+             (define-key undo-tree-map (kbd "C-.") 'undo-tree-redo)
+             (define-key undo-tree-map (kbd "C-x C-t") 'undo-tree-visualize))
+
 (use-package fvwm-mode :ensure t)
 (use-package cmake-mode :ensure t)
 (require 'highlight-tail)
@@ -109,7 +111,7 @@
                          (concat (getenv "PERL6LIB") ";" p6-lib)
                        p6-lib)))
 
-(use-package perl6-mode :ensure t)
+;(use-package perl6-mode :ensure t)
 
 (use-package flycheck :ensure t :config
 (defun enable-flycheck-in-prog ()
