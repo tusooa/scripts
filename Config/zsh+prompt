@@ -31,12 +31,12 @@ get_git_status () {
     if [[ -n "$st" ]]
     then
         local -a arr
-        arr=(${(f)st}) 
+        arr=(${(f)st})
         if [[ $arr[1] =~ 'Not currently on any branch.' ]]
         then
-            __CURRENT_GIT_BRANCH='no-branch' 
+            __CURRENT_GIT_BRANCH='no-branch'
         else
-            __CURRENT_GIT_BRANCH="${arr[1][(w)4]}" 
+            __CURRENT_GIT_BRANCH="${arr[1][(w)4]}"
         fi
         if [[ $arr[2] =~ 'Your branch is' ]]
         then
@@ -45,12 +45,12 @@ get_git_status () {
                 __CURRENT_GIT_BRANCH_STATUS=ahead
             elif [[ $arr[2] =~ 'diverged' ]]
             then
-                __CURRENT_GIT_BRANCH_STATUS=diverged 
+                __CURRENT_GIT_BRANCH_STATUS=diverged
             else
-                __CURRENT_GIT_BRANCH_STATUS=behind 
+                __CURRENT_GIT_BRANCH_STATUS=behind
             fi
         fi
-        [[ ! $st =~ "nothing to commit" ]] && __CURRENT_GIT_BRANCH_IS_DIRTY=1 
+        [[ ! $st =~ "nothing to commit" ]] && __CURRENT_GIT_BRANCH_IS_DIRTY=1
     fi
     return 0
 }
@@ -65,7 +65,7 @@ get_prompt_git ()
             (diverged) s+="="  ;;
             (behind) s+="-"  ;;
         esac
-        [[ $__CURRENT_GIT_BRANCH_IS_DIRTY = '1' ]] && s+="*" 
+        [[ $__CURRENT_GIT_BRANCH_IS_DIRTY = '1' ]] && s+="*"
         echo "${_YELLOW}$s${NOCOL}"
     fi
 }
@@ -164,7 +164,7 @@ screenTitlePreexec()
         continue=0
         for i in ${(k)_prefixes} ; do
             #echo $cmd, $i,$continue
-            
+
             if [[ "$cmd" = "$i "* ]] ; then
                 #echo match "$i"
                 cmd="${cmd#$i }"
@@ -205,7 +205,7 @@ screenTitlePrecmd()
     screentitle ":$dir"
 }
 
-if [[ "$TERM" = screen ]] ; then
+if [[ "$TERM" = screen* ]] ; then
     preexec_functions+=(screenTitlePreexec)
     precmd_functions+=(screenTitlePrecmd)
 fi

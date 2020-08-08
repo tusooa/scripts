@@ -43,3 +43,5 @@ libp6/.precomp
 # install-specific files
 lib/Scripts/Path/defConf.pm
 default-cfg/syspath
+# Who generated these? Dolphin? fc-cache?
+.uuid
