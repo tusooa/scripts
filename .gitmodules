@@ -46,3 +46,5 @@
 [submodule "Config/fonts/ttf-symbola"]
 	path = Config/fonts/ttf-symbola
 	url = https://github.com/gearit/ttf-symbola.git
+	ignore = untracked
+
