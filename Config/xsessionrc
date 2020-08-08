@@ -1,3 +1,4 @@
 export PATH="$HOME/Apps/bin:$HOME/Install/bin:$PATH"
 export PERL5LIB="$HOME/Apps/lib${PERL5LIB:+:$PERL5LIB}"
+export LC_CTYPE="zh_CN.UTF-8"
 #(sleep 20 && /home/tusooa/.fvwm/autostart.bash) &

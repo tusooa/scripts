@@ -14,8 +14,8 @@ export PATH="$HOME/Apps/bin:$PATH"
 
 echo "xset -b"
 xset -b
-echo "xrdb"
-xrdb ~/.Xresource
+#echo "xrdb"
+#xrdb ~/.Xresource
 #xbacklight -set 45
 #/usr/libexec/polkit-gnome-authentication-agent-1 &
 #xbindkeys&

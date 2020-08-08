@@ -54,7 +54,7 @@ URxvt.preeditType:              OffTheSpot
 URxvt.imFont:                   fixed
 !===================================================================!
 !设置字体分辨率
-Xft.dpi:                                96
+!Xft.dpi:                                96
 !设置字体
 !URxvt.font: xft:DejaVu Sans YuanTi Mono:pixelsize=18
 
