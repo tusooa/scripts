@@ -21,7 +21,8 @@
                         (cond
                          ((string= (system-name) "tusooa-surface")
                           (if (eq system-type 'windows-nt) "14" "28"))
-                         ((string= (system-name) "tusooa-yoga") "13")
+                         ((string= (system-name) "tusooa-yoga")
+                          (if (eq system-type 'windows-nt) "13" "15"))
                          (t "15"))))
 (set-fontset-font (frame-parameter nil 'font) 'han "DejaVu Sans YuanTi Mono")
 (set-fontset-font t

@@ -43,3 +43,6 @@
 [submodule "src/windy/iconvpp"]
 	path = src/windy/iconvpp
 	url = https://github.com/unnonouno/iconvpp.git
+[submodule "Config/fonts/ttf-symbola"]
+	path = Config/fonts/ttf-symbola
+	url = https://github.com/gearit/ttf-symbola.git
