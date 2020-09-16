@@ -52,7 +52,7 @@
 (setq tramp-default-method "sudo")
 
 (setq highlight-tail-colors '(("black" . 0)
-                              ("#bc2525" . 25)
+                              ("#750e49" . 25)
                               ("black" . 66))
       highlight-tail-posterior-type t
 ;      highlight-tail-const-width 20
@@ -98,6 +98,8 @@
   (rainbow-delimiters-mode t)
   (rainbow-identifiers-mode t))
 (add-hook 'prog-mode-hook 'thistusooa-prog-mode-hook)
+;; for unknown reasons c++ mode is not inherited from prog mode any more.
+(add-hook 'c++-mode-hook 'thistusooa-prog-mode-hook)
 ;颜色来自于孟塞尔颜色系统,见custom.el
 ;http://zh.wikipedia.org/wiki/%E5%AD%9F%E5%A1%9E%E5%B0%94%E9%A2%9C%E8%89%B2%E7%B3%BB%E7%BB%9F
 (defun thistusooa-git-commit-mode-hook ()
@@ -190,3 +192,7 @@
 
 (use-package nyan-mode :ensure t :config
   (nyan-mode 1))
+
+(use-package rjsx-mode :ensure t :config
+  (add-to-list 'auto-mode-alist
+               '("\\.js\\'" . rjsx-mode)))

@@ -33,3 +33,4 @@ export NVM_DIR="$HOME/.nvm"
 
 true
 
+if [ -e /home/tusooa/.nix-profile/etc/profile.d/nix.sh ]; then . /home/tusooa/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
