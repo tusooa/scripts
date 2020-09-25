@@ -7,27 +7,27 @@
  '(ansi-color-names-vector
    ["black" "firebrick1" "lime green" "gold1" "RoyalBlue3" "HotPink1" "dark turquoise" "white"])
  '(c-default-style
-   (quote
-    ((c-mode . "cc-mode")
+   '((c-mode . "cc-mode")
      (c++-mode . "cc-mode")
      (java-mode . "java")
      (awk-mode . "awk")
-     (other . "gnu"))))
+     (other . "gnu")))
  '(canlock-password "64af8575f06472636c3a0709394ee6a2eae4520d")
  '(cperl-highlight-variables-indiscriminately t)
  '(cperl-indent-level 4)
  '(custom-file "~/.emacs.d/config/custom.el")
- '(emojify-emoji-styles (quote (unicode)))
- '(emojify-program-contexts (quote (comments)))
+ '(custom-safe-themes
+   '("27a1dd6378f3782a593cc83e108a35c2b93e5ecc3bd9057313e1d88462701fcd" default))
+ '(emojify-emoji-styles '(unicode))
+ '(emojify-program-contexts '(comments))
  '(gnus-no-groups-message "-- No Groups --")
  '(gnus-permanently-visible-groups ".+")
  '(gnus-summary-gather-exclude-subject "^ *$\\|^(none)$")
  '(gnus-thread-operation-ignore-subject t)
- '(ibuffer-never-show-predicates (quote ("^\\*helm[- ]")) nil (ibuf-ext))
+ '(ibuffer-never-show-predicates '("^\\*helm[- ]") nil (ibuf-ext))
  '(ibuffer-saved-filter-groups nil)
  '(ibuffer-saved-filters
-   (quote
-    (("programming"
+   '(("programming"
       (or
        (derived-mode . prog-mode)
        (mode . ess-mode)
@@ -59,26 +59,24 @@
        (mode . mail-mode)
        (mode . gnus-group-mode)
        (mode . gnus-summary-mode)
-       (mode . gnus-article-mode))))))
+       (mode . gnus-article-mode)))))
  '(indent-tabs-mode nil)
- '(ispell-extra-args (quote ("--lang=en_CA")))
+ '(ispell-extra-args '("--lang=en_CA"))
  '(ispell-program-name
    (if
-       (eq system-type
-           (quote windows-nt))
+       (eq system-type 'windows-nt)
        "C:/Home/Programs/Aspell/bin/aspell.exe" "/usr/bin/aspell"))
  '(js-indent-level 2)
  '(magit-git-executable "C:/Home/Programs/Git/bin/git.exe")
  '(max-specpdl-size 3000)
  '(mouse-wheel-progressive-speed nil)
- '(mouse-wheel-scroll-amount (quote (1 ((shift) . 1) ((control)))))
+ '(mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control))))
  '(nyan-animate-nyancat nil)
  '(nyan-wavy-trail nil)
  '(org-startup-truncated nil)
  '(package-selected-packages
-   (quote
-    (mustache-mode rjsx-mode yaml-mode editorconfig helm rainbow-delimiters rainbow-identifiers rainbow-mode cmake-mode undo-tree gnu-elpa-keyring-update dim delight nyan-mode emojify helm-files emms fvwm-mode color-theme egg mew pandoc-mode powerline moe-theme emoji-fontset wc-mode markdown-mode zlc flycheck-perl6 flycheck perl6-mode)))
- '(pop3-connection-type (quote ssl))
+   '(mustache-mode rjsx-mode yaml-mode editorconfig helm rainbow-delimiters rainbow-identifiers rainbow-mode cmake-mode undo-tree gnu-elpa-keyring-update dim delight nyan-mode emojify helm-files emms fvwm-mode color-theme egg mew pandoc-mode powerline moe-theme emoji-fontset wc-mode markdown-mode zlc flycheck-perl6 flycheck perl6-mode))
+ '(pop3-connection-type 'ssl)
  '(powerline-default-separator nil)
  '(powerline-height nil)
  '(rainbow-identifiers-face-count 10)
