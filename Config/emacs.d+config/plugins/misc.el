@@ -180,7 +180,8 @@
      (overwrite-mode " ⌦" t)
      (isearch-mode " 🔎" t)
      (help-mode "㉄" :major)
-     (emacs-lisp-mode "EL" :major)))
+     (emacs-lisp-mode "EL" :major)
+     (undo-tree-mode " ᛦ" undo-tree)))
   (require 'delight-powerline))
 
 (use-package powerline :ensure t :config
