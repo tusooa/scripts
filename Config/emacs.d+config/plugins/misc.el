@@ -191,9 +191,13 @@
 (use-package emojify :ensure t :config
   (global-emojify-mode 1))
 
-(use-package nyan-mode :ensure t :config
-  (nyan-mode 1))
+;;(use-package nyan-mode :ensure t :config
+;;  (nyan-mode 1))
+(load-file "~/Code/nyan-mode/nyan-mode.el")
+(nyan-mode 1)
 
 (use-package rjsx-mode :ensure t :config
   (add-to-list 'auto-mode-alist
                '("\\.js\\'" . rjsx-mode)))
+
+(use-package markdown-mode :ensure t)

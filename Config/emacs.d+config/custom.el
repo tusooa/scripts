@@ -72,6 +72,8 @@
  '(mouse-wheel-progressive-speed nil)
  '(mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control))))
  '(nyan-animate-nyancat nil)
+ '(nyan-bar-length 48)
+ '(nyan-scaling-factor 3.0)
  '(nyan-wavy-trail nil)
  '(org-startup-truncated nil)
  '(package-selected-packages
