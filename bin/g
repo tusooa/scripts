@@ -13,6 +13,9 @@ use utf8;
 use Encode qw/_utf8_on _utf8_off/;
 no if $] >= 5.018, warnings => "experimental";
 
+sub printLine;
+sub printDivider;
+
 my (@files, @regex);
 my $help = 0;
 my $showVersion = 0;
@@ -28,6 +31,9 @@ my $ignoreCase = 0;
 my $fixed = 0;
 my $invert = 0;
 my $autoCase = 1;
+my $beforeLines = 0;
+my $afterLines = 0;
+my $divider = '--';
 
 GetOptions (
     'help' => \$help,
@@ -43,15 +49,20 @@ GetOptions (
     'remove-comment|c' => \$removeComment,
     'comment-startswith|s=s' => \$commentStart,
     'color' => \$showColor,
-    'no-color|C' => sub { $showColor = 0 },
+    'no-color' => sub { $showColor = 0 },
     'ignore-case|i' => sub { $ignoreCase = 1; $autoCase = 0 },
-    'no-ignore-case|I' => sub { $ignoreCase = 0 },
+    'no-ignore-case|I' => sub { $ignoreCase = 0; $autoCase = 0 },
     'autocase|a' => sub { $autoCase = 1; $ignoreCase = 0 },
-    'no-autocase|A' => sub { $autoCase = 0 },
     'fixed|F' => \$fixed,
     'no-fixed|r' => sub { $fixed = 0 },
     'v|invert' => \$invert,
     'V|no-invert' => sub { $invert = 0 },
+    'B|before=i' => \$beforeLines,
+    'A|after=i' => \$afterLines,
+    'C|around=i' => sub {
+        my (undef, $optVal) = @_;
+        $beforeLines = $afterLines = $optVal;
+    },
 );
 
 my $scriptName = 'grep.perl';
@@ -84,7 +95,10 @@ qq{$scriptName $version, 简写 g.
     -F, --fixed                 Don't use regex, just plain text matching
     -r, --no-fixed              Disable fixed
     --color                     Show colors
-    -C, --no-color              Do not show colors
+    --no-color                  Do not show colors
+    -B, --before=NUM            Display NUM lines before the match
+    -A, --after=NUM             Display NUM lines after the match
+    -C, --around=NUM            Display NUM lines around the match
 高级玩法
     g -lnf files ... # 连接这些文件并显示文件名和行号
                      # 不是cgrep模式的话，正则可以省略的。
@@ -146,10 +160,12 @@ my @col;
 my $nocol;
 my $filenameColor;
 my $lineNumColor;
+my $dividerColor;
 if ($showColor) {
     my $gColors = Scripts::EnvConf->new ($ENV{G_COLORS});
     $filenameColor = $gColors->{fn} ? "\e[".($gColors->{fn})."m" : "\e[33m";
     $lineNumColor = $gColors->{ln} ? "\e[".($gColors->{ln})."m" : "\e[32m";
+    $dividerColor = $gColors->{div} ? "\e[".($gColors->{div})."m" : "\e[34m";
     # 这不科学！为什么用`\t'作正则匹配的时候，显示的颜色会不一样呢?!!!
     @col = map "\e[1;4;3".(int rand(6) +1).';40m', @regex;
     # 在终端里边，选中了一下，再取消选择，发现居然正常了
@@ -175,7 +191,7 @@ for my $file (@files) {
             say STDERR "Cannot open `$file': $!";
             next;
         }
-        # ● gc [ ~/.conkyrc  
+        # ● gc [ ~/.conkyrc
         # Unmatched [ in regex; marked by <-- HERE in m/([ <-- HERE )/ at /home/tusooa/应用/脚本/gc line 140, </home/tusooa/.conkyrc> line 1.
 
     }
@@ -187,6 +203,10 @@ for my $file (@files) {
     #$_ = join "",@_;
     # 如果原来就有颜色呢？去掉。
     #s/\e\[[0-9;]*[mK]//g;
+    my @savedLines;
+    my $lastMatchedLine;
+    my $lastPrintedLine;
+
     LINE:
     while (<$fh>) {
         _utf8_on ($_); #修复了用/./来匹配，会造成乱码的错误
@@ -208,15 +228,60 @@ for my $file (@files) {
             }
             #say $i;
         }
+        # If it goes here, it means the match succeeded.
+        $lastMatchedLine = $.;
+    } continue {
         _utf8_off ($_);
-        print "${filenameColor}${file}:$nocol" if $fn;
-        # 行号,具体参见 ● perldoc -v '$.'
-        print "${lineNumColor}${.}:$nocol" if $ln;
-        print;
+        # We want to print
+        # ($lastMatchedLine - $beforeLines)
+        # to ($lastMatchedLine)
+        # to ($lastMatchedLine + $afterLines)
+        #
+        if ($lastMatchedLine
+            and $lastMatchedLine <= $.
+            and $. <= ($lastMatchedLine + $afterLines)) {
+            my @linesToPrint = ($.-@savedLines) .. ($.);
+            push @savedLines, $_;
+            if (($beforeLines or $afterLines)
+                and $lastPrintedLine
+                and $linesToPrint[0] - $lastPrintedLine > 1) {
+                printDivider;
+            }
+            my $i = 0;
+            for my $lineNum (@linesToPrint) {
+                printLine $file, $lineNum, $savedLines[$i++], $lineNum == $lastMatchedLine;
+            }
+            $lastPrintedLine = $.;
+            # Clear saved lines as they are printed already
+            @savedLines = ();
+        } else {
+            # Add current line to saved lines
+            push @savedLines, $_;
+            # And keep the storage at most $beforeLines lines
+            if (@savedLines > $beforeLines) {
+                splice @savedLines, 0, @savedLines - $beforeLines;
+            }
+        }
     }
     close $fh;
 }
+
+sub printDivider
+{
+    say $dividerColor.$divider.$nocol;
+}
+
+sub printLine
+{
+    my ($file, $lineNum, $content, $matches) = @_;
+    my $divSymbol = $matches ? ':' : '-';
+    print $filenameColor, $file, $nocol,
+        $dividerColor, $divSymbol, $nocol if $fn;
+    # 行号,具体参见 ● perldoc -v '$.'
+    print $lineNumColor, $lineNum, $nocol,
+        $dividerColor, $divSymbol, $nocol if $ln;
+    print $content;
+}
+
 #● g -clns'#|$' -f g |wc -l
 #128
-
-
