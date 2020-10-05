@@ -10,11 +10,17 @@ use 5.012;
 use Scripts::scriptFunctions;
 use Scripts::EnvConf;
 use utf8;
+use List::Util qw/reduce/;
+use List::MoreUtils qw/qsort/;
 use Encode qw/_utf8_on _utf8_off/;
 no if $] >= 5.018, warnings => "experimental";
 
 sub printLine;
 sub printDivider;
+
+# constants for properties
+sub PROPSTART() { 1 }
+sub PROPEND() { 0 }
 
 my (@files, @regex);
 my $help = 0;
@@ -142,6 +148,8 @@ if ($fixed) {
 }
 if ($autoCase) {
     for (@regex) {
+        # Fix unicode matching.
+        _utf8_on $_;
         if (! /[A-Z]/) { # ignore case if there is no capital letter
             $_ = qr/$_/i;
         } else {
@@ -206,9 +214,15 @@ for my $file (@files) {
     my @savedLines;
     my $lastMatchedLine;
     my $lastPrintedLine;
+    # Properties: [{ pos => <int, starting pos of match>,
+    #                prop => <int, index of regex>,
+    #                action => <START|END>,
+    #              }, ...]
+    my @properties;
 
     LINE:
     while (<$fh>) {
+        @properties = ();
         _utf8_on ($_); #修复了用/./来匹配，会造成乱码的错误
         for my $i (0..$#regex) {
             $regex[$i] or next; #解决了如下bug:
@@ -218,8 +232,21 @@ for my $file (@files) {
             if ($invert) {
                 /$regex[$i]/ and next LINE;
             } else {
-                s{($regex[$i])}{$col[$i]$1$nocol}g or next LINE;
-                #有些情况下，有问题
+                my $curMatched = 0;
+                while (/$regex[$i]/g) {
+                    $curMatched = 1;
+                    push @properties, {
+                        pos => $-[0],
+                        action => PROPSTART,
+                        prop => $i,
+                    }, {
+                        pos => $+[0],
+                        action => PROPEND,
+                        prop => $i,
+                    };
+                }
+                $curMatched or next LINE;
+                #~~有些情况下，有问题~~ # solved
                 # 例如 my $scriptName = 'grep.perl';
                 # ● g grep p.p -f bin/g
                 # 就得不到期望的结果
@@ -231,7 +258,10 @@ for my $file (@files) {
         # If it goes here, it means the match succeeded.
         $lastMatchedLine = $.;
     } continue {
-        _utf8_off ($_);
+        my $lineWithProps = {
+            line => $_,
+            props => [@properties],
+        };
         # We want to print
         # ($lastMatchedLine - $beforeLines)
         # to ($lastMatchedLine)
@@ -241,7 +271,7 @@ for my $file (@files) {
             and $lastMatchedLine <= $.
             and $. <= ($lastMatchedLine + $afterLines)) {
             my @linesToPrint = ($.-@savedLines) .. ($.);
-            push @savedLines, $_;
+            push @savedLines, $lineWithProps;
             if (($beforeLines or $afterLines)
                 and $lastPrintedLine
                 and $linesToPrint[0] - $lastPrintedLine > 1) {
@@ -256,7 +286,7 @@ for my $file (@files) {
             @savedLines = ();
         } else {
             # Add current line to saved lines
-            push @savedLines, $_;
+            push @savedLines, $lineWithProps;
             # And keep the storage at most $beforeLines lines
             if (@savedLines > $beforeLines) {
                 splice @savedLines, 0, @savedLines - $beforeLines;
@@ -271,6 +301,74 @@ sub printDivider
     say $dividerColor.$divider.$nocol;
 }
 
+sub printContent
+{
+    my ($lineWithProps) = @_;
+    my $line = $lineWithProps->{line};
+    my $props = $lineWithProps->{props};
+    if (not $showColor) {
+        _utf8_off($line);
+        print $line;
+    } else {
+        qsort {
+            # Sort by position,
+            # then action (PROPEND will be before PROPSTART),
+            # then prop in ascending order.
+            $a->{pos} <=> $b->{pos}
+            || $a->{action} <=> $b->{action}
+            || $a->{prop} <=> $b->{prop};
+        } @{$props};
+
+        # Merge the actions and generate a list of states.
+        # State is like { pos => <int>, props => [<int>, ...] };
+        my $states = reduce {
+            my $propList;
+            #use Data::Dumper;
+            #print 'REDUCE:', Dumper($a);
+            if ($a->[-1]->{pos} == $b->{pos}) {
+                $propList = $a->[-1]->{props};
+            } else {
+                my $old = $a->[-1];
+                my $state = {
+                    pos => $b->{pos},
+                    props => [@{$old->{props}}],
+                };
+                push @$a, $state;
+                $propList = $state->{props};
+            }
+
+            my $action = $b->{action};
+            my $prop = $b->{prop};
+            if ($action == PROPSTART) {
+                push @$propList, $prop;
+            } else {
+                # Replace everything in the list but
+                # keep its reference.
+                splice @$propList,
+                    0, scalar @$propList,
+                    grep { $_ != $prop } @$propList;
+            }
+            $a;
+        } [{ pos => 0, props => [] }], @$props;
+
+        my $lastPos = 0;
+        #use Data::Dumper;
+        #print Dumper(@$states);
+
+        reduce {
+            my $props = $a->{props};
+            my $lastPos = $a->{pos};
+            my $pos = $b->{pos};
+            my $chunk = substr $line, $lastPos, $pos - $lastPos;
+            _utf8_off $chunk;
+            print map { $col[$_] } @$props;
+            print $chunk;
+            print $nocol;
+            $b;
+        } { pos => 0, props => [] }, @$states, { pos => length $line, props => [] };
+    }
+}
+
 sub printLine
 {
     my ($file, $lineNum, $content, $matches) = @_;
@@ -280,7 +378,7 @@ sub printLine
     # 行号,具体参见 ● perldoc -v '$.'
     print $lineNumColor, $lineNum, $nocol,
         $dividerColor, $divSymbol, $nocol if $ln;
-    print $content;
+    printContent $content;
 }
 
 #● g -clns'#|$' -f g |wc -l
